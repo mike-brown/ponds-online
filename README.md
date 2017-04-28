@@ -2,4 +2,6 @@
 
 A SURE2017 project (University of Sheffield)
 
+An interactive online tool for exploring vegetated storm-water pond design
+
 http://vpond.group.shef.ac.uk for more details
