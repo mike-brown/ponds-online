@@ -1,0 +1,22 @@
+{
+  "name": "ponds-online",
+  "version": "0.0.1",
+  "description": "A SURE2017 project (University of Sheffield)",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mike-brown/ponds-online.git"
+  },
+  "author": "Matt Barber, Rob Ede, David Grundy",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/mike-brown/ponds-online/issues"
+  },
+  "homepage": "https://github.com/mike-brown/ponds-online#readme",
+  "devDependencies": {
+    "eslint": "^4.0.0"
+  }
+}
