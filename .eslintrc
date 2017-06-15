@@ -33,7 +33,7 @@
     "camelcase": [
       "error",
       {
-        "properties": "never"
+        "properties": "always"
       }
     ],
     "comma-dangle": [
