@@ -8,8 +8,13 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
+    "*": [
+      "eclint fix",
+      "git add"
+    ],
     "*.js": [
-      "eslint --fix"
+      "eslint --fix",
+      "git add"
     ]
   },
   "repository": {
@@ -23,6 +28,7 @@
   },
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
   "devDependencies": {
+    "eclint": "^2.2.0",
     "eslint": "^4.0.0",
     "husky": "^0.13.4",
     "lint-staged": "^4.0.0"
