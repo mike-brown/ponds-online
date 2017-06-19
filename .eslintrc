@@ -118,7 +118,7 @@
     "no-extra-boolean-cast": 2,
     "no-extra-parens": [
       "error",
-      "functions"
+      "all"
     ],
     "no-fallthrough": 2,
     "no-floating-decimal": 2,
