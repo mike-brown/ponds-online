@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
   "devDependencies": {
-    "eslint": "^4.0.0"
+    "eslint": "^4.0.0",
+    "husky": "^0.13.4",
+    "lint-staged": "^4.0.0"
   }
 }
