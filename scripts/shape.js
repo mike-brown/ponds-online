@@ -11,18 +11,8 @@ var prev = zeros(rows, cols) // old values
 var temp = zeros(rows, cols) // advect values
 
 const time = 1.0 // 1s interval
-const size = 0.01 // 1cm cell
-const density = 998.2 // 1000kg/m^3
-
-// prev[0][0].velocity.x = 0.1
-// prev[0][0].velocity.y = 0.1
-//
-// prev[0][1].velocity.x = 0.3
-// prev[0][1].velocity.y = 0.3
-//
-// prev[1][0].velocity.x = 0.5
-// prev[1][0].velocity.y = 0.5
-//
+const size = 0.01 // 10mm cell
+const density = 998.2 // 998.2kg/m^3
 
 function zeros (rows, cols) {
   let grid = []
@@ -170,12 +160,12 @@ function jacobi (curr, prev, dvrg) {
         w: border(prev, { x: x - 2, y: y })
       }
 
-      let term = (dvrg[y][x] + p.e.p + p.w.p + p.s.p + p.n.p) / 4
+      let term = (dvrg[y][x] + p.e.p + p.w.p + p.s.p + p.n.p) / 4 // calculates new pressures
       arr[y][x].pressure = term
 
       arr[y][x].velocity = {
-        x: curr[y][x].velocity.x,
-        y: curr[y][x].velocity.y
+        x: curr[y][x].velocity.x, // preserves old x-axis velocity
+        y: curr[y][x].velocity.y // preserves old y-axis velocity
       }
     }
   }
@@ -262,60 +252,6 @@ function draw (arr) {
 
       ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', ' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', 255)'
       ctxp.fillRect(x * 10, y * 10, 10, 10)
-
-      // if (arr[y][x].pressure > 0) {
-      //   ctxp.beginPath()
-      //   ctxp.moveTo(x * 10, y * 10 + 10)
-      //   ctxp.lineTo(x * 10 + 5, y * 10)
-      //   ctxp.lineTo(x * 10 + 10, y * 10 + 10)
-      //   ctxp.closePath()
-      //   ctxp.stroke()
-      // }
-
-      // if (arr[y][x].pressure < 0) {
-      //   ctxp.beginPath()
-      //   ctxp.moveTo(x * 10, y * 10)
-      //   ctxp.lineTo(x * 10 + 5, y * 10 + 10)
-      //   ctxp.lineTo(x * 10 + 10, y * 10)
-      //   ctxp.closePath()
-      //   ctxp.stroke()
-      // }
-
-      // if (arr[y][x].velocity.y < 0) {
-      //   ctxv.beginPath()
-      //   ctxv.moveTo(x * 10, y * 10 + 10)
-      //   ctxv.lineTo(x * 10 + 5, y * 10)
-      //   ctxv.lineTo(x * 10 + 10, y * 10 + 10)
-      //   ctxv.closePath()
-      //   ctxv.stroke()
-      // }
-
-      // if (arr[y][x].velocity.y > 0) {
-      //   ctxv.beginPath()
-      //   ctxv.moveTo(x * 10, y * 10)
-      //   ctxv.lineTo(x * 10 + 5, y * 10 + 10)
-      //   ctxv.lineTo(x * 10 + 10, y * 10)
-      //   ctxv.closePath()
-      //   ctxv.stroke()
-      // }
-
-      // if (arr[y][x].velocity.x < 0) {
-      //   ctxv.beginPath()
-      //   ctxv.moveTo(x * 10 + 10, y * 10)
-      //   ctxv.lineTo(x * 10, y * 10 + 5)
-      //   ctxv.lineTo(x * 10 + 10, y * 10 + 10)
-      //   ctxv.closePath()
-      //   ctxv.stroke()
-      // }
-
-      // if (arr[y][x].velocity.x > 0) {
-      //   ctxv.beginPath()
-      //   ctxv.moveTo(x * 10, y * 10)
-      //   ctxv.lineTo(x * 10 + 10, y * 10 + 5)
-      //   ctxv.lineTo(x * 10, y * 10 + 10)
-      //   ctxv.closePath()
-      //   ctxv.stroke()
-      // }
     }
   }
 
