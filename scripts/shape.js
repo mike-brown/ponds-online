@@ -12,7 +12,8 @@ var temp = zeros(rows, cols) // advect values
 
 const time = 1.0 // 1s interval
 const size = 0.01 // 10mm cell
-const density = 998.2 // 998.2kg/m^3
+const rho = 998.2 // 998.2kg/m^3 density
+const mu = 0 // viscosity
 
 function zeros (rows, cols) {
   let grid = []
@@ -29,6 +30,37 @@ function zeros (rows, cols) {
     }
     grid.push(line)
   }
+  return grid
+}
+
+function couple (prev) {
+  let grid = []
+  for (let y = 0; y < prev.length; y++) {
+    let line = []
+    for (let x = 0; x < prev[y].length; x++) {
+      // if not active, ignore
+
+      let v = {
+        n: border(prev, { x: x, y: y - 1 }),
+        e: border(prev, { x: x + 1, y: y }),
+        s: border(prev, { x: x, y: y + 1 }),
+        w: border(prev, { x: x - 1, y: y })
+      }
+
+      let vx = v.e.x + v.w.x + v.s.x + v.n.x + (v.w.p - prev[y][x].pressure) * size + diverge(prev)
+      let vy = v.e.y + v.w.y + v.s.y + v.n.y + (v.n.p - prev[y][x].pressure) * size + diverge(prev)
+
+      line.push({
+        pressure: prev[y][x].pressure,
+        velocity: {
+          x: vx,
+          y: vy
+        }
+      })
+    }
+    grid.push(line)
+  }
+
   return grid
 }
 
@@ -137,7 +169,7 @@ function diverge (temp) {
         w: border(temp, { x: x - 1, y: y })
       }
 
-      let term = (-2 * size * density) / time
+      let term = size * rho / time
 
       line.push(term * (v.e.x - v.w.x + v.s.y - v.n.y))
     }
@@ -160,7 +192,7 @@ function jacobi (curr, prev, dvrg) {
         w: border(prev, { x: x - 2, y: y })
       }
 
-      let term = (dvrg[y][x] + p.e.p + p.w.p + p.s.p + p.n.p) / 4 // calculates new pressures
+      let term = (dvrg[y][x] + p.e.p + p.w.p + p.s.p + p.n.p) / 4.0 // calculates new pressures
       arr[y][x].pressure = term
 
       arr[y][x].velocity = {
@@ -187,7 +219,7 @@ function gradient (curr, prev) {
           w: border(curr, { x: x - 1, y: y })
         }
 
-        let term = (time / (2 * size * density))
+        let term = (time / (2 * size * rho))
 
         arr[y][x].velocity = {
           x: prev[y][x].velocity.x - term * (p.e.p - p.w.p),
@@ -238,6 +270,8 @@ function draw (arr) {
 
   console.log('MAX:', maxp, maxx, maxy, 'SUM:', sump)
 
+  console.log('MAX:', valp, valx, valy, 'SUM:', sump)
+
   for (let y = 0; y < row; y++) {
     for (let x = 0; x < col; x++) {
       ctxp.rect(x * 20 + 5, y * 20 + 5, 20, 20)
@@ -262,7 +296,7 @@ function draw (arr) {
 function run () {
   curr = zeros(rows, cols) // new values
 
-  temp = advect(prev)
+  temp = couple(prev)
 
   // inlet
   for (let i = 1; i < rows; i = i + 2) {
@@ -276,12 +310,27 @@ function run () {
 
   curr = jacobi(curr, prev, diverge(temp))
 
+  // inlet
+  for (let i = 1; i < rows; i = i + 2) {
+    curr[i][0].velocity.x = 0.00005
+  }
+
   // outlet
   for (let i = 1; i < rows; i = i + 2) {
     curr[i][cols - 2].pressure = 0
   }
 
   curr = gradient(curr, prev)
+
+  // inlet
+  for (let i = 1; i < rows; i = i + 2) {
+    curr[i][0].velocity.x = 0.00005
+  }
+
+  // outlet
+  for (let i = 1; i < rows; i = i + 2) {
+    curr[i][cols - 2].pressure = 0
+  }
 
   draw(curr)
 
