@@ -8,8 +8,11 @@ let state = zeros(cols, rows)
 state[0][4] = 1
 
 let prevP = zeros(cols, rows) // I,J
-let prevX = zeros(cols + 1, rows + 1) // i,J
-let prevY = zeros(cols + 1, rows + 1) // I,j
+let prevX = zeros(cols + 1, rows) // i,J
+let prevY = zeros(cols, rows + 1) // I,
+
+prevX[4][4] = 0.00005
+prevY[4][4] = 0.00005
 
 let tempP
 let tempX
@@ -41,50 +44,66 @@ function couple (cArr, pArr, xArr, yArr) {
   let jArr = zeros(yArr.length, yArr[0].length)
   let iArr = zeros(xArr.length, xArr[0].length)
 
-  for (let j = 0; j < xArr.length; j++) {
-    for (let i = 0; i < xArr[j].length; i++) {
-      const dir = {
-        n: bounds(j - 1, i, xArr),
-        s: bounds(j + 1, i, xArr),
-        w: bounds(j, i - 1, xArr),
-        e: bounds(j, i + 1, xArr)
+  for (let j = 1; j < iArr.length - 1; j++) {
+    for (let i = 1; i < iArr[j].length - 1; i++) {
+      const vx = {
+        n: xArr[j - 1][i],
+        s: xArr[j + 1][i],
+        w: xArr[j][i - 1],
+        e: xArr[j][i + 1]
       }
 
-      if ((dir.n && dir.s && dir.w && dir.e) || cArr[j][i] !== 0) {
-        const vx = {
-          n: dir.n ? xArr[j - 1][i] : cArr[j][i] === 1 ? 0.00005 : cArr[j][i] === 2 ? xArr[j][i] : 0,
-          s: dir.s ? xArr[j + 1][i] : cArr[j][i] === 1 ? -0.00005 : cArr[j][i] === 2 ? xArr[j][i] : 0,
-          w: dir.w ? xArr[j][i - 1] : cArr[j][i] === 1 ? 0.00005 : cArr[j][i] === 2 ? xArr[j][i] : 0,
-          e: dir.e ? xArr[j][i + 1] : cArr[j][i] === 1 ? -0.00005 : cArr[j][i] === 2 ? xArr[j][i] : 0
-        }
-
-        const vy = {
-          n: dir.n ? yArr[j - 1][i] : cArr[j][i] === 1 ? 0.00005 : cArr[j][i] === 2 ? yArr[j][i] : 0,
-          s: dir.s ? yArr[j + 1][i] : cArr[j][i] === 1 ? -0.00005 : cArr[j][i] === 2 ? yArr[j][i] : 0,
-          w: dir.w ? yArr[j][i - 1] : cArr[j][i] === 1 ? 0.00005 : cArr[j][i] === 2 ? yArr[j][i] : 0,
-          e: dir.e ? yArr[j][i + 1] : cArr[j][i] === 1 ? -0.00005 : cArr[j][i] === 2 ? yArr[j][i] : 0
-        }
-
-        const p = {
-          n: dir.n ? pArr[j - 1][i] : cArr[j][i] === 1 ? pArr[j][i] : 0,
-          w: dir.w ? pArr[j][i - 1] : cArr[j][i] === 1 ? pArr[j][i] : 0
-        }
-
-        let ox = vx.n + vx.s + vx.w + vx.e + (p.w - pArr[j][i]) * params.size // + divergence
-        let oy = vy.n + vy.s + vy.w + vy.e + (p.n - pArr[j][i]) * params.size // + divergence
-
-        jArr[j][i] = oy
-        iArr[j][i] = ox
-      } else {
-        jArr[j][i] = 0
-        iArr[j][i] = 0
+      const p = {
+        n: pArr[j - 1][i],
+        w: pArr[j][i - 1]
       }
+
+      const ox = vx.n + vx.s + vx.w + vx.e + (p.w - pArr[j][i]) * params.size // + divergence
+
+      iArr[j][i] = ox
     }
   }
-  return {
-    y: jArr,
-    x: iArr
+
+  for (let j = 1; j < jArr.length - 1; j++) {
+    for (let i = 1; i < jArr[j].length - 1; i++) {
+      const vy = {
+        n: yArr[j - 1][i],
+        s: yArr[j + 1][i],
+        w: yArr[j][i - 1],
+        e: yArr[j][i + 1]
+      }
+
+      const p = {
+        n: pArr[j - 1][i],
+        w: pArr[j][i - 1]
+      }
+
+      const oy = vy.n + vy.s + vy.w + vy.e + (p.n - pArr[j][i]) * params.size // + divergence
+
+      jArr[j][i] = oy
+    }
   }
+
+  for (let j = 0; j < cArr.length; j++) {
+    jArr[j][0] += cArr[j][0] * 0.00005 // north wall
+
+    jArr[j][cArr[j].length] -= cArr[j][cArr[j].length - 1] * 0.00005 // south wall
+  }
+
+  for (let i = 0; i < cArr[0].length; i++) {
+    iArr[0][i] += cArr[0][i] * 0.00005 // west wall
+
+    iArr[cArr.length][i] -= cArr[cArr[i].length - 1][i] * 0.00005 // east wall
+  }
+
+  return {
+    x: iArr,
+    y: jArr
+  }
+}
+
+function jacobi (cArr, pArr, xArr, yArr) {
+  let kArr = zeros(yArr.length, yArr[0].length)
 }
 
 function bounds (j, i, arr) {
@@ -92,9 +111,12 @@ function bounds (j, i, arr) {
 }
 
 function execute () {
-  console.log(couple(state, prevP, prevX, prevY))
-
   let temp = couple(state, prevP, prevX, prevY)
+
+  console.log(temp)
+
+  tempX = temp.x
+  tempY = temp.y
 }
 
 window.addEventListener('DOMContentLoaded', function () {
