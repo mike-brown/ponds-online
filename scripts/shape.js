@@ -1,6 +1,6 @@
 'use strict'
 
-const row = 10
+const row = 9
 const col = 30
 
 const rows = 2 * row + 1
@@ -11,8 +11,8 @@ var prev = zeros(rows, cols) // old values
 var temp = zeros(rows, cols) // advect values
 
 const time = 1.0 // 1s interval
-const size = 0.1 // 10cm cell
-const density = 1000.0 // 1000kg/m^3
+const size = 0.01 // 1cm cell
+const density = 998.2 // 1000kg/m^3
 
 // prev[0][0].velocity.x = 0.1
 // prev[0][0].velocity.y = 0.1
@@ -330,19 +330,19 @@ function run () {
 
   // inlet
   for (let i = 1; i < rows; i = i + 2) {
-    temp[i][cols - 1].velocity.x = -0.5
+    temp[i][0].velocity.x = 0.00005
   }
 
   // outlet
   for (let i = 1; i < rows; i = i + 2) {
-    prev[i][1].pressure = -30.0
+    prev[i][cols - 2].pressure = 0
   }
 
   curr = jacobi(curr, prev, diverge(temp))
 
   // outlet
   for (let i = 1; i < rows; i = i + 2) {
-    curr[i][1].pressure = -30.0
+    curr[i][cols - 2].pressure = 0
   }
 
   curr = gradient(curr, prev)
@@ -361,5 +361,5 @@ function run () {
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-  setInterval(run, 1000)
+  setInterval(run, 200)
 }, false)
