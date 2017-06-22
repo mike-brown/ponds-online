@@ -1,19 +1,19 @@
 'use strict'
 
-const cols = 27
-const rows = 9
+const cols = 39
+const rows = 19
 
 let state = zeros(rows, cols)
 
-state[4][0] = 1
+state[10][0] = 1
 
-state[4][cols - 1] = 1
+state[10][cols - 1] = 1
 
 let prevP = zeros(rows, cols) //     ( 9R, 27C)
 let prevX = zeros(rows, cols + 1) // ( 9R, 28C)
 let prevY = zeros(rows + 1, cols) // (10R, 27C)
 
-prevX[6][3] = 0.00005
+prevX[10][0] = 0.00005
 
 let oldP = zeros(rows, cols)
 let newP
@@ -57,12 +57,7 @@ function couple (cArr, pArr, xArr, yArr) {
         e: xArr[j][i + 1]
       }
 
-      const p = {
-        n: pArr[j - 1][i],
-        w: pArr[j][i - 1]
-      }
-
-      const ox = vx.n + vx.s + vx.w + vx.e + (p.w - pArr[j][i]) * params.size // + divergence
+      const ox = vx.n + vx.s + vx.w + vx.e + (pArr[j][i - 1] - pArr[j][i]) * params.size // + divergence
 
       iArr[j][i] = ox
     }
@@ -78,12 +73,7 @@ function couple (cArr, pArr, xArr, yArr) {
         e: yArr[j][i + 1]
       }
 
-      const p = {
-        n: pArr[j - 1][i],
-        w: pArr[j][i - 1]
-      }
-
-      const oy = vy.n + vy.s + vy.w + vy.e + (p.n - pArr[j][i]) * params.size // + divergence
+      const oy = vy.n + vy.s + vy.w + vy.e + (pArr[j - 1][i] - pArr[j][i]) * params.size // + divergence
 
       jArr[j][i] = oy
     }
@@ -308,8 +298,65 @@ function jacobi (cArr, pArr, xArr, yArr) {
   return kArr
 }
 
-function correct (cArr, pArr, xArr, yArr) {
+function correct (cArr, pArr, qArr, xArr, yArr) {
+  let iArr = zeros(rows, cols + 1)
+  let jArr = zeros(rows + 1, cols)
+  let kArr = zeros(rows, cols)
 
+  // performs velocity calculation in x-axis
+  for (let j = 0; j < kArr.length; j++) {
+    for (let i = 0; i < kArr[j].length; i++) {
+      kArr[j][i] = pArr[j][i] + qArr[j][i]
+    }
+  }
+
+  // performs velocity calculation in x-axis
+  for (let j = 1; j < iArr.length - 1; j++) {
+    for (let i = 1; i < iArr[j].length - 1; i++) {
+      iArr[j][i] = xArr[j][i] + (pArr[j][i - 1] - pArr[j][i]) * params.size
+    }
+  }
+
+  // performs velocity calculation in y-axis
+  for (let j = 1; j < jArr.length - 1; j++) {
+    for (let i = 1; i < jArr[j].length - 1; i++) {
+      jArr[j][i] = yArr[j][i] + (pArr[j - 1][i] - pArr[j][i]) * params.size
+    }
+  }
+
+  return {
+    x: iArr,
+    y: jArr,
+    p: kArr
+  }
+}
+
+function draw (arr) {
+  let ctxp = document.getElementById('pcanvas').getContext('2d')
+
+  ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
+  ctxp.rect(0, 0, cols * 10, rows * 10)
+
+  let maxp = 0
+
+  for (let y = 0; y < arr.length; y++) {
+    for (let x = 0; x < arr[y].length; x++) {
+      if (maxp < Math.abs(arr[y][x])) {
+        maxp = Math.abs(arr[y][x])
+      }
+    }
+  }
+
+  let valp = (maxp === 0) ? 0 : 255.0 / maxp
+
+  for (let y = 0; y < arr.length; y++) {
+    for (let x = 0; x < arr[y].length; x++) {
+      ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(arr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(arr[y][x])) + ', 255)'
+      ctxp.fillRect(x * 10, y * 10, 10, 10)
+    }
+  }
+
+  ctxp.stroke()
 }
 
 function execute () {
@@ -323,9 +370,25 @@ function execute () {
   newP = jacobi(state, oldP, prevX, prevY)
 
   console.log('New Estimated Pressure:', newP)
+
+  temp = correct(state, prevP, newP, tempX, tempY)
+
+  nextX = temp.x
+  nextY = temp.y
+  nextP = temp.p
+
+  console.log('New Estimated Component:', temp)
+
+  draw(nextP)
+
+  prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
+  prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
+  prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
+
+  requestAnimationFrame(execute)
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-//  setInterval(execute, 20)
-  execute()
+  // setInterval(execute, 200)
+  requestAnimationFrame(execute)
 }, false)
