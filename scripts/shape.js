@@ -58,7 +58,7 @@ function advect(arr) {
 	}
 }
 
-function bilinear(x, y, q11, q12, q21, q22) {
+function bilinear(arr, x, y, q11, q12, q21, q22) {
 	const d = {
 		x:  x,
 		y:  y,
@@ -68,19 +68,19 @@ function bilinear(x, y, q11, q12, q21, q22) {
 		y2: q22.y
 	}
 
-	let term1 = 1 / (d.x2 - d.x1) * (d.y2 - d.y1)
+	let term = 1 / (d.x2 - d.x1) * (d.y2 - d.y1)
 
-	// performs x-term computation of interpolation
-	let term2 = ((d.x2 - d.x) * (q11.x + q21.x)) * (d.y2 - d.y)
-			  + ((d.x - d.x1) * (q12.x + q22.x)) * (d.y - d.y1)
+	// performs x-axis velocity computation of interpolation
+	let vx = ((d.x2 - d.x) * (arr[q11.x][q11.y].velocity.x + arr[q21.x][q21.y].velocity.x)) * (d.y2 - d.y)
+		   + ((d.x - d.x1) * (arr[q12.x][q12.y].velocity.x + arr[q22.x][q22.y].velocity.x)) * (d.y - d.y1)
 
-	// performes y-term computation of interpolation
-	let term3 = ((d.x2 - d.x) * (q11.y + q21.y)) * (d.y2 - d.y)
-			  + ((d.x - d.x1) * (q12.y + q22.y)) * (d.y - d.y1)
+	// performs y-axis velocity computation of interpolation
+	let vy = ((d.x2 - d.x) * (arr[q11.x][q11.y].velocity.y + arr[q21.x][q21.y].velocity.y)) * (d.y2 - d.y)
+		   + ((d.x - d.x1) * (arr[q12.x][q12.y].velocity.y + arr[q22.x][q22.y].velocity.y)) * (d.y - d.y1)
 
 	return {
-		x: term1 * term2,
-		y: term1 * term3
+		vx:  term * vx,
+		vy:  term * vy
 	}
 }
 
