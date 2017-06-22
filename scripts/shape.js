@@ -1,7 +1,7 @@
 'use strict'
 
-const row = 25
-const col = 25
+const row = 10
+const col = 30
 
 const rows = 2 * row + 1
 const cols = 2 * col + 1
@@ -11,7 +11,7 @@ var prev = zeros(rows, cols) // old values
 var temp = zeros(rows, cols) // advect values
 
 const time = 1.0 // 1s interval
-const size = 1.0 // 1m cell
+const size = 0.1 // 10cm cell
 const density = 1000.0 // 1000kg/m^3
 
 // prev[0][0].velocity.x = 0.1
@@ -26,9 +26,9 @@ const density = 1000.0 // 1000kg/m^3
 
 function zeros (rows, cols) {
   let grid = []
-  for (let y = 0; y < cols; y++) {
+  for (let y = 0; y < rows; y++) {
     let line = []
-    for (let x = 0; x < rows; x++) {
+    for (let x = 0; x < cols; x++) {
       line.push({
         pressure: 0, // pressure
         velocity: {
@@ -50,36 +50,41 @@ function advect (prev) {
       let ox = x - prev[y][x].velocity.x * time
       let oy = y - prev[y][x].velocity.y * time
 
-      let q11 = {
+      let qxy = {
         x: parseInt(Math.floor(ox)),
         y: parseInt(Math.floor(oy))
+      }
+
+      let q11 = {
+        x: qxy.x,
+        y: qxy.y
       }
 
       let q12 = {
-        x: parseInt(Math.floor(ox)),
-        y: parseInt(Math.floor(oy)) + 1
+        x: qxy.x,
+        y: qxy.y + 1
       }
 
       let q21 = {
-        x: parseInt(Math.floor(ox)) + 1,
-        y: parseInt(Math.floor(oy))
+        x: qxy.x + 1,
+        y: qxy.y
       }
 
       let q22 = {
-        x: parseInt(Math.floor(ox)) + 1,
-        y: parseInt(Math.floor(oy)) + 1
+        x: qxy.x + 1,
+        y: qxy.y + 1
       }
 
-      arr[y][x] = bilinear(prev, ox, oy, q11, q12, q21, q22)
+      arr[y][x] = bilinear(prev, x, y, ox, oy, q11, q12, q21, q22)
     }
   }
   return arr
 }
 
-function bilinear (arr, x, y, q11, q12, q21, q22) {
+function bilinear (arr, x, y, ox, oy, q11, q12, q21, q22) {
   const d = {
-    x: x,
-    y: y,
+    x: ox,
+    y: oy,
     x1: q11.x,
     y1: q11.y,
     x2: q22.x,
@@ -102,7 +107,7 @@ function bilinear (arr, x, y, q11, q12, q21, q22) {
            (((d.x2 - d.x) * d.v12.y) + ((d.x - d.x1) * d.v22.y)) * (d.y - d.y1)
 
   return {
-    pressure: 0,
+    pressure: arr[y][x].pressure,
     velocity: {
       x: term * vx,
       y: term * vy
@@ -117,17 +122,12 @@ function border (arr, q) {
     y: 0
   }
 
-  if (q.x >= 0 && q.x < arr.length && q.y >= 0 && q.y < arr[q.x].length) {
+  if (q.y >= 0 && q.y < arr.length && q.x >= 0 && q.x < arr[q.y].length) {
     v = {
       p: arr[q.y][q.x].pressure,
       x: arr[q.y][q.x].velocity.x,
       y: arr[q.y][q.x].velocity.y
     }
-  }
-
-  // outlet
-  if (q.y === 25 && q.x === 1) {
-    v.p = -3000
   }
 
   return v
@@ -189,7 +189,7 @@ function gradient (curr, prev) {
       // make current velocity using current pressure and past velocity
 
       // doesn't calculate if velocity cells aren't against a wall, unless designated as inlet or outlet
-      if ((x - 2 >= 0 && x + 2 < arr.length && y - 2 >= 0 && y + 2 < arr[0].length)) {
+      if ((y - 2 >= 0 && y + 2 < arr.length && x - 2 >= 0 && x + 2 < arr[y].length)) {
         let p = {
           n: border(curr, { x: x, y: y - 1 }),
           e: border(curr, { x: x + 1, y: y }),
@@ -226,7 +226,7 @@ function draw (arr) {
 
   for (let y = 0; y < arr.length; y++) {
     for (let x = 0; x < arr[y].length; x++) {
-      sump += Math.abs(arr[y][x].pressure)
+      sump += arr[y][x].pressure
 
       if (maxp < Math.abs(arr[y][x].pressure)) {
         maxp = Math.abs(arr[y][x].pressure)
@@ -263,59 +263,59 @@ function draw (arr) {
       ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', ' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', 255)'
       ctxp.fillRect(x * 10, y * 10, 10, 10)
 
-      if (arr[y][x].pressure > 0) {
-        ctxp.beginPath()
-        ctxp.moveTo(x * 10, y * 10 + 10)
-        ctxp.lineTo(x * 10 + 5, y * 10)
-        ctxp.lineTo(x * 10 + 10, y * 10 + 10)
-        ctxp.closePath()
-        ctxp.stroke()
-      }
+      // if (arr[y][x].pressure > 0) {
+      //   ctxp.beginPath()
+      //   ctxp.moveTo(x * 10, y * 10 + 10)
+      //   ctxp.lineTo(x * 10 + 5, y * 10)
+      //   ctxp.lineTo(x * 10 + 10, y * 10 + 10)
+      //   ctxp.closePath()
+      //   ctxp.stroke()
+      // }
 
-      if (arr[y][x].pressure < 0) {
-        ctxp.beginPath()
-        ctxp.moveTo(x * 10, y * 10)
-        ctxp.lineTo(x * 10 + 5, y * 10 + 10)
-        ctxp.lineTo(x * 10 + 10, y * 10)
-        ctxp.closePath()
-        ctxp.stroke()
-      }
+      // if (arr[y][x].pressure < 0) {
+      //   ctxp.beginPath()
+      //   ctxp.moveTo(x * 10, y * 10)
+      //   ctxp.lineTo(x * 10 + 5, y * 10 + 10)
+      //   ctxp.lineTo(x * 10 + 10, y * 10)
+      //   ctxp.closePath()
+      //   ctxp.stroke()
+      // }
 
-      if (arr[y][x].velocity.y < 0) {
-        ctxv.beginPath()
-        ctxv.moveTo(x * 10, y * 10 + 10)
-        ctxv.lineTo(x * 10 + 5, y * 10)
-        ctxv.lineTo(x * 10 + 10, y * 10 + 10)
-        ctxv.closePath()
-        ctxv.stroke()
-      }
+      // if (arr[y][x].velocity.y < 0) {
+      //   ctxv.beginPath()
+      //   ctxv.moveTo(x * 10, y * 10 + 10)
+      //   ctxv.lineTo(x * 10 + 5, y * 10)
+      //   ctxv.lineTo(x * 10 + 10, y * 10 + 10)
+      //   ctxv.closePath()
+      //   ctxv.stroke()
+      // }
 
-      if (arr[y][x].velocity.y > 0) {
-        ctxv.beginPath()
-        ctxv.moveTo(x * 10, y * 10)
-        ctxv.lineTo(x * 10 + 5, y * 10 + 10)
-        ctxv.lineTo(x * 10 + 10, y * 10)
-        ctxv.closePath()
-        ctxv.stroke()
-      }
+      // if (arr[y][x].velocity.y > 0) {
+      //   ctxv.beginPath()
+      //   ctxv.moveTo(x * 10, y * 10)
+      //   ctxv.lineTo(x * 10 + 5, y * 10 + 10)
+      //   ctxv.lineTo(x * 10 + 10, y * 10)
+      //   ctxv.closePath()
+      //   ctxv.stroke()
+      // }
 
-      if (arr[y][x].velocity.x < 0) {
-        ctxv.beginPath()
-        ctxv.moveTo(x * 10 + 10, y * 10)
-        ctxv.lineTo(x * 10, y * 10 + 5)
-        ctxv.lineTo(x * 10 + 10, y * 10 + 10)
-        ctxv.closePath()
-        ctxv.stroke()
-      }
+      // if (arr[y][x].velocity.x < 0) {
+      //   ctxv.beginPath()
+      //   ctxv.moveTo(x * 10 + 10, y * 10)
+      //   ctxv.lineTo(x * 10, y * 10 + 5)
+      //   ctxv.lineTo(x * 10 + 10, y * 10 + 10)
+      //   ctxv.closePath()
+      //   ctxv.stroke()
+      // }
 
-      if (arr[y][x].velocity.x > 0) {
-        ctxv.beginPath()
-        ctxv.moveTo(x * 10, y * 10)
-        ctxv.lineTo(x * 10 + 10, y * 10 + 5)
-        ctxv.lineTo(x * 10, y * 10 + 10)
-        ctxv.closePath()
-        ctxv.stroke()
-      }
+      // if (arr[y][x].velocity.x > 0) {
+      //   ctxv.beginPath()
+      //   ctxv.moveTo(x * 10, y * 10)
+      //   ctxv.lineTo(x * 10 + 10, y * 10 + 5)
+      //   ctxv.lineTo(x * 10, y * 10 + 10)
+      //   ctxv.closePath()
+      //   ctxv.stroke()
+      // }
     }
   }
 
@@ -329,11 +329,24 @@ function run () {
   temp = advect(prev)
 
   // inlet
-  temp[23][cols - 1].velocity.x = -0.1
-  temp[25][cols - 1].velocity.x = -0.1
-  temp[27][cols - 1].velocity.x = -0.1
+  for (let i = 1; i < rows; i = i + 2) {
+    temp[i][cols - 1].velocity.x = -0.5
+  }
 
-  curr = gradient(jacobi(curr, prev, diverge(temp)), prev)
+  // outlet
+  for (let i = 1; i < rows; i = i + 2) {
+    prev[i][1].pressure = -30.0
+  }
+
+  curr = jacobi(curr, prev, diverge(temp))
+
+  // outlet
+  for (let i = 1; i < rows; i = i + 2) {
+    curr[i][1].pressure = -30.0
+  }
+
+  curr = gradient(curr, prev)
+
   draw(curr)
 
   for (let y = 0; y < prev.length; y++) {
@@ -348,5 +361,5 @@ function run () {
 }
 
 window.addEventListener('DOMContentLoaded', function () {
-  setInterval(run, 50)
+  setInterval(run, 1000)
 }, false)
