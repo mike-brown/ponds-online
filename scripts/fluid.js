@@ -7,7 +7,7 @@ let state = zeros(cols, rows)
 
 state[4][0] = 1
 
-let prevP = zeros(cols, cols) //     (27C,  9R)
+let prevP = zeros(cols, rows) //     (27C,  9R)
 let prevX = zeros(cols + 1, rows) // (28C,  9R)
 let prevY = zeros(cols, rows + 1) // (27C, 10R)
 
@@ -141,7 +141,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
     }
   }
 
-  // west side
+  // west bank
   for (let j = 1; j < rows - 1; j++) {
     const vx = {
       w: xArr[j][0],
@@ -162,28 +162,28 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[j][0] = p.n + p.s + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
-  // east wall
+  // east bank
   for (let j = 1; j < rows - 1; j++) {
     const vx = {
-      w: xArr[j][kArr[j].length - 1],
-      e: xArr[j][kArr[j].length]
+      w: xArr[j][cols - 1],
+      e: xArr[j][cols]
     }
 
     const vy = {
-      n: yArr[j][kArr[j].length - 1],
-      s: yArr[j + 1][kArr[j].length - 1]
+      n: yArr[j][cols - 1],
+      s: yArr[j + 1][cols - 1]
     }
 
     const p = {
-      n: pArr[j - 1][kArr[j].length - 1],
-      s: pArr[j + 1][kArr[j].length - 1],
-      w: pArr[j][kArr[j].length - 2]
+      n: pArr[j - 1][cols - 1],
+      s: pArr[j + 1][cols - 1],
+      w: pArr[j][cols - 2]
     }
 
-    kArr[j][kArr[j].length - 1] = p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+    kArr[j][cols - 1] = p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
-  // north edge
+  // north bank
   for (let i = 1; i < cols - 1; i++) {
     const vx = {
       w: xArr[0][i],
@@ -204,32 +204,104 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[0][i] = p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
-  // south side
+  // south bank
   for (let i = 1; i < cols - 1; i++) {
     const vx = {
-      w: xArr[kArr.length - 1][i],
-      e: xArr[kArr.length - 1][i + 1]
+      w: xArr[rows - 1][i],
+      e: xArr[rows - 1][i + 1]
     }
 
     const vy = {
-      n: yArr[kArr.length - 1][i],
-      s: yArr[kArr.length][i]
+      n: yArr[rows - 1][i],
+      s: yArr[rows][i]
     }
 
     const p = {
-      n: pArr[kArr.length - 2][i],
-      w: pArr[kArr.length - 1][i - 1],
-      e: pArr[kArr.length - 1][i + 1]
+      n: pArr[rows - 2][i],
+      w: pArr[rows - 1][i - 1],
+      e: pArr[rows - 1][i + 1]
     }
 
-    kArr[kArr.length - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+    kArr[rows - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+  }
+
+  {
+    const vx = {
+      w: xArr[0][0],
+      e: xArr[0][1]
+    }
+
+    const vy = {
+      n: yArr[0][0],
+      s: yArr[1][0]
+    }
+
+    const p = {
+      s: pArr[1][0],
+      e: pArr[0][1]
+    }
+
+    kArr[0][0] = p.s + p.e + (vx.w - vx.e + vy.n - vy.s)
+  }
+
+  {
+    const vx = {
+      w: xArr[0][cols - 1],
+      e: xArr[0][cols]
+    }
+
+    const vy = {
+      n: yArr[0][cols - 1],
+      s: yArr[1][cols - 1]
+    }
+
+    const p = {
+      s: pArr[1][cols - 1],
+      w: pArr[0][cols - 2]
+    }
+
+    kArr[0][cols - 1] = p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+  }
+
+  {
+    const vx = {
+      w: xArr[rows - 1][0],
+      e: xArr[rows - 1][1]
+    }
+
+    const vy = {
+      n: yArr[rows - 1][0],
+      s: yArr[rows][0]
+    }
+
+    const p = {
+      n: pArr[rows - 2][0],
+      e: pArr[rows - 1][1]
+    }
+
+    kArr[rows - 1][0] = p.n + p.e + (vx.w - vx.e + vy.n - vy.s)
+  }
+
+  {
+    const vx = {
+      w: xArr[rows - 1][cols - 1],
+      e: xArr[rows - 1][cols]
+    }
+
+    const vy = {
+      n: yArr[rows - 1][cols - 1],
+      s: yArr[rows][cols - 1]
+    }
+
+    const p = {
+      n: pArr[rows - 2][cols - 1],
+      w: pArr[rows - 1][cols - 2]
+    }
+
+    kArr[rows - 1][cols - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
   return kArr
-}
-
-function bounds (j, i, arr) {
-  return j >= 0 && i >= 0 && j < arr.length && i < arr[j].length
 }
 
 function execute () {
