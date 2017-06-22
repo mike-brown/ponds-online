@@ -3,17 +3,19 @@
 const cols = 27
 const rows = 9
 
-let state = zeros(cols, rows)
+let state = zeros(rows, cols)
 
 state[4][0] = 1
 
-let prevP = zeros(cols, rows) //     (27C,  9R)
-let prevX = zeros(cols + 1, rows) // (28C,  9R)
-let prevY = zeros(cols, rows + 1) // (27C, 10R)
+state[4][cols - 1] = 1
 
-prevX[6][2] = 0.00005
+let prevP = zeros(rows, cols) //     ( 9R, 27C)
+let prevX = zeros(rows, cols + 1) // ( 9R, 28C)
+let prevY = zeros(rows + 1, cols) // (10R, 27C)
 
-let oldP = zeros(cols, rows)
+prevX[6][3] = 0.00005
+
+let oldP = zeros(rows, cols)
 let newP
 
 let tempX
@@ -29,7 +31,7 @@ const params = {
   mu: 0.0 // viscosity
 }
 
-function zeros (cols, rows) {
+function zeros (rows, cols) {
   let grid = []
   for (let j = 0; j < rows; j++) {
     let line = []
@@ -42,8 +44,8 @@ function zeros (cols, rows) {
 }
 
 function couple (cArr, pArr, xArr, yArr) {
-  let iArr = zeros(cols + 1, rows)
-  let jArr = zeros(cols, rows + 1)
+  let iArr = zeros(rows, cols + 1)
+  let jArr = zeros(rows + 1, cols)
 
   // performs velocity calculation in x-axis
   for (let j = 1; j < iArr.length - 1; j++) {
@@ -87,6 +89,7 @@ function couple (cArr, pArr, xArr, yArr) {
     }
   }
 
+  // traverses y-axis and sets x-edge values
   for (let j = 0; j < rows; j++) {
     let bool = {
       w: cArr[j][0] === 1,
@@ -98,6 +101,7 @@ function couple (cArr, pArr, xArr, yArr) {
     iArr[j][cols] -= bool.e * 0.00005 // east wall
   }
 
+  // traverses x-axis and sets y-edge values
   for (let i = 0; i < cols; i++) {
     let bool = {
       n: cArr[0][i] === 1,
@@ -116,7 +120,7 @@ function couple (cArr, pArr, xArr, yArr) {
 }
 
 function jacobi (cArr, pArr, xArr, yArr) {
-  let kArr = zeros(cols, rows)
+  let kArr = zeros(rows, cols)
 
   for (let j = 1; j < kArr.length - 1; j++) {
     for (let i = 1; i < kArr[j].length - 1; i++) {
@@ -302,6 +306,10 @@ function jacobi (cArr, pArr, xArr, yArr) {
   }
 
   return kArr
+}
+
+function correct (cArr, pArr, xArr, yArr) {
+
 }
 
 function execute () {
