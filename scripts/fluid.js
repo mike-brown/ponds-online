@@ -474,7 +474,7 @@ window.addEventListener('DOMContentLoaded', function () {
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(state, oldP, prevX, prevY)
+      newP = jacobi(state, oldP, tempX, tempY)
 
       // console.log('New Estimated Pressure:', newP)
 
