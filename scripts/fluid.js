@@ -1,20 +1,21 @@
 'use strict'
 
-const cols = 39
-const rows = 19
+const CELL_SIZE = 10
+const COLS = 39
+const ROWS = 19
 
-let state = zeros(rows, cols)
+let state = zeros(ROWS, COLS)
 
-let prevP = zeros(rows, cols) //     ( 9R, 27C)
-let prevX = zeros(rows, cols + 1) // ( 9R, 28C)
-let prevY = zeros(rows + 1, cols) // (10R, 27C)
+let prevP = zeros(ROWS, COLS) //     ( 9R, 27C)
+let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
+let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
 
 state[10][0] = 1
-state[10][cols - 1] = 2
+state[10][COLS - 1] = 2
 
 prevX[10][0] = 0.00005
 
-let oldP = zeros(rows, cols)
+let oldP = zeros(ROWS, COLS)
 let newP
 
 let tempX
@@ -30,11 +31,11 @@ const params = {
   mu: 0.0 // viscosity
 }
 
-function zeros (rows, cols) {
+function zeros (ROWS, COLS) {
   let grid = []
-  for (let j = 0; j < rows; j++) {
+  for (let j = 0; j < ROWS; j++) {
     let line = []
-    for (let i = 0; i < cols; i++) {
+    for (let i = 0; i < COLS; i++) {
       line.push(0)
     }
     grid.push(line)
@@ -43,8 +44,8 @@ function zeros (rows, cols) {
 }
 
 function couple (cArr, pArr, xArr, yArr) {
-  let iArr = zeros(rows, cols + 1)
-  let jArr = zeros(rows + 1, cols)
+  let iArr = zeros(ROWS, COLS + 1)
+  let jArr = zeros(ROWS + 1, COLS)
 
   // performs velocity calculation in x-axis
   for (let j = 1; j < iArr.length - 1; j++) {
@@ -79,27 +80,27 @@ function couple (cArr, pArr, xArr, yArr) {
   }
 
   // traverses y-axis and sets x-edge values
-  for (let j = 0; j < rows; j++) {
+  for (let j = 0; j < ROWS; j++) {
     let bool = {
       w: cArr[j][0] === 1,
-      e: cArr[j][cols - 1] === 1
+      e: cArr[j][COLS - 1] === 1
     }
 
     iArr[j][0] += bool.w * 0.00005 // west wall
 
-    iArr[j][cols] -= bool.e * 0.00005 // east wall
+    iArr[j][COLS] -= bool.e * 0.00005 // east wall
   }
 
   // traverses x-axis and sets y-edge values
-  for (let i = 0; i < cols; i++) {
+  for (let i = 0; i < COLS; i++) {
     let bool = {
       n: cArr[0][i] === 1,
-      s: cArr[rows - 1][i] === 1
+      s: cArr[ROWS - 1][i] === 1
     }
 
     jArr[0][i] += bool.n * 0.00005 // north wall
 
-    jArr[rows][i] -= bool.s * 0.00005 // south wall
+    jArr[ROWS][i] -= bool.s * 0.00005 // south wall
   }
 
   return {
@@ -109,7 +110,7 @@ function couple (cArr, pArr, xArr, yArr) {
 }
 
 function jacobi (cArr, pArr, xArr, yArr) {
-  let kArr = zeros(rows, cols)
+  let kArr = zeros(ROWS, COLS)
 
   for (let j = 1; j < kArr.length - 1; j++) {
     for (let i = 1; i < kArr[j].length - 1; i++) {
@@ -135,7 +136,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
   }
 
   // west bank
-  for (let j = 1; j < rows - 1; j++) {
+  for (let j = 1; j < ROWS - 1; j++) {
     const vx = {
       w: xArr[j][0],
       e: xArr[j][1]
@@ -156,28 +157,28 @@ function jacobi (cArr, pArr, xArr, yArr) {
   }
 
   // east bank
-  for (let j = 1; j < rows - 1; j++) {
+  for (let j = 1; j < ROWS - 1; j++) {
     const vx = {
-      w: xArr[j][cols - 1],
-      e: xArr[j][cols]
+      w: xArr[j][COLS - 1],
+      e: xArr[j][COLS]
     }
 
     const vy = {
-      n: yArr[j][cols - 1],
-      s: yArr[j + 1][cols - 1]
+      n: yArr[j][COLS - 1],
+      s: yArr[j + 1][COLS - 1]
     }
 
     const p = {
-      n: pArr[j - 1][cols - 1],
-      s: pArr[j + 1][cols - 1],
-      w: pArr[j][cols - 2]
+      n: pArr[j - 1][COLS - 1],
+      s: pArr[j + 1][COLS - 1],
+      w: pArr[j][COLS - 2]
     }
 
-    kArr[j][cols - 1] = p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+    kArr[j][COLS - 1] = p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
   // north bank
-  for (let i = 1; i < cols - 1; i++) {
+  for (let i = 1; i < COLS - 1; i++) {
     const vx = {
       w: xArr[0][i],
       e: xArr[0][i + 1]
@@ -198,24 +199,24 @@ function jacobi (cArr, pArr, xArr, yArr) {
   }
 
   // south bank
-  for (let i = 1; i < cols - 1; i++) {
+  for (let i = 1; i < COLS - 1; i++) {
     const vx = {
-      w: xArr[rows - 1][i],
-      e: xArr[rows - 1][i + 1]
+      w: xArr[ROWS - 1][i],
+      e: xArr[ROWS - 1][i + 1]
     }
 
     const vy = {
-      n: yArr[rows - 1][i],
-      s: yArr[rows][i]
+      n: yArr[ROWS - 1][i],
+      s: yArr[ROWS][i]
     }
 
     const p = {
-      n: pArr[rows - 2][i],
-      w: pArr[rows - 1][i - 1],
-      e: pArr[rows - 1][i + 1]
+      n: pArr[ROWS - 2][i],
+      w: pArr[ROWS - 1][i - 1],
+      e: pArr[ROWS - 1][i + 1]
     }
 
-    kArr[rows - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+    kArr[ROWS - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
   {
@@ -239,68 +240,68 @@ function jacobi (cArr, pArr, xArr, yArr) {
 
   {
     const vx = {
-      w: xArr[0][cols - 1],
-      e: xArr[0][cols]
+      w: xArr[0][COLS - 1],
+      e: xArr[0][COLS]
     }
 
     const vy = {
-      n: yArr[0][cols - 1],
-      s: yArr[1][cols - 1]
+      n: yArr[0][COLS - 1],
+      s: yArr[1][COLS - 1]
     }
 
     const p = {
-      s: pArr[1][cols - 1],
-      w: pArr[0][cols - 2]
+      s: pArr[1][COLS - 1],
+      w: pArr[0][COLS - 2]
     }
 
-    kArr[0][cols - 1] = p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+    kArr[0][COLS - 1] = p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
   {
     const vx = {
-      w: xArr[rows - 1][0],
-      e: xArr[rows - 1][1]
+      w: xArr[ROWS - 1][0],
+      e: xArr[ROWS - 1][1]
     }
 
     const vy = {
-      n: yArr[rows - 1][0],
-      s: yArr[rows][0]
+      n: yArr[ROWS - 1][0],
+      s: yArr[ROWS][0]
     }
 
     const p = {
-      n: pArr[rows - 2][0],
-      e: pArr[rows - 1][1]
+      n: pArr[ROWS - 2][0],
+      e: pArr[ROWS - 1][1]
     }
 
-    kArr[rows - 1][0] = p.n + p.e + (vx.w - vx.e + vy.n - vy.s)
+    kArr[ROWS - 1][0] = p.n + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
   {
     const vx = {
-      w: xArr[rows - 1][cols - 1],
-      e: xArr[rows - 1][cols]
+      w: xArr[ROWS - 1][COLS - 1],
+      e: xArr[ROWS - 1][COLS]
     }
 
     const vy = {
-      n: yArr[rows - 1][cols - 1],
-      s: yArr[rows][cols - 1]
+      n: yArr[ROWS - 1][COLS - 1],
+      s: yArr[ROWS][COLS - 1]
     }
 
     const p = {
-      n: pArr[rows - 2][cols - 1],
-      w: pArr[rows - 1][cols - 2]
+      n: pArr[ROWS - 2][COLS - 1],
+      w: pArr[ROWS - 1][COLS - 2]
     }
 
-    kArr[rows - 1][cols - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
+    kArr[ROWS - 1][COLS - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
   return kArr
 }
 
 function correct (cArr, pArr, qArr, xArr, yArr) {
-  let iArr = zeros(rows, cols + 1)
-  let jArr = zeros(rows + 1, cols)
-  let kArr = zeros(rows, cols)
+  let iArr = zeros(ROWS, COLS + 1)
+  let jArr = zeros(ROWS + 1, COLS)
+  let kArr = zeros(ROWS, COLS)
 
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
@@ -336,10 +337,10 @@ function draw (pArr, xArr, yArr) {
   let ctxy = document.getElementById('canvasy').getContext('2d')
 
   ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
-  ctxp.rect(0, 0, cols * 10, rows * 10)
+  ctxp.rect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE)
 
   ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
-  ctxx.rect(0, 0, cols * 10, rows * 10)
+  ctxx.rect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE)
 
   let maxp = 0
   let maxx = 0
@@ -375,7 +376,7 @@ function draw (pArr, xArr, yArr) {
   for (let y = 0; y < pArr.length; y++) {
     for (let x = 0; x < pArr[y].length; x++) {
       ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', 255)'
-      ctxp.fillRect(x * 10, y * 10, 10, 10)
+      ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     }
   }
 
