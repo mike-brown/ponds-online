@@ -30,13 +30,14 @@ window.addEventListener('DOMContentLoaded', function () {
 
   let tempX
   let tempY
+  let tempC
 
   let nextP
   let nextX
   let nextY
 
   const params = {
-    gamma: 0.0, // interface diffusion
+    gamma: 0.2, // interface diffusion
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.0 // viscosity
@@ -55,26 +56,65 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function coefficients (xArr, yArr) {
-    let aArr = zeros(ROWS, COLS)
+    let jArr = zeros(ROWS, COLS)
+    let iArr = zeros(ROWS, COLS)
 
-    for (let j = 1; j < aArr.length - 1; j++) {
-      for (let i = 1; i < aArr[j].length; i++) {
+    const constants = {
+      density: (params.rho / 2),
+      diffuse: (params.gamma / params.size)
+    }
+
+    for (let j = 1; j < iArr.length - 1; j++) {
+      for (let i = 1; i < iArr[j].length - 1; i++) {
         const f = {
-          n: 0,
-          s: 0,
-          w: 0,
-          e: 0
+          n: constants.density * (yArr[j][i] + yArr[j - 1][i]),
+          s: constants.density * (yArr[j][i + 1] + yArr[j - 1][i + 1]),
+          w: constants.density * (xArr[j - 1][i] + xArr[j][i]),
+          e: constants.density * (xArr[j][i] + xArr[j + 1][i])
         }
 
-        const bool = {
-          n: (f.n > 0) * f.n,
-          s: (-f.s > 0) * -f.s,
-          w: (f.w > 0) * f.w,
-          e: (-f.e > 0) * -f.e
+        const a = {
+          n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
+          s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
+          w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
+          e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
         }
+
+        iArr[j][i].n = a.n
+        iArr[j][i].s = a.s
+        iArr[j][i].w = a.w
+        iArr[j][i].e = a.e
+        iArr[j][i].c = a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
       }
     }
-    return aArr
+
+    for (let j = 1; j < jArr.length - 1; j++) {
+      for (let i = 1; i < jArr[j].length - 1; i++) {
+        const f = {
+          n: constants.density * (xArr[j - 1][i] + xArr[j][i]),
+          s: constants.density * (xArr[j][i] + xArr[j + 1][i]),
+          w: constants.density * (yArr[j][i] + yArr[j - 1][i]),
+          e: constants.density * (yArr[j][i + 1] + yArr[j - 1][i + 1])
+        }
+
+        const a = {
+          n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
+          s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
+          w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
+          e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
+        }
+
+        jArr[j][i].n = a.n
+        jArr[j][i].s = a.s
+        jArr[j][i].w = a.w
+        jArr[j][i].e = a.e
+        jArr[j][i].c = a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+      }
+    }
+
+    // TODO: corner cases
+
+    return jArr
   }
 
   function couple (cArr, pArr, xArr, yArr) {
