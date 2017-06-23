@@ -383,30 +383,32 @@ function draw (pArr, xArr, yArr) {
 }
 
 function execute () {
-  let temp = couple(state, prevP, prevX, prevY)
+  if (document.querySelector('.js-running').checked) {
+    let temp = couple(state, prevP, prevX, prevY)
 
-  console.log('New Estimated Velocity:', temp)
+    console.log('New Estimated Velocity:', temp)
 
-  tempX = temp.x
-  tempY = temp.y
+    tempX = temp.x
+    tempY = temp.y
 
-  newP = jacobi(state, oldP, prevX, prevY)
+    newP = jacobi(state, oldP, prevX, prevY)
 
-  console.log('New Estimated Pressure:', newP)
+    console.log('New Estimated Pressure:', newP)
 
-  temp = correct(state, prevP, newP, tempX, tempY)
+    temp = correct(state, prevP, newP, tempX, tempY)
 
-  nextX = temp.x
-  nextY = temp.y
-  nextP = temp.p
+    nextX = temp.x
+    nextY = temp.y
+    nextP = temp.p
 
-  console.log('New Estimated Component:', temp)
+    console.log('New Estimated Component:', temp)
 
-  draw(nextP, nextX, nextY)
+    draw(nextP, nextX, nextY)
 
-  prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
-  prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
-  prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
+    prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
+    prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
+    prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
+  }
 
   requestAnimationFrame(execute)
 }
