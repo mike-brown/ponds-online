@@ -12,10 +12,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
   ctxp.canvas.width = COLS * CELL_SIZE + 1
   ctxp.canvas.height = ROWS * CELL_SIZE + 1
-  ctxx.canvas.width = COLS * CELL_SIZE + 1
+  ctxx.canvas.width = (COLS + 1) * CELL_SIZE + 1
   ctxx.canvas.height = ROWS * CELL_SIZE + 1
   ctxy.canvas.width = COLS * CELL_SIZE + 1
-  ctxy.canvas.height = ROWS * CELL_SIZE + 1
+  ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
   let state = zeros(ROWS, COLS)
 
@@ -405,13 +405,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function draw (pArr, xArr, yArr) {
     ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
-    ctxp.strokeRect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE)
-
     ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
-    ctxx.strokeRect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE)
-
-    ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
-    ctxx.strokeRect(0, 0, COLS * CELL_SIZE, ROWS * CELL_SIZE)
+    ctxx.clearRect(0, 0, ctxy.canvas.width, ctxy.canvas.height)
 
     let maxp = 0
     let maxx = 0
@@ -448,6 +443,24 @@ window.addEventListener('DOMContentLoaded', function () {
       for (let x = 0; x < pArr[y].length; x++) {
         ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', 255)'
         ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
+
+    for (let i = 0; i < xArr.length; i++) {
+      for (let j = 0; j < xArr[i].length; j++) {
+        const vel = xArr[i][j]
+
+        ctxx.fillStyle = `hsl(${Math.floor(240 - (vel / maxx) * 240)}, 100%, 50%)`
+        ctxx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
+
+    for (let i = 0; i < yArr.length; i++) {
+      for (let j = 0; j < yArr[i].length; j++) {
+        const vel = yArr[i][j]
+
+        ctxy.fillStyle = `hsl(${Math.floor(240 - (vel / maxy) * 240)}, 100%, 50%)`
+        ctxy.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       }
     }
   }
