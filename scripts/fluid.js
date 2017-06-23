@@ -9,6 +9,8 @@ window.addEventListener('DOMContentLoaded', function () {
   const ctxp = document.querySelector('.canvasp').getContext('2d')
   const ctxx = document.querySelector('.canvasx').getContext('2d')
   const ctxy = document.querySelector('.canvasy').getContext('2d')
+  const ctxxscale = document.querySelector('.canvasxscale').getContext('2d')
+  const ctxyscale = document.querySelector('.canvasyscale').getContext('2d')
 
   ctxp.canvas.width = COLS * CELL_SIZE + 1
   ctxp.canvas.height = ROWS * CELL_SIZE + 1
@@ -472,6 +474,22 @@ window.addEventListener('DOMContentLoaded', function () {
         ctxy.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       }
     }
+
+    document.querySelector('.xscale .min').textContent = '0'
+    document.querySelector('.xscale .max').textContent = maxx.toFixed(2)
+
+    document.querySelector('.yscale .min').textContent = '0'
+    document.querySelector('.yscale .max').textContent = maxy.toFixed(2)
+  }
+
+  for (let i = 0; i < ctxxscale.canvas.width; i++) {
+    ctxxscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxxscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxxscale.fillRect(i, 0, 10, 50)
+  }
+
+  for (let i = 0; i < ctxyscale.canvas.width; i++) {
+    ctxyscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxyscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxyscale.fillRect(i, 0, 10, 50)
   }
 
   function execute () {
