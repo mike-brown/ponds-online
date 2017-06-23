@@ -147,7 +147,7 @@ window.addEventListener('DOMContentLoaded', function () {
         e: xArr[j][1]
       }
 
-      iArr[j][0] = bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size) // west wall inlets
+      iArr[j][0] += bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size) // west wall inlets
     }
 
     // east edge
@@ -160,7 +160,7 @@ window.addEventListener('DOMContentLoaded', function () {
         w: xArr[j][COLS - 1]
       }
 
-      iArr[j][COLS] = bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size) // east wall inlets
+      iArr[j][COLS] += bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size) // east wall inlets
     }
 
     // north edge
@@ -173,7 +173,7 @@ window.addEventListener('DOMContentLoaded', function () {
         e: yArr[0][i + 1]
       }
 
-      jArr[0][i] = by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size) // north wall inlets
+      jArr[0][i] += by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size) // north wall inlets
     }
 
     // south edge
@@ -186,10 +186,10 @@ window.addEventListener('DOMContentLoaded', function () {
         e: yArr[ROWS][i + 1]
       }
 
-      jArr[ROWS][i] = by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size) // south wall inlets
+      jArr[ROWS][i] += by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size) // south wall inlets
     }
 
-    console.log(iArr[0][COLS])
+    // TODO: write corner-cases
 
     return {
       x: iArr,
@@ -219,7 +219,7 @@ window.addEventListener('DOMContentLoaded', function () {
           e: pArr[j][i + 1]
         }
 
-        kArr[j][i] = (p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s))
+        kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
       }
     }
 
@@ -387,8 +387,6 @@ window.addEventListener('DOMContentLoaded', function () {
       kArr[ROWS - 1][COLS - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
     }
 
-    // TODO: write corner-cases
-
     return kArr
   }
 
@@ -419,14 +417,17 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     for (let j = 0; j < iArr.length; j++) {
-      iArr[j][0] = yArr[j][0] + (0 - pArr[j][0]) * params.size
-      iArr[j][COLS] = yArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size
+      iArr[j][0] = xArr[j][0] + (0 - pArr[j][0]) * params.size
+      iArr[j][COLS] = xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size
     }
 
     for (let i = 0; i < jArr[0].length; i++) {
       jArr[0][i] = yArr[0][i] + (0 - pArr[0][i]) * params.size
       jArr[ROWS][i] = yArr[ROWS][i] + (pArr[ROWS - 1][i] - 0) * params.size
     }
+
+    console.log('tempX:', xArr[10][0])
+    console.log('nextX:', iArr[10][0])
 
     return {
       x: iArr,
@@ -528,7 +529,7 @@ window.addEventListener('DOMContentLoaded', function () {
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(state, oldP, tempX, tempY)
+      newP = jacobi(state, oldP, prevX, prevY)
 
       // console.log('New Estimated Pressure:', newP)
 
