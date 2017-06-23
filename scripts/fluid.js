@@ -5,13 +5,12 @@ const rows = 19
 
 let state = zeros(rows, cols)
 
-state[10][0] = 1
-
-state[10][cols - 1] = 1
-
 let prevP = zeros(rows, cols) //     ( 9R, 27C)
 let prevX = zeros(rows, cols + 1) // ( 9R, 28C)
 let prevY = zeros(rows + 1, cols) // (10R, 27C)
+
+state[10][0] = 1
+state[10][cols - 1] = 2
 
 prevX[10][0] = 0.00005
 
@@ -331,27 +330,51 @@ function correct (cArr, pArr, qArr, xArr, yArr) {
   }
 }
 
-function draw (arr) {
-  let ctxp = document.getElementById('pcanvas').getContext('2d')
+function draw (pArr, xArr, yArr) {
+  let ctxp = document.getElementById('canvasp').getContext('2d')
+  let ctxx = document.getElementById('canvasx').getContext('2d')
+  let ctxy = document.getElementById('canvasy').getContext('2d')
 
   ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
   ctxp.rect(0, 0, cols * 10, rows * 10)
 
-  let maxp = 0
+  ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
+  ctxx.rect(0, 0, cols * 10, rows * 10)
 
-  for (let y = 0; y < arr.length; y++) {
-    for (let x = 0; x < arr[y].length; x++) {
-      if (maxp < Math.abs(arr[y][x])) {
-        maxp = Math.abs(arr[y][x])
+  let maxp = 0
+  let maxx = 0
+  let maxy = 0
+
+  for (let y = 0; y < pArr.length; y++) {
+    for (let x = 0; x < pArr[y].length; x++) {
+      if (maxp < Math.abs(pArr[y][x])) {
+        maxp = Math.abs(pArr[y][x])
+      }
+    }
+  }
+
+  for (let y = 0; y < xArr.length; y++) {
+    for (let x = 0; x < xArr[y].length; x++) {
+      if (maxx < Math.abs(xArr[y][x])) {
+        maxx = Math.abs(xArr[y][x])
+      }
+    }
+  }
+
+  for (let y = 0; y < yArr.length; y++) {
+    for (let x = 0; x < yArr[y].length; x++) {
+      if (maxy < Math.abs(yArr[y][x])) {
+        maxy = Math.abs(yArr[y][x])
       }
     }
   }
 
   let valp = (maxp === 0) ? 0 : 255.0 / maxp
+  let valv = (maxx === 0) ? 0 : 255.0 / (maxx > maxy ? maxx : maxy)
 
-  for (let y = 0; y < arr.length; y++) {
-    for (let x = 0; x < arr[y].length; x++) {
-      ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(arr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(arr[y][x])) + ', 255)'
+  for (let y = 0; y < pArr.length; y++) {
+    for (let x = 0; x < pArr[y].length; x++) {
+      ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', 255)'
       ctxp.fillRect(x * 10, y * 10, 10, 10)
     }
   }
@@ -379,7 +402,7 @@ function execute () {
 
   console.log('New Estimated Component:', temp)
 
-  draw(nextP)
+  draw(nextP, nextX, nextY)
 
   prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
   prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
