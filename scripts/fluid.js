@@ -10,10 +10,11 @@ let prevP = zeros(ROWS, COLS) //     ( 9R, 27C)
 let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
 let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
 
-state[10][0] = 1
-state[10][COLS - 1] = 2
-
-prevX[10][0] = 0.00005
+for (let j = 1; j < ROWS - 1; j++) {
+  state[j][0] = 1
+  state[j][COLS - 1] = 2
+  prevX[j][0] = 0.00005
+}
 
 let oldP = zeros(ROWS, COLS)
 let newP
@@ -81,26 +82,78 @@ function couple (cArr, pArr, xArr, yArr) {
 
   // traverses y-axis and sets x-edge values
   for (let j = 0; j < ROWS; j++) {
-    let bool = {
+    const bool = {
       w: cArr[j][0] === 1,
       e: cArr[j][COLS - 1] === 1
     }
 
-    iArr[j][0] += bool.w * 0.00005 // west wall
+    iArr[j][0] += bool.w * 0.00005 // west wall inlets
 
-    iArr[j][COLS] -= bool.e * 0.00005 // east wall
+    iArr[j][COLS] -= bool.e * 0.00005 // east wall inlets
   }
 
   // traverses x-axis and sets y-edge values
   for (let i = 0; i < COLS; i++) {
-    let bool = {
+    const bool = {
       n: cArr[0][i] === 1,
       s: cArr[ROWS - 1][i] === 1
     }
 
-    jArr[0][i] += bool.n * 0.00005 // north wall
+    jArr[0][i] += bool.n * 0.00005 // north wall inlets
 
-    jArr[ROWS][i] -= bool.s * 0.00005 // south wall
+    jArr[ROWS][i] -= bool.s * 0.00005 // south wall inlets
+  }
+
+  // west edge
+  for (let j = 1; j < ROWS - 1; j++) {
+    const bx = cArr[j][0] === 2
+
+    const vx = {
+      n: xArr[j - 1][0],
+      s: xArr[j + 1][0],
+      e: xArr[j][1]
+    }
+
+    iArr[j][0] = bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size) // west wall inlets
+  }
+
+  // east edge
+  for (let j = 1; j < ROWS - 1; j++) {
+    const bx = cArr[j][COLS - 1] === 2
+
+    const vx = {
+      n: xArr[j - 1][COLS],
+      s: xArr[j + 1][COLS],
+      w: xArr[j][COLS - 1]
+    }
+
+    iArr[j][COLS] = bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size) // east wall inlets
+  }
+
+  // north edge
+  for (let i = 1; i < COLS - 1; i++) {
+    const by = cArr[0][i] === 2
+
+    const vy = {
+      s: yArr[1][i],
+      w: yArr[0][i - 1],
+      e: yArr[0][i + 1]
+    }
+
+    jArr[0][i] = by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size) // north wall inlets
+  }
+
+  // south edge
+  for (let i = 1; i < COLS - 1; i++) {
+    const by = cArr[ROWS - 1][i] === 2
+
+    const vy = {
+      n: yArr[ROWS - 1][i],
+      w: yArr[ROWS][i - 1],
+      e: yArr[ROWS][i + 1]
+    }
+
+    jArr[ROWS][i] = by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size) // south wall inlets
   }
 
   return {
@@ -219,6 +272,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[ROWS - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
+  // north-west corner
   {
     const vx = {
       w: xArr[0][0],
@@ -238,6 +292,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[0][0] = p.s + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
+  // north-east corner
   {
     const vx = {
       w: xArr[0][COLS - 1],
@@ -257,6 +312,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[0][COLS - 1] = p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
 
+  // south-west corner
   {
     const vx = {
       w: xArr[ROWS - 1][0],
@@ -276,6 +332,7 @@ function jacobi (cArr, pArr, xArr, yArr) {
     kArr[ROWS - 1][0] = p.n + p.e + (vx.w - vx.e + vy.n - vy.s)
   }
 
+  // south-east corner
   {
     const vx = {
       w: xArr[ROWS - 1][COLS - 1],
@@ -294,6 +351,8 @@ function jacobi (cArr, pArr, xArr, yArr) {
 
     kArr[ROWS - 1][COLS - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
   }
+
+  // TODO: write corner-cases
 
   return kArr
 }
@@ -387,14 +446,14 @@ function execute () {
   if (document.querySelector('.js-running').checked) {
     let temp = couple(state, prevP, prevX, prevY)
 
-    console.log('New Estimated Velocity:', temp)
+    // console.log('New Estimated Velocity:', temp)
 
     tempX = temp.x
     tempY = temp.y
 
     newP = jacobi(state, oldP, prevX, prevY)
 
-    console.log('New Estimated Pressure:', newP)
+    // console.log('New Estimated Pressure:', newP)
 
     temp = correct(state, prevP, newP, tempX, tempY)
 
@@ -402,7 +461,7 @@ function execute () {
     nextY = temp.y
     nextP = temp.p
 
-    console.log('New Estimated Component:', temp)
+    // console.log('New Estimated Component:', temp)
 
     draw(nextP, nextX, nextY)
 
