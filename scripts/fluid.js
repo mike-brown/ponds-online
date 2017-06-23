@@ -25,12 +25,6 @@ window.addEventListener('DOMContentLoaded', function () {
   let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
   let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
 
-  for (let j = 1; j < ROWS - 1; j++) {
-    state[j][0] = 1
-    state[j][COLS - 1] = 2
-    prevX[j][0] = 0.00005
-  }
-
   let oldP = zeros(ROWS, COLS)
   let newP
 
@@ -42,6 +36,7 @@ window.addEventListener('DOMContentLoaded', function () {
   let nextY
 
   const params = {
+    gamma: 0.0, // interface diffusion
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.0 // viscosity
@@ -60,12 +55,26 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function coefficients (xArr, yArr) {
-    return {
-      n: 0,
-      s: 0,
-      w: 0,
-      e: 0
+    let aArr = zeros(ROWS, COLS)
+
+    for (let j = 1; j < aArr.length - 1; j++) {
+      for (let i = 1; i < aArr[j].length; i++) {
+        const f = {
+          n: 0,
+          s: 0,
+          w: 0,
+          e: 0
+        }
+
+        const bool = {
+          n: (f.n > 0) * f.n,
+          s: (-f.s > 0) * -f.s,
+          w: (f.w > 0) * f.w,
+          e: (-f.e > 0) * -f.e
+        }
+      }
     }
+    return aArr
   }
 
   function couple (cArr, pArr, xArr, yArr) {
@@ -180,6 +189,8 @@ window.addEventListener('DOMContentLoaded', function () {
       jArr[ROWS][i] = by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size) // south wall inlets
     }
 
+    console.log(iArr[0][COLS])
+
     return {
       x: iArr,
       y: jArr
@@ -208,7 +219,7 @@ window.addEventListener('DOMContentLoaded', function () {
           e: pArr[j][i + 1]
         }
 
-        kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+        kArr[j][i] = (p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s))
       }
     }
 
@@ -394,7 +405,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     // performs velocity calculation in x-axis
-    for (let j = 1; j < iArr.length - 1; j++) {
+    for (let j = 0; j < iArr.length; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
         iArr[j][i] = xArr[j][i] + (pArr[j][i - 1] - pArr[j][i]) * params.size
       }
@@ -402,9 +413,19 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // performs velocity calculation in y-axis
     for (let j = 1; j < jArr.length - 1; j++) {
-      for (let i = 1; i < jArr[j].length - 1; i++) {
+      for (let i = 0; i < jArr[j].length; i++) {
         jArr[j][i] = yArr[j][i] + (pArr[j - 1][i] - pArr[j][i]) * params.size
       }
+    }
+
+    for (let j = 0; j < iArr.length; j++) {
+      iArr[j][0] = yArr[j][0] + (0 - pArr[j][0]) * params.size
+      iArr[j][COLS] = yArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size
+    }
+
+    for (let i = 0; i < jArr[0].length; i++) {
+      jArr[0][i] = yArr[0][i] + (0 - pArr[0][i]) * params.size
+      jArr[ROWS][i] = yArr[ROWS][i] + (pArr[ROWS - 1][i] - 0) * params.size
     }
 
     return {
@@ -494,6 +515,12 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function execute () {
     if (running.checked) {
+      for (let j = 1; j < ROWS - 1; j++) {
+        state[j][0] = 1
+        state[j][COLS - 1] = 2
+        prevX[j][0] = 0.00005
+      }
+
       let temp = couple(state, prevP, prevX, prevY)
 
       // console.log('New Estimated Velocity:', temp)
@@ -501,7 +528,7 @@ window.addEventListener('DOMContentLoaded', function () {
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(state, oldP, prevX, prevY)
+      newP = jacobi(state, oldP, tempX, tempY)
 
       // console.log('New Estimated Pressure:', newP)
 
@@ -522,7 +549,6 @@ window.addEventListener('DOMContentLoaded', function () {
 
     requestAnimationFrame(execute)
   }
-
-  // setInterval(execute, 200)
+  // setInterval(execute, 2000)
   requestAnimationFrame(execute)
 }, false)
