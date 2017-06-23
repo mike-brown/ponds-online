@@ -474,7 +474,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
     for (let y = 0; y < pArr.length; y++) {
       for (let x = 0; x < pArr[y].length; x++) {
-        ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', ' + parseInt(255 - valp * Math.abs(pArr[y][x])) + ', 255)'
+        const val = 120 - (pArr[y][x] / maxp) * 120
+
+        ctxp.fillStyle = `hsl(${val}, 100%, 50%)`
         ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       }
     }
