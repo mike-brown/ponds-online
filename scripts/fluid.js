@@ -57,6 +57,15 @@ window.addEventListener('DOMContentLoaded', function () {
     return grid
   }
 
+  function coefficients (xArr, yArr) {
+    return {
+      n: 0,
+      s: 0,
+      w: 0,
+      e: 0
+    }
+  }
+
   function couple (cArr, pArr, xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
