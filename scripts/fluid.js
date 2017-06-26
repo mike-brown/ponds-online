@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', function () {
   let nextY
 
   const params = {
-    gamma: 0.02, // interface diffusion
+    gamma: 1.0, // interface diffusion
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.0 // viscosity
@@ -56,6 +56,23 @@ window.addEventListener('DOMContentLoaded', function () {
     return grid
   }
 
+  function diffuse (f, constants) {
+    const a = {
+      n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
+      s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
+      w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
+      e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
+    }
+
+    return {
+      n: a.n,
+      s: a.s,
+      w: a.w,
+      e: a.e,
+      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+    }
+  }
+
   function coefficients (xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
@@ -65,7 +82,7 @@ window.addEventListener('DOMContentLoaded', function () {
       diffuse: (params.gamma / params.size)
     }
 
-    for (let j = 1; j < iArr.length - 1; j++) {
+    for (let j = 0; j < iArr.length; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
         const f = {
           n: constants.density * (yArr[j][i - 1] + yArr[j][i]),
@@ -74,25 +91,12 @@ window.addEventListener('DOMContentLoaded', function () {
           e: constants.density * (xArr[j][i] + xArr[j][i + 1])
         }
 
-        const a = {
-          n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
-          s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
-          w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
-          e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
-        }
-
-        iArr[j][i] = {
-          n: a.n,
-          s: a.s,
-          w: a.w,
-          e: a.e,
-          c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
-        }
+        iArr[j][i] = diffuse(f, constants)
       }
     }
 
     for (let j = 1; j < jArr.length - 1; j++) {
-      for (let i = 1; i < jArr[j].length - 1; i++) {
+      for (let i = 0; i < jArr[j].length; i++) {
         const f = {
           n: constants.density * (yArr[j - 1][i] + yArr[j][i]),
           s: constants.density * (yArr[j][i] + yArr[j + 1][i]),
@@ -100,24 +104,27 @@ window.addEventListener('DOMContentLoaded', function () {
           e: constants.density * (xArr[j - 1][i + 1] + xArr[j][i + 1])
         }
 
-        const a = {
-          n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
-          s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
-          w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
-          e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
-        }
-
-        jArr[j][i] = {
-          n: a.n,
-          s: a.s,
-          w: a.w,
-          e: a.e,
-          c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
-        }
+        jArr[j][i] = diffuse(f, constants)
       }
     }
 
-    // TODO: corner cases
+    // west and east walls in x-axis
+    for (let j = 0; j < ROWS; j++) {
+      const fw = constants.density * (xArr[j][COLS - 1] + xArr[j][COLS])
+      const fe = constants.density * (xArr[j][0] + xArr[j][1])
+
+      iArr[j][COLS] = diffuse({ n: 0, s: 0, w: fw, e: 0 }, constants)
+      iArr[j][0] = diffuse({ n: 0, s: 0, w: 0, e: fe }, constants)
+    }
+
+    // north and south walls in y-axis
+    for (let i = 0; i < COLS; i++) {
+      const fn = constants.density * (yArr[ROWS - 1][i] + yArr[ROWS][i])
+      const fs = constants.density * (yArr[0][i] + yArr[1][i])
+
+      jArr[ROWS][i] = diffuse({ n: fn, s: 0, w: 0, e: 0 }, constants)
+      jArr[0][i] = diffuse({ n: 0, s: fs, w: 0, e: 0 }, constants)
+    }
 
     return {
       x: iArr,
@@ -190,12 +197,12 @@ window.addEventListener('DOMContentLoaded', function () {
       const bx = cArr[j][0] === 2
 
       const vx = {
-        n: xArr[j - 1][0],
-        s: xArr[j + 1][0],
-        e: xArr[j][1]
+        n: aX[j][0].n * xArr[j - 1][0],
+        s: aX[j][0].s * xArr[j + 1][0],
+        e: aX[j][0].e * xArr[j][1]
       }
 
-      iArr[j][0] += bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size) // west wall inlets
+      iArr[j][0] += (bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
     }
 
     // east edge
@@ -203,12 +210,12 @@ window.addEventListener('DOMContentLoaded', function () {
       const bx = cArr[j][COLS - 1] === 2
 
       const vx = {
-        n: xArr[j - 1][COLS],
-        s: xArr[j + 1][COLS],
-        w: xArr[j][COLS - 1]
+        n: aX[j][COLS].n * xArr[j - 1][COLS],
+        s: aX[j][COLS].s * xArr[j + 1][COLS],
+        w: aX[j][COLS].w * xArr[j][COLS - 1]
       }
 
-      iArr[j][COLS] += bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size) // east wall inlets
+      iArr[j][COLS] += (bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
     }
 
     // north edge
@@ -216,12 +223,12 @@ window.addEventListener('DOMContentLoaded', function () {
       const by = cArr[0][i] === 2
 
       const vy = {
-        s: yArr[1][i],
-        w: yArr[0][i - 1],
-        e: yArr[0][i + 1]
+        s: aY[0][i].s * yArr[1][i],
+        w: aY[0][i].w * yArr[0][i - 1],
+        e: aY[0][i].e * yArr[0][i + 1]
       }
 
-      jArr[0][i] += by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size) // north wall inlets
+      jArr[0][i] += (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
     }
 
     // south edge
@@ -229,12 +236,12 @@ window.addEventListener('DOMContentLoaded', function () {
       const by = cArr[ROWS - 1][i] === 2
 
       const vy = {
-        n: yArr[ROWS - 1][i],
-        w: yArr[ROWS][i - 1],
-        e: yArr[ROWS][i + 1]
+        n: aY[ROWS][i].n * yArr[ROWS - 1][i],
+        w: aY[ROWS][i].w * yArr[ROWS][i - 1],
+        e: aY[ROWS][i].e * yArr[ROWS][i + 1]
       }
 
-      jArr[ROWS][i] += by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size) // south wall inlets
+      jArr[ROWS][i] += (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
     }
 
     // TODO: write corner-cases
@@ -545,10 +552,10 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     document.querySelector('.xscale .min').textContent = '0'
-    document.querySelector('.xscale .max').textContent = maxx.toFixed(2)
+    document.querySelector('.xscale .max').textContent = maxx.toFixed(5)
 
     document.querySelector('.yscale .min').textContent = '0'
-    document.querySelector('.yscale .max').textContent = maxy.toFixed(2)
+    document.querySelector('.yscale .max').textContent = maxy.toFixed(5)
   }
 
   for (let i = 0; i < ctxxscale.canvas.width; i++) {
@@ -576,14 +583,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
       temp = couple(state, prevP, prevX, prevY, valsX, valsY)
 
-      // console.log('New Estimated Velocity:', temp)
-
       tempX = temp.x
       tempY = temp.y
 
       newP = jacobi(state, oldP, prevX, prevY)
-
-      // console.log('New Estimated Pressure:', newP)
 
       temp = correct(state, prevP, newP, tempX, tempY)
 
@@ -591,7 +594,9 @@ window.addEventListener('DOMContentLoaded', function () {
       nextY = temp.y
       nextP = temp.p
 
-      // console.log('New Estimated Component:', temp)
+      for (let j = 1; j < ROWS - 1; j++) {
+        nextX[j][0] = 0.00005
+      }
 
       draw(nextP, nextX, nextY)
 
