@@ -56,6 +56,13 @@ window.addEventListener('DOMContentLoaded', function () {
     return grid
   }
 
+  function cell (arr, j, i) {
+    const bx = (i >= 0) && (i < arr[0].length)
+    const by = (j >= 0) && (j < arr.length)
+
+    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)] * bx * by
+  }
+
   function coefficients (xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
@@ -66,47 +73,29 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     for (let j = 0; j < iArr.length; j++) {
-      for (let i = 1; i < iArr[j].length - 1; i++) {
+      for (let i = 0; i < iArr[j].length; i++) {
         const f = {
-          n: constants.density * (yArr[j][i - 1] + yArr[j][i]),
-          s: constants.density * (yArr[j + 1][i - 1] + yArr[j + 1][i]),
-          w: constants.density * (xArr[j][i - 1] + xArr[j][i]),
-          e: constants.density * (xArr[j][i] + xArr[j][i + 1])
+          n: constants.density * (cell(yArr, j, i - 1) + cell(yArr, j, i)),
+          s: constants.density * (cell(yArr, j + 1, i - 1) + cell(yArr, j + 1, i)),
+          w: constants.density * (cell(xArr, j, i - 1) + cell(xArr, j, i)),
+          e: constants.density * (cell(xArr, j, i) + cell(xArr, j, i + 1))
         }
 
         iArr[j][i] = diffuse(f, constants)
       }
     }
 
-    for (let j = 1; j < jArr.length - 1; j++) {
+    for (let j = 0; j < jArr.length; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
         const f = {
-          n: constants.density * (yArr[j - 1][i] + yArr[j][i]),
-          s: constants.density * (yArr[j][i] + yArr[j + 1][i]),
-          w: constants.density * (xArr[j - 1][i] + xArr[j][i]),
-          e: constants.density * (xArr[j - 1][i + 1] + xArr[j][i + 1])
+          n: constants.density * (cell(yArr, j - 1, i) + cell(yArr, j, i)),
+          s: constants.density * (cell(yArr, j, i) + cell(yArr, j + 1, i)),
+          w: constants.density * (cell(xArr, j - 1, i) + cell(xArr, j, i)),
+          e: constants.density * (cell(xArr, j - 1, i + 1) + cell(xArr, j, i + 1))
         }
 
         jArr[j][i] = diffuse(f, constants)
       }
-    }
-
-    // west and east walls in x-axis
-    for (let j = 0; j < ROWS; j++) {
-      const fw = constants.density * (xArr[j][COLS - 1] + xArr[j][COLS])
-      const fe = constants.density * (xArr[j][0] + xArr[j][1])
-
-      iArr[j][COLS] = diffuse({ n: 0, s: 0, w: fw, e: 0 }, constants)
-      iArr[j][0] = diffuse({ n: 0, s: 0, w: 0, e: fe }, constants)
-    }
-
-    // north and south walls in y-axis
-    for (let i = 0; i < COLS; i++) {
-      const fn = constants.density * (yArr[ROWS - 1][i] + yArr[ROWS][i])
-      const fs = constants.density * (yArr[0][i] + yArr[1][i])
-
-      jArr[ROWS][i] = diffuse({ n: fn, s: 0, w: 0, e: 0 }, constants)
-      jArr[0][i] = diffuse({ n: 0, s: fs, w: 0, e: 0 }, constants)
     }
 
     return {
@@ -128,13 +117,28 @@ window.addEventListener('DOMContentLoaded', function () {
       s: a.s,
       w: a.w,
       e: a.e,
-      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e +
     }
   }
 
-  function sink (xArr, yArr, f) {
-    for (let j = 2; j < xArr.length - 2; j++) {
-      for (let i = 2; i < xArr[j].length - 2; i++) {
+  function momentum (xArr, yArr) {
+    let iArr = zeros(ROWS, COLS + 1)
+    let jArr = zeros(ROWS + 1, COLS)
+
+    const constants = {
+      density: (params.rho / 2),
+      diffuse: (params.gamma / params.size)
+    }
+
+    for (let j = 0; j < xArr.length; j++) {
+      for (let i = 0; i < xArr[j].length; i++) {
+        const f = {
+          n: constants.density * (cell(yArr, j, i - 1) + cell(yArr, j, i)),
+          s: constants.density * (cell(yArr, j + 1, i - 1) + cell(yArr, j + 1, i)),
+          w: constants.density * (cell(xArr, j, i - 1) + cell(xArr, j, i)),
+          e: constants.density * (cell(xArr, j, i) + cell(xArr, j, i + 1))
+        }
+
         const a = {
           n: f.n > 0,
           s: f.s > 0,
@@ -144,27 +148,79 @@ window.addEventListener('DOMContentLoaded', function () {
 
         // positive r-values
         const rp = {
-          n: 0,
-          s: 0,
-          w: 0,
-          e: 0
+          n: (cell(xArr, j - 1, i) - cell(xArr, j - 2, i)) / (cell(xArr, j, i) - cell(xArr, j - 1, i)),
+          s: (cell(xArr, j, i) - cell(xArr, j - 1, i)) / (cell(xArr, j + 1, i) - cell(xArr, j, i)),
+          w: (cell(xArr, j, i - 1) - cell(xArr, j, i - 2)) / (cell(xArr, j, i) - cell(xArr, j, i - 1)),
+          e: (cell(xArr, j, i) - cell(xArr, j, i - 1)) / (cell(xArr, j, i + 1) - cell(xArr, j, i))
         }
 
         // negative r-values
         const rn = {
-          n: 0,
-          s: 0,
-          w: 0,
-          e: 0
+          n: (cell(xArr, j - 1, i) - cell(xArr, j, i)) / (cell(xArr, j, i) - cell(xArr, j + 1, i)),
+          s: (cell(xArr, j - 2, i) - cell(xArr, j - 1, i)) / (cell(xArr, j - 1, i) - cell(xArr, j, i)),
+          w: (cell(xArr, j, i - 1) - cell(xArr, j, i)) / (cell(xArr, j, i) - cell(xArr, j, i + 1)),
+          e: (cell(xArr, j, i - 2) - cell(xArr, j, i - 1)) / (cell(xArr, j, i - 1) - cell(xArr, j, i))
         }
 
+        // flux constituents
         const fx = {
-          n: f.n * (a.n * psi(rp.n) - (1 - a.n) * psi(rn.n)) * (xArr[j + 1][i] - xArr[j][i]),
-          s: f.s * ((1 - a.s) * psi(rn.s) - a.s * psi(rp.s)) * (xArr[j][i] - xArr[j - 1][i]),
-          w: f.w * (a.w * psi(rp.w) - (1 - a.w) * psi(rn.w)) * (xArr[j][i + 1] - xArr[j][i]),
-          e: f.e * ((1 - a.e) * psi(rn.e) - a.e * psi(rp.e)) * (xArr[j][i] - xArr[j][i - 1])
+          n: f.n * (a.n * psi(rp.n) - (1 - a.n) * psi(rn.n)) * (cell(xArr, j, i) - cell(xArr, j - 1, i)),
+          s: f.s * ((1 - a.s) * psi(rn.s) - a.s * psi(rp.s)) * (cell(xArr, j + 1, i) - cell(xArr, j, i)),
+          w: f.w * (a.w * psi(rp.w) - (1 - a.w) * psi(rn.w)) * (cell(xArr, j, i) - cell(xArr, j, i - 1)),
+          e: f.e * ((1 - a.e) * psi(rn.e) - a.e * psi(rp.e)) * (cell(xArr, j, i + 1) - cell(xArr, j, i))
         }
+
+        iArr[j][i] = (fx.n + fx.s + fx.w + fx.e) / 2
       }
+    }
+
+    for (let j = 0; j < jArr.length; j++) {
+      for (let i = 0; i < jArr[j].length; i++) {
+        const f = {
+          n: constants.density * (cell(yArr, j, i - 1) + cell(yArr, j, i)),
+          s: constants.density * (cell(yArr, j + 1, i - 1) + cell(yArr, j + 1, i)),
+          w: constants.density * (cell(xArr, j, i - 1) + cell(xArr, j, i)),
+          e: constants.density * (cell(xArr, j, i) + cell(xArr, j, i + 1))
+        }
+
+        const a = {
+          n: f.n > 0,
+          s: f.s > 0,
+          w: f.w > 0,
+          e: f.e > 0
+        }
+
+        // positive r-values
+        const rp = {
+          n: (cell(yArr, j - 1, i) - cell(yArr, j - 2, i)) / (cell(yArr, j, i) - cell(yArr, j - 1, i)),
+          s: (cell(yArr, j, i) - cell(yArr, j - 1, i)) / (cell(yArr, j + 1, i) - cell(yArr, j, i)),
+          w: (cell(yArr, j, i - 1) - cell(yArr, j, i - 2)) / (cell(yArr, j, i) - cell(yArr, j, i - 1)),
+          e: (cell(yArr, j, i) - cell(yArr, j, i - 1)) / (cell(yArr, j, i + 1) - cell(yArr, j, i))
+        }
+
+        // negative r-values
+        const rn = {
+          n: (cell(yArr, j - 1, i) - cell(yArr, j, i)) / (cell(yArr, j, i) - cell(yArr, j + 1, i)),
+          s: (cell(yArr, j - 2, i) - cell(yArr, j - 1, i)) / (cell(yArr, j - 1, i) - cell(yArr, j, i)),
+          w: (cell(yArr, j, i - 1) - cell(yArr, j, i)) / (cell(yArr, j, i) - cell(yArr, j, i + 1)),
+          e: (cell(yArr, j, i - 2) - cell(yArr, j, i - 1)) / (cell(yArr, j, i - 1) - cell(yArr, j, i))
+        }
+
+        // flux constituents
+        const fy = {
+          n: f.n * (a.n * psi(rp.n) - (1 - a.n) * psi(rn.n)) * (cell(yArr, j, i) - cell(yArr, j - 1, i)),
+          s: f.s * ((1 - a.s) * psi(rn.s) - a.s * psi(rp.s)) * (cell(yArr, j + 1, i) - cell(yArr, j, i)),
+          w: f.w * (a.w * psi(rp.w) - (1 - a.w) * psi(rn.w)) * (cell(yArr, j, i) - cell(yArr, j, i - 1)),
+          e: f.e * ((1 - a.e) * psi(rn.e) - a.e * psi(rp.e)) * (cell(yArr, j, i + 1) - cell(yArr, j, i))
+        }
+
+        jArr[j][i] = (fy.n + fy.s + fy.w + fy.e) / 2
+      }
+    }
+
+    return {
+      x: iArr,
+      y: jArr
     }
   }
 
@@ -176,17 +232,22 @@ window.addEventListener('DOMContentLoaded', function () {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
 
+    let {
+      x: uArr,
+      y: vArr
+    } = momentum(xArr, yArr)
+
     // performs velocity calculation in x-axis
     for (let j = 1; j < iArr.length - 1; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
         const vx = {
-          n: aX[j][i].n * xArr[j - 1][i],
-          s: aX[j][i].s * xArr[j + 1][i],
-          w: aX[j][i].w * xArr[j][i - 1],
-          e: aX[j][i].e * xArr[j][i + 1]
+          n: aX[j][i].n * cell(xArr, j - 1, i),
+          s: aX[j][i].s * cell(xArr, j + 1, i),
+          w: aX[j][i].w * cell(xArr, j, i - 1),
+          e: aX[j][i].e * cell(xArr, j, i + 1)
         }
 
-        const ox = vx.n + vx.s + vx.w + vx.e + (pArr[j][i - 1] - pArr[j][i]) * params.size // + divergence
+        const ox = vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - pArr[j][i]) * params.size // + uArr[j][i]
 
         iArr[j][i] = ox / aX[j][i].c
       }
@@ -196,13 +257,13 @@ window.addEventListener('DOMContentLoaded', function () {
     for (let j = 1; j < jArr.length - 1; j++) {
       for (let i = 1; i < jArr[j].length - 1; i++) {
         const vy = {
-          n: aY[j][i].n * yArr[j - 1][i],
-          s: aY[j][i].s * yArr[j + 1][i],
-          w: aY[j][i].w * yArr[j][i - 1],
-          e: aY[j][i].e * yArr[j][i + 1]
+          n: aY[j][i].n * cell(yArr, j - 1, i),
+          s: aY[j][i].s * cell(yArr, j + 1, i),
+          w: aY[j][i].w * cell(yArr, j, i - 1),
+          e: aY[j][i].e * cell(yArr, j, i + 1)
         }
 
-        const oy = vy.n + vy.s + vy.w + vy.e + (pArr[j - 1][i] - pArr[j][i]) * params.size // + divergence
+        const oy = vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - pArr[j][i]) * params.size // + vArr[j][i]
 
         jArr[j][i] = oy / aY[j][i].c
       }
@@ -295,207 +356,27 @@ window.addEventListener('DOMContentLoaded', function () {
   function jacobi (cArr, pArr, xArr, yArr) {
     let kArr = zeros(ROWS, COLS)
 
-    for (let j = 1; j < kArr.length - 1; j++) {
-      for (let i = 1; i < kArr[j].length - 1; i++) {
+    for (let j = 0; j < kArr.length; j++) {
+      for (let i = 0; i < kArr[j].length; i++) {
         const vx = {
-          w: xArr[j][i],
-          e: xArr[j][i + 1]
+          w: cell(xArr, j, i),
+          e: cell(xArr, j, i + 1)
         }
 
         const vy = {
-          n: yArr[j][i],
-          s: yArr[j + 1][i]
+          n: cell(yArr, j, i),
+          s: cell(yArr, j + 1, i)
         }
 
         const p = {
-          n: pArr[j - 1][i],
-          s: pArr[j + 1][i],
-          w: pArr[j][i - 1],
-          e: pArr[j][i + 1]
+          n: cell(pArr, j - 1, i),
+          s: cell(pArr, j + 1, i),
+          w: cell(pArr, j, i - 1),
+          e: cell(pArr, j, i + 1)
         }
 
         kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
       }
-    }
-
-    // west bank
-    for (let j = 1; j < ROWS - 1; j++) {
-      const bx = cArr[j][0] !== 0
-
-      const vx = {
-        w: xArr[j][0],
-        e: xArr[j][1]
-      }
-
-      const vy = {
-        n: yArr[j][0],
-        s: yArr[j + 1][0]
-      }
-
-      const p = {
-        n: pArr[j - 1][0],
-        s: pArr[j + 1][0],
-        e: pArr[j][1]
-      }
-
-      kArr[j][0] = (bx * (p.n + p.s + p.e + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // east bank
-    for (let j = 1; j < ROWS - 1; j++) {
-      const bx = cArr[j][COLS - 1] !== 0
-
-      const vx = {
-        w: xArr[j][COLS - 1],
-        e: xArr[j][COLS]
-      }
-
-      const vy = {
-        n: yArr[j][COLS - 1],
-        s: yArr[j + 1][COLS - 1]
-      }
-
-      const p = {
-        n: pArr[j - 1][COLS - 1],
-        s: pArr[j + 1][COLS - 1],
-        w: pArr[j][COLS - 2]
-      }
-
-      kArr[j][COLS - 1] = (bx * (p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // north bank
-    for (let i = 1; i < COLS - 1; i++) {
-      const by = cArr[0][i] !== 0
-
-      const vx = {
-        w: xArr[0][i],
-        e: xArr[0][i + 1]
-      }
-
-      const vy = {
-        n: yArr[0][i],
-        s: yArr[1][i]
-      }
-
-      const p = {
-        s: pArr[1][i],
-        w: pArr[0][i - 1],
-        e: pArr[0][i + 1]
-      }
-
-      kArr[0][i] = (by * (p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // south bank
-    for (let i = 1; i < COLS - 1; i++) {
-      const by = cArr[ROWS - 1][i] !== 0
-
-      const vx = {
-        w: xArr[ROWS - 1][i],
-        e: xArr[ROWS - 1][i + 1]
-      }
-
-      const vy = {
-        n: yArr[ROWS - 1][i],
-        s: yArr[ROWS][i]
-      }
-
-      const p = {
-        n: pArr[ROWS - 2][i],
-        w: pArr[ROWS - 1][i - 1],
-        e: pArr[ROWS - 1][i + 1]
-      }
-
-      kArr[ROWS - 1][i] = (by * (p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // north-west corner
-    {
-      const bx = cArr[0][0] !== 0
-
-      const vx = {
-        w: xArr[0][0],
-        e: xArr[0][1]
-      }
-
-      const vy = {
-        n: yArr[0][0],
-        s: yArr[1][0]
-      }
-
-      const p = {
-        s: pArr[1][0],
-        e: pArr[0][1]
-      }
-
-      kArr[0][0] = (bx * (p.s + p.e + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // north-east corner
-    {
-      const bx = cArr[0][COLS - 1] !== 0
-
-      const vx = {
-        w: xArr[0][COLS - 1],
-        e: xArr[0][COLS]
-      }
-
-      const vy = {
-        n: yArr[0][COLS - 1],
-        s: yArr[1][COLS - 1]
-      }
-
-      const p = {
-        s: pArr[1][COLS - 1],
-        w: pArr[0][COLS - 2]
-      }
-
-      kArr[0][COLS - 1] = (bx * (p.s + p.w + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // south-west corner
-    {
-      const by = cArr[ROWS - 1][0] !== 0
-
-      const vx = {
-        w: xArr[ROWS - 1][0],
-        e: xArr[ROWS - 1][1]
-      }
-
-      const vy = {
-        n: yArr[ROWS - 1][0],
-        s: yArr[ROWS][0]
-      }
-
-      const p = {
-        n: pArr[ROWS - 2][0],
-        e: pArr[ROWS - 1][1]
-      }
-
-      kArr[ROWS - 1][0] = (by * (p.n + p.e + (vx.w - vx.e + vy.n - vy.s)))
-    }
-
-    // south-east corner
-    {
-      const by = cArr[ROWS - 1][COLS - 1] !== 0
-
-      const vx = {
-        w: xArr[ROWS - 1][COLS - 1],
-        e: xArr[ROWS - 1][COLS]
-      }
-
-      const vy = {
-        n: yArr[ROWS - 1][COLS - 1],
-        s: yArr[ROWS][COLS - 1]
-      }
-
-      const p = {
-        n: pArr[ROWS - 2][COLS - 1],
-        w: pArr[ROWS - 1][COLS - 2]
-      }
-
-      kArr[ROWS - 1][COLS - 1] = (by * (p.n + p.w + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     return kArr
@@ -516,14 +397,14 @@ window.addEventListener('DOMContentLoaded', function () {
     // performs velocity calculation in x-axis
     for (let j = 0; j < iArr.length; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
-        iArr[j][i] = xArr[j][i] + (pArr[j][i - 1] - pArr[j][i]) * params.size
+        iArr[j][i] = cell(xArr, j, i) + (pArr[j][i - 1] - pArr[j][i]) * params.size
       }
     }
 
     // performs velocity calculation in y-axis
     for (let j = 1; j < jArr.length - 1; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
-        jArr[j][i] = yArr[j][i] + (pArr[j - 1][i] - pArr[j][i]) * params.size
+        jArr[j][i] = cell(yArr, j, i) + (pArr[j - 1][i] - pArr[j][i]) * params.size
       }
     }
 
