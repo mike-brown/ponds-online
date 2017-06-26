@@ -56,23 +56,6 @@ window.addEventListener('DOMContentLoaded', function () {
     return grid
   }
 
-  function diffuse (f, constants) {
-    const a = {
-      n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
-      s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
-      w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
-      e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
-    }
-
-    return {
-      n: a.n,
-      s: a.s,
-      w: a.w,
-      e: a.e,
-      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
-    }
-  }
-
   function coefficients (xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
@@ -130,6 +113,63 @@ window.addEventListener('DOMContentLoaded', function () {
       x: iArr,
       y: jArr
     }
+  }
+
+  function diffuse (f, constants) {
+    const a = {
+      n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
+      s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
+      w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
+      e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
+    }
+
+    return {
+      n: a.n,
+      s: a.s,
+      w: a.w,
+      e: a.e,
+      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+    }
+  }
+
+  function sink (xArr, yArr, f) {
+    for (let j = 2; j < xArr.length - 2; j++) {
+      for (let i = 2; i < xArr[j].length - 2; i++) {
+        const a = {
+          n: f.n > 0,
+          s: f.s > 0,
+          w: f.w > 0,
+          e: f.e > 0
+        }
+
+        // positive r-values
+        const rp = {
+          n: 0,
+          s: 0,
+          w: 0,
+          e: 0
+        }
+
+        // negative r-values
+        const rn = {
+          n: 0,
+          s: 0,
+          w: 0,
+          e: 0
+        }
+
+        const fx = {
+          n: f.n * (a.n * psi(rp.n) - (1 - a.n) * psi(rn.n)) * (xArr[j + 1][i] - xArr[j][i]),
+          s: f.s * ((1 - a.s) * psi(rn.s) - a.s * psi(rp.s)) * (xArr[j][i] - xArr[j - 1][i]),
+          w: f.w * (a.w * psi(rp.w) - (1 - a.w) * psi(rn.w)) * (xArr[j][i + 1] - xArr[j][i]),
+          e: f.e * ((1 - a.e) * psi(rn.e) - a.e * psi(rp.e)) * (xArr[j][i] - xArr[j][i - 1])
+        }
+      }
+    }
+  }
+
+  function psi (v) {
+    return v // TODO: implement proper psi function
   }
 
   function couple (cArr, pArr, xArr, yArr, aX, aY) {
@@ -202,7 +242,7 @@ window.addEventListener('DOMContentLoaded', function () {
         e: aX[j][0].e * xArr[j][1]
       }
 
-      iArr[j][0] += (bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
+      iArr[j][0] = (bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
     }
 
     // east edge
@@ -215,7 +255,7 @@ window.addEventListener('DOMContentLoaded', function () {
         w: aX[j][COLS].w * xArr[j][COLS - 1]
       }
 
-      iArr[j][COLS] += (bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
+      iArr[j][COLS] = (bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
     }
 
     // north edge
@@ -228,7 +268,7 @@ window.addEventListener('DOMContentLoaded', function () {
         e: aY[0][i].e * yArr[0][i + 1]
       }
 
-      jArr[0][i] += (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
+      jArr[0][i] = (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
     }
 
     // south edge
@@ -241,7 +281,7 @@ window.addEventListener('DOMContentLoaded', function () {
         e: aY[ROWS][i].e * yArr[ROWS][i + 1]
       }
 
-      jArr[ROWS][i] += (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
+      jArr[ROWS][i] = (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
     }
 
     // TODO: write corner-cases
@@ -280,6 +320,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // west bank
     for (let j = 1; j < ROWS - 1; j++) {
+      const bx = cArr[j][0] !== 0
+
       const vx = {
         w: xArr[j][0],
         e: xArr[j][1]
@@ -296,11 +338,13 @@ window.addEventListener('DOMContentLoaded', function () {
         e: pArr[j][1]
       }
 
-      kArr[j][0] = p.n + p.s + p.e + (vx.w - vx.e + vy.n - vy.s)
+      kArr[j][0] = (bx * (p.n + p.s + p.e + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // east bank
     for (let j = 1; j < ROWS - 1; j++) {
+      const bx = cArr[j][COLS - 1] !== 0
+
       const vx = {
         w: xArr[j][COLS - 1],
         e: xArr[j][COLS]
@@ -317,11 +361,13 @@ window.addEventListener('DOMContentLoaded', function () {
         w: pArr[j][COLS - 2]
       }
 
-      kArr[j][COLS - 1] = p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+      kArr[j][COLS - 1] = (bx * (p.n + p.s + p.w + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // north bank
     for (let i = 1; i < COLS - 1; i++) {
+      const by = cArr[0][i] !== 0
+
       const vx = {
         w: xArr[0][i],
         e: xArr[0][i + 1]
@@ -338,11 +384,13 @@ window.addEventListener('DOMContentLoaded', function () {
         e: pArr[0][i + 1]
       }
 
-      kArr[0][i] = p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+      kArr[0][i] = (by * (p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // south bank
     for (let i = 1; i < COLS - 1; i++) {
+      const by = cArr[ROWS - 1][i] !== 0
+
       const vx = {
         w: xArr[ROWS - 1][i],
         e: xArr[ROWS - 1][i + 1]
@@ -359,11 +407,13 @@ window.addEventListener('DOMContentLoaded', function () {
         e: pArr[ROWS - 1][i + 1]
       }
 
-      kArr[ROWS - 1][i] = p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+      kArr[ROWS - 1][i] = (by * (p.n + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // north-west corner
     {
+      const bx = cArr[0][0] !== 0
+
       const vx = {
         w: xArr[0][0],
         e: xArr[0][1]
@@ -379,11 +429,13 @@ window.addEventListener('DOMContentLoaded', function () {
         e: pArr[0][1]
       }
 
-      kArr[0][0] = p.s + p.e + (vx.w - vx.e + vy.n - vy.s)
+      kArr[0][0] = (bx * (p.s + p.e + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // north-east corner
     {
+      const bx = cArr[0][COLS - 1] !== 0
+
       const vx = {
         w: xArr[0][COLS - 1],
         e: xArr[0][COLS]
@@ -399,11 +451,13 @@ window.addEventListener('DOMContentLoaded', function () {
         w: pArr[0][COLS - 2]
       }
 
-      kArr[0][COLS - 1] = p.s + p.w + (vx.w - vx.e + vy.n - vy.s)
+      kArr[0][COLS - 1] = (bx * (p.s + p.w + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // south-west corner
     {
+      const by = cArr[ROWS - 1][0] !== 0
+
       const vx = {
         w: xArr[ROWS - 1][0],
         e: xArr[ROWS - 1][1]
@@ -419,11 +473,13 @@ window.addEventListener('DOMContentLoaded', function () {
         e: pArr[ROWS - 1][1]
       }
 
-      kArr[ROWS - 1][0] = p.n + p.e + (vx.w - vx.e + vy.n - vy.s)
+      kArr[ROWS - 1][0] = (by * (p.n + p.e + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     // south-east corner
     {
+      const by = cArr[ROWS - 1][COLS - 1] !== 0
+
       const vx = {
         w: xArr[ROWS - 1][COLS - 1],
         e: xArr[ROWS - 1][COLS]
@@ -439,7 +495,7 @@ window.addEventListener('DOMContentLoaded', function () {
         w: pArr[ROWS - 1][COLS - 2]
       }
 
-      kArr[ROWS - 1][COLS - 1] = p.n + p.w + (vx.w - vx.e + vy.n - vy.s)
+      kArr[ROWS - 1][COLS - 1] = (by * (p.n + p.w + (vx.w - vx.e + vy.n - vy.s)))
     }
 
     return kArr
@@ -494,35 +550,25 @@ window.addEventListener('DOMContentLoaded', function () {
     ctxx.clearRect(0, 0, ctxy.canvas.width, ctxy.canvas.height)
 
     let maxp = 0
-    let maxx = 0
-    let maxy = 0
+    let maxv = 0
 
     for (let y = 0; y < pArr.length; y++) {
       for (let x = 0; x < pArr[y].length; x++) {
-        if (maxp < Math.abs(pArr[y][x])) {
-          maxp = Math.abs(pArr[y][x])
-        }
+        maxp = Math.max(maxp, Math.abs(pArr[y][x]))
       }
     }
 
     for (let y = 0; y < xArr.length; y++) {
       for (let x = 0; x < xArr[y].length; x++) {
-        if (maxx < Math.abs(xArr[y][x])) {
-          maxx = Math.abs(xArr[y][x])
-        }
+        maxv = Math.max(maxv, Math.abs(xArr[y][x]))
       }
     }
 
     for (let y = 0; y < yArr.length; y++) {
       for (let x = 0; x < yArr[y].length; x++) {
-        if (maxy < Math.abs(yArr[y][x])) {
-          maxy = Math.abs(yArr[y][x])
-        }
+        maxv = Math.max(maxv, Math.abs(yArr[y][x]))
       }
     }
-
-    let valp = (maxp === 0) ? 0 : 255.0 / maxp
-    let valv = (maxx === 0) ? 0 : 255.0 / (maxx > maxy ? maxx : maxy)
 
     for (let y = 0; y < pArr.length; y++) {
       for (let x = 0; x < pArr[y].length; x++) {
@@ -537,7 +583,7 @@ window.addEventListener('DOMContentLoaded', function () {
       for (let j = 0; j < xArr[i].length; j++) {
         const vel = xArr[i][j]
 
-        ctxx.fillStyle = `hsl(${Math.floor(240 - (vel / maxx) * 240)}, 100%, 50%)`
+        ctxx.fillStyle = `hsl(${Math.floor(240 - (vel / maxv) * 240)}, 100%, 50%)`
         ctxx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       }
     }
@@ -546,16 +592,16 @@ window.addEventListener('DOMContentLoaded', function () {
       for (let j = 0; j < yArr[i].length; j++) {
         const vel = yArr[i][j]
 
-        ctxy.fillStyle = `hsl(${Math.floor(240 - (vel / maxy) * 240)}, 100%, 50%)`
+        ctxy.fillStyle = `hsl(${Math.floor(240 - (vel / maxv) * 240)}, 100%, 50%)`
         ctxy.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
       }
     }
 
     document.querySelector('.xscale .min').textContent = '0'
-    document.querySelector('.xscale .max').textContent = maxx.toFixed(5)
+    document.querySelector('.xscale .max').textContent = maxv.toFixed(5)
 
     document.querySelector('.yscale .min').textContent = '0'
-    document.querySelector('.yscale .max').textContent = maxy.toFixed(5)
+    document.querySelector('.yscale .max').textContent = maxv.toFixed(5)
   }
 
   for (let i = 0; i < ctxxscale.canvas.width; i++) {
