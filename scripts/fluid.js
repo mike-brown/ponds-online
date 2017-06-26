@@ -30,14 +30,15 @@ window.addEventListener('DOMContentLoaded', function () {
 
   let tempX
   let tempY
-  let tempC
+  let valsX
+  let valsY
 
   let nextP
   let nextX
   let nextY
 
   const params = {
-    gamma: 0.2, // interface diffusion
+    gamma: 0.02, // interface diffusion
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.0 // viscosity
@@ -56,8 +57,8 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function coefficients (xArr, yArr) {
-    let jArr = zeros(ROWS, COLS)
-    let iArr = zeros(ROWS, COLS)
+    let iArr = zeros(ROWS, COLS + 1)
+    let jArr = zeros(ROWS + 1, COLS)
 
     const constants = {
       density: (params.rho / 2),
@@ -67,10 +68,10 @@ window.addEventListener('DOMContentLoaded', function () {
     for (let j = 1; j < iArr.length - 1; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
         const f = {
-          n: constants.density * (yArr[j][i] + yArr[j - 1][i]),
-          s: constants.density * (yArr[j][i + 1] + yArr[j - 1][i + 1]),
-          w: constants.density * (xArr[j - 1][i] + xArr[j][i]),
-          e: constants.density * (xArr[j][i] + xArr[j + 1][i])
+          n: constants.density * (yArr[j][i - 1] + yArr[j][i]),
+          s: constants.density * (yArr[j + 1][i - 1] + yArr[j + 1][i]),
+          w: constants.density * (xArr[j][i - 1] + xArr[j][i]),
+          e: constants.density * (xArr[j][i] + xArr[j][i + 1])
         }
 
         const a = {
@@ -80,21 +81,23 @@ window.addEventListener('DOMContentLoaded', function () {
           e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
         }
 
-        iArr[j][i].n = a.n
-        iArr[j][i].s = a.s
-        iArr[j][i].w = a.w
-        iArr[j][i].e = a.e
-        iArr[j][i].c = a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+        iArr[j][i] = {
+          n: a.n,
+          s: a.s,
+          w: a.w,
+          e: a.e,
+          c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+        }
       }
     }
 
     for (let j = 1; j < jArr.length - 1; j++) {
       for (let i = 1; i < jArr[j].length - 1; i++) {
         const f = {
-          n: constants.density * (xArr[j - 1][i] + xArr[j][i]),
-          s: constants.density * (xArr[j][i] + xArr[j + 1][i]),
-          w: constants.density * (yArr[j][i] + yArr[j - 1][i]),
-          e: constants.density * (yArr[j][i + 1] + yArr[j - 1][i + 1])
+          n: constants.density * (yArr[j - 1][i] + yArr[j][i]),
+          s: constants.density * (yArr[j][i] + yArr[j + 1][i]),
+          w: constants.density * (xArr[j - 1][i] + xArr[j][i]),
+          e: constants.density * (xArr[j - 1][i + 1] + xArr[j][i + 1])
         }
 
         const a = {
@@ -104,20 +107,25 @@ window.addEventListener('DOMContentLoaded', function () {
           e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
         }
 
-        jArr[j][i].n = a.n
-        jArr[j][i].s = a.s
-        jArr[j][i].w = a.w
-        jArr[j][i].e = a.e
-        jArr[j][i].c = a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+        jArr[j][i] = {
+          n: a.n,
+          s: a.s,
+          w: a.w,
+          e: a.e,
+          c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e + dF
+        }
       }
     }
 
     // TODO: corner cases
 
-    return jArr
+    return {
+      x: iArr,
+      y: jArr
+    }
   }
 
-  function couple (cArr, pArr, xArr, yArr) {
+  function couple (cArr, pArr, xArr, yArr, aX, aY) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
 
@@ -125,15 +133,15 @@ window.addEventListener('DOMContentLoaded', function () {
     for (let j = 1; j < iArr.length - 1; j++) {
       for (let i = 1; i < iArr[j].length - 1; i++) {
         const vx = {
-          n: xArr[j - 1][i],
-          s: xArr[j + 1][i],
-          w: xArr[j][i - 1],
-          e: xArr[j][i + 1]
+          n: aX[j][i].n * xArr[j - 1][i],
+          s: aX[j][i].s * xArr[j + 1][i],
+          w: aX[j][i].w * xArr[j][i - 1],
+          e: aX[j][i].e * xArr[j][i + 1]
         }
 
         const ox = vx.n + vx.s + vx.w + vx.e + (pArr[j][i - 1] - pArr[j][i]) * params.size // + divergence
 
-        iArr[j][i] = ox
+        iArr[j][i] = ox / aX[j][i].c
       }
     }
 
@@ -141,15 +149,15 @@ window.addEventListener('DOMContentLoaded', function () {
     for (let j = 1; j < jArr.length - 1; j++) {
       for (let i = 1; i < jArr[j].length - 1; i++) {
         const vy = {
-          n: yArr[j - 1][i],
-          s: yArr[j + 1][i],
-          w: yArr[j][i - 1],
-          e: yArr[j][i + 1]
+          n: aY[j][i].n * yArr[j - 1][i],
+          s: aY[j][i].s * yArr[j + 1][i],
+          w: aY[j][i].w * yArr[j][i - 1],
+          e: aY[j][i].e * yArr[j][i + 1]
         }
 
         const oy = vy.n + vy.s + vy.w + vy.e + (pArr[j - 1][i] - pArr[j][i]) * params.size // + divergence
 
-        jArr[j][i] = oy
+        jArr[j][i] = oy / aY[j][i].c
       }
     }
 
@@ -466,9 +474,6 @@ window.addEventListener('DOMContentLoaded', function () {
       jArr[ROWS][i] = yArr[ROWS][i] + (pArr[ROWS - 1][i] - 0) * params.size
     }
 
-    console.log('tempX:', xArr[10][0])
-    console.log('nextX:', iArr[10][0])
-
     return {
       x: iArr,
       y: jArr,
@@ -564,7 +569,12 @@ window.addEventListener('DOMContentLoaded', function () {
         prevX[j][0] = 0.00005
       }
 
-      let temp = couple(state, prevP, prevX, prevY)
+      let temp = coefficients(prevX, prevY)
+
+      valsX = temp.x
+      valsY = temp.y
+
+      temp = couple(state, prevP, prevX, prevY, valsX, valsY)
 
       // console.log('New Estimated Velocity:', temp)
 
@@ -592,6 +602,6 @@ window.addEventListener('DOMContentLoaded', function () {
 
     requestAnimationFrame(execute)
   }
-  // setInterval(execute, 2000)
+  // setInterval(execute, 1000)
   requestAnimationFrame(execute)
 }, false)
