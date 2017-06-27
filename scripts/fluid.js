@@ -2,7 +2,7 @@
 
 window.addEventListener('DOMContentLoaded', function () {
   const CELL_SIZE = 10
-  const COLS = 39
+  const COLS = 79
   const ROWS = 19
 
   // TODO: velocity profile at end of simulation
@@ -42,14 +42,7 @@ window.addEventListener('DOMContentLoaded', function () {
   let oldP = zeros(ROWS, COLS)
   let newP
 
-  let tempX
-  let tempY
-  let valsX
-  let valsY
-
-  let nextP
-  let nextX
-  let nextY
+  let tempX, tempY, valsX, valsY, nextP, nextX, nextY
 
   const params = {
     gamma: 0.2, // interface diffusion
@@ -59,8 +52,8 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   const constants = {
-    density: (params.rho / 2),
-    diffuse: (params.gamma / params.size)
+    density: params.rho / 2,
+    diffuse: params.gamma / params.size
   }
 
   function zeros (ROWS, COLS) {
@@ -270,7 +263,8 @@ window.addEventListener('DOMContentLoaded', function () {
         }
 
         // TODO: generalise state for all axes
-        const wx = cell(state, j, i - 1) === 2 ||
+        const wx = cell(state, j, i) === 2 ||
+                   cell(state, j, i - 1) === 2 ||
                   (cell(state, j, i) !== 0 &&
                    cell(state, j - 1, i) !== 0 &&
                    cell(state, j + 1, i) !== 0 &&
@@ -294,7 +288,8 @@ window.addEventListener('DOMContentLoaded', function () {
           e: aY[j][i].e * edge(yArr, j, i + 1)
         }
 
-        const wy =
+        const wy = cell(state, j, i) === 2 ||
+                   cell(state, j - 1, i) === 2 ||
                   (cell(state, j, i) !== 0 &&
                    cell(state, j, i - 1) !== 0 &&
                    cell(state, j, i + 1) !== 0 &&
@@ -316,7 +311,6 @@ window.addEventListener('DOMContentLoaded', function () {
       }
 
       iArr[j][0] += bool.w * 0.00005 // west wall inlets
-
       iArr[j][COLS] -= bool.e * 0.00005 // east wall inlets
     }
 
@@ -328,63 +322,8 @@ window.addEventListener('DOMContentLoaded', function () {
       }
 
       jArr[0][i] += bool.n * 0.00005 // north wall inlets
-
       jArr[ROWS][i] -= bool.s * 0.00005 // south wall inlets
     }
-
-    // // west edge
-    // for (let j = 1; j < ROWS - 1; j++) {
-    //   const bx = state[j][0] === 2
-    //
-    //   const vx = {
-    //     n: aX[j][0].n * xArr[j - 1][0],
-    //     s: aX[j][0].s * xArr[j + 1][0],
-    //     w: aX[j][0].w * xArr[j][0],
-    //     e: aX[j][0].e * xArr[j][1]
-    //   }
-    //
-    //   iArr[j][0] = (bx * (vx.n + vx.s + vx.w + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
-    // }
-    //
-    // // east edge
-    // for (let j = 1; j < ROWS - 1; j++) {
-    //   const bx = state[j][COLS - 1] === 2
-    //
-    //   const vx = {
-    //     n: aX[j][COLS].n * xArr[j - 1][COLS],
-    //     s: aX[j][COLS].s * xArr[j + 1][COLS],
-    //     w: aX[j][COLS].w * xArr[j][COLS - 2],
-    //     e: aX[j][COLS].e * xArr[j][COLS - 1]
-    //   }
-    //
-    //   iArr[j][COLS] = (bx * (vx.n + vx.s + vx.w + vx.e + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
-    // }
-    //
-    // // north edge
-    // for (let i = 1; i < COLS - 1; i++) {
-    //   const by = state[0][i] === 2
-    //
-    //   const vy = {
-    //     s: aY[0][i].s * yArr[1][i],
-    //     w: aY[0][i].w * yArr[0][i - 1],
-    //     e: aY[0][i].e * yArr[0][i + 1]
-    //   }
-    //
-    //   jArr[0][i] = (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
-    // }
-    //
-    // // south edge
-    // for (let i = 1; i < COLS - 1; i++) {
-    //   const by = state[ROWS - 1][i] === 2
-    //
-    //   const vy = {
-    //     n: aY[ROWS][i].n * yArr[ROWS - 1][i],
-    //     w: aY[ROWS][i].w * yArr[ROWS][i - 1],
-    //     e: aY[ROWS][i].e * yArr[ROWS][i + 1]
-    //   }
-    //
-    //   jArr[ROWS][i] = (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
-    // }
 
     return {
       x: iArr,
@@ -568,7 +507,7 @@ window.addEventListener('DOMContentLoaded', function () {
         nextX[j][0] = 0.00005
       }
 
-      draw(nextP, tempX, tempY)
+      draw(nextP, nextX, nextY)
 
       prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
       prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
