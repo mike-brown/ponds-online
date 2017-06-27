@@ -1,354 +1,192 @@
 'use strict'
 
-const row = 9
-const col = 15
-
-const rows = 2 * row + 1
-const cols = 2 * col + 1
-
-var curr = zeros(rows, cols) // new values
-var prev = zeros(rows, cols) // old values
-var tmpv = zeros(rows, cols) // estimated velocity values
-var tmpp = zeros(rows, cols) // estimated pressure values
-
-const time = 1.0 // 1s interval
-const size = 0.01 // 10mm cell
-const rho = 998.2 // 998.2kg/m^3 density
-const mu = 0 // viscosity
-
-function zeros (rows, cols) {
-  let grid = []
-  for (let y = 0; y < rows; y++) {
-    let line = []
-    for (let x = 0; x < cols; x++) {
-      line.push({
-        pressure: 0, // pressure
-        velocity: {
-          x: 0, // velocity (x-axis)
-          y: 0 // velocity (y-axis)
-        }
-      })
-    }
-    grid.push(line)
-  }
-  return grid
-}
-
-function couple (prev, dvrg) {
-  let grid = []
-  for (let y = 0; y < prev.length; y++) {
-    let line = []
-    for (let x = 0; x < prev[y].length; x++) {
-      // if not active, ignore
-
-      let v = {
-        n: border(prev, { x: x, y: y - 2 }),
-        s: border(prev, { x: x, y: y + 2 }),
-        e: border(prev, { x: x + 2, y: y }),
-        w: border(prev, { x: x - 2, y: y })
-      }
-
-      let p = {
-        n: border(prev, { x: x, y: y - 1 }),
-        s: border(prev, { x: x, y: y + 1 }),
-        e: border(prev, { x: x + 1, y: y }),
-        w: border(prev, { x: x - 1, y: y })
-      }
-
-      let vx = v.e.x + v.w.x + v.s.x + v.n.x + (p.w.p - p.e.p) * size
-      let vy = v.e.y + v.w.y + v.s.y + v.n.y + (p.n.p - p.s.p) * size
-
-      line.push({
-        pressure: prev[y][x].pressure,
-        velocity: {
-          x: vx,
-          y: vy
-        }
-      })
-    }
-    grid.push(line)
-  }
-
-  return grid
-}
-
-// function advect (prev) {
-//   let arr = zeros(rows, cols)
-//
-//   for (let y = 0; y < prev.length; y++) {
-//     for (let x = 0; x < prev[y].length; x++) {
-//       let ox = x - prev[y][x].velocity.x * time
-//       let oy = y - prev[y][x].velocity.y * time
-//
-//       let qxy = {
-//         x: parseInt(Math.floor(ox)),
-//         y: parseInt(Math.floor(oy))
-//       }
-//
-//       let q11 = {
-//         x: qxy.x,
-//         y: qxy.y
-//       }
-//
-//       let q12 = {
-//         x: qxy.x,
-//         y: qxy.y + 1
-//       }
-//
-//       let q21 = {
-//         x: qxy.x + 1,
-//         y: qxy.y
-//       }
-//
-//       let q22 = {
-//         x: qxy.x + 1,
-//         y: qxy.y + 1
-//       }
-//
-//       arr[y][x] = bilinear(prev, x, y, ox, oy, q11, q12, q21, q22)
-//     }
-//   }
-//   return arr
-// }
-
-// function bilinear (arr, x, y, ox, oy, q11, q12, q21, q22) {
-//   const d = {
-//     x: ox,
-//     y: oy,
-//     x1: q11.x,
-//     y1: q11.y,
-//     x2: q22.x,
-//     y2: q22.y,
-//
-//     v11: border(arr, q11),
-//     v12: border(arr, q12),
-//     v21: border(arr, q21),
-//     v22: border(arr, q22)
-//   }
-//
-//   let term = 1 / (d.x2 - d.x1) * (d.y2 - d.y1)
-//
-//   // performs x-axis velocity computation of interpolation
-//   let vx = (((d.x2 - d.x) * d.v11.x) + ((d.x - d.x1) * d.v21.x)) * (d.y2 - d.y) +
-//            (((d.x2 - d.x) * d.v12.x) + ((d.x - d.x1) * d.v22.x)) * (d.y - d.y1)
-//
-//   // performs y-axis velocity computation of interpolation
-//   let vy = (((d.x2 - d.x) * d.v11.y) + ((d.x - d.x1) * d.v21.y)) * (d.y2 - d.y) +
-//            (((d.x2 - d.x) * d.v12.y) + ((d.x - d.x1) * d.v22.y)) * (d.y - d.y1)
-//
-//   return {
-//     pressure: arr[y][x].pressure,
-//     velocity: {
-//       x: term * vx,
-//       y: term * vy
-//     }
-//   }
-// }
-
-function border (arr, q) {
-  let v = {
-    p: 0,
-    x: 0,
-    y: 0
-  }
-
-  if (q.y >= 0 && q.y < arr.length && q.x >= 0 && q.x < arr[q.y].length) {
-    v = {
-      p: arr[q.y][q.x].pressure,
-      x: arr[q.y][q.x].velocity.x,
-      y: arr[q.y][q.x].velocity.y
-    }
-  }
-
-  return v
-}
-
-function diverge (tmpv) {
-  let grid = []
-  for (let y = 0; y < tmpv.length; y++) {
-    let line = []
-    for (let x = 0; x < tmpv[y].length; x++) {
-      // if not active, ignore
-
-      let v = {
-        n: border(tmpv, { x: x, y: y - 1 }),
-        e: border(tmpv, { x: x + 1, y: y }),
-        s: border(tmpv, { x: x, y: y + 1 }),
-        w: border(tmpv, { x: x - 1, y: y })
-      }
-
-      let term = size * rho // / time
-
-      line.push(term * (v.w.x - v.e.x + v.n.y - v.s.y))
-    }
-    grid.push(line)
-  }
-
-  return grid
-}
-
-function jacobi (prev, dvrg) {
-  let arr = zeros(rows, cols)
-  for (let y = 0; y < prev.length; y++) {
-    for (let x = 0; x < prev[y].length; x++) {
-      // if not active, ignore
-
-      let p = {
-        n: border(prev, { x: x, y: y - 2 }),
-        e: border(prev, { x: x + 2, y: y }),
-        s: border(prev, { x: x, y: y + 2 }),
-        w: border(prev, { x: x - 2, y: y })
-      }
-
-      let term = (dvrg[y][x] + p.e.p + p.w.p + p.s.p + p.n.p) // calculates pressure difference
-      arr[y][x].pressure = term
-
-      if (prev[y][x].velocity.x === 0.0004991) console.log('velo: (' + x, y + ')')
-
-      arr[y][x].velocity = {
-        x: prev[y][x].velocity.x, // preserves old x-axis velocity
-        y: prev[y][x].velocity.y // preserves old y-axis velocity
-      }
-    }
-  }
-  return arr
-}
-
-// function gradient (curr, prev) {
-//   let arr = zeros(rows, cols)
-//   for (let y = 0; y < prev.length; y++) {
-//     for (let x = 0; x < prev[y].length; x++) {
-//       // make current velocity using current pressure and past velocity
-//
-//       // doesn't calculate if velocity cells aren't against a wall, unless designated as inlet or outlet
-//       if ((y - 2 >= 0 && y + 2 < arr.length && x - 2 >= 0 && x + 2 < arr[y].length)) {
-//         let p = {
-//           n: border(curr, { x: x, y: y - 2 }),
-//           e: border(curr, { x: x + 2, y: y }),
-//           s: border(curr, { x: x, y: y + 2 }),
-//           w: border(curr, { x: x - 2, y: y })
-//         }
-//
-//         let term = (time / (2 * size * rho))
-//
-//         arr[y][x].velocity = {
-//           x: prev[y][x].velocity.x - term * (p.e.p - p.w.p),
-//           y: prev[y][x].velocity.y - term * (p.s.p - p.n.p)
-//         }
-//       }
-//
-//       arr[y][x].pressure = curr[y][x].pressure
-//     }
-//   }
-//   return arr
-// }
-
-function draw (arr) {
-  let ctxp = document.getElementById('pcanvas').getContext('2d')
-  let ctxv = document.getElementById('vcanvas').getContext('2d')
-
-  ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
-  ctxv.clearRect(0, 0, ctxv.canvas.width, ctxv.canvas.height)
-
-  let maxp = 0
-  let maxx = 0
-  let maxy = 0
-
-  let sump = 0
-
-  for (let y = 0; y < arr.length; y++) {
-    for (let x = 0; x < arr[y].length; x++) {
-      sump += arr[y][x].pressure
-
-      if (maxp < Math.abs(arr[y][x].pressure)) {
-        maxp = Math.abs(arr[y][x].pressure)
-      }
-
-      if (maxx < Math.abs(arr[y][x].velocity.x)) {
-        maxx = Math.abs(arr[y][x].velocity.x)
-      }
-
-      if (maxy < Math.abs(arr[y][x].velocity.y)) {
-        maxy = Math.abs(arr[y][x].velocity.y)
-      }
-    }
-  }
-
-  let valp = (maxp === 0) ? 0 : 255.0 / maxp
-  let valx = (maxx === 0) ? 0 : 255.0 / maxx
-  let valy = (maxy === 0) ? 0 : 255.0 / maxy
-
-  console.log('MAX:', maxp, maxx, maxy, 'SUM:', sump)
-
-  for (let y = 0; y < row; y++) {
-    for (let x = 0; x < col; x++) {
-      ctxp.rect(x * 20 + 5, y * 20 + 5, 20, 20)
-      ctxv.rect(x * 20 + 5, y * 20 + 5, 20, 20)
-    }
-  }
-
-  for (let y = 0; y < arr.length; y++) {
-    for (let x = 0; x < arr[y].length; x++) {
-      ctxv.fillStyle = 'rgb(' + parseInt(255 - valx * Math.abs(arr[y][x].velocity.x)) + ', ' + parseInt(255 - valy * Math.abs(arr[y][x].velocity.y)) + ', 255)'
-      ctxv.fillRect(x * 10, y * 10, 10, 10)
-
-      ctxp.fillStyle = 'rgb(' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', ' + parseInt(255 - valp * Math.abs(arr[y][x].pressure)) + ', 255)'
-      ctxp.fillRect(x * 10, y * 10, 10, 10)
-    }
-  }
-
-  ctxp.stroke()
-  ctxv.stroke()
-}
-
-function run () {
-  curr = zeros(rows, cols) // new values
-
-  for (let i = 1; i < rows; i = i + 2) {
-    prev[i][0].velocity.x = 0.00005 // inlet
-    prev[i][cols - 2].pressure = 0 // outlet
-  }
-
-  tmpv = couple(prev, diverge(prev))
-  tmpp = jacobi(prev, diverge(prev))
-
-  for (let i = 1; i < rows; i = i + 2) {
-    tmpv[i][0].velocity.x = 0.00005 // inlet
-    tmpp[i][cols - 2].pressure = 0 // outlet
-  }
-
-  for (let y = 0; y < prev.length; y++) {
-    for (let x = 0; x < prev[y].length; x++) {
-      if ((y - 2 >= 0 && y + 2 < prev.length && x - 2 >= 0 && x + 2 < prev[y].length)) {
-        let p = {
-          n: border(prev, { x: x, y: y - 1 }),
-          s: border(prev, { x: x, y: y + 1 }),
-          e: border(prev, { x: x + 1, y: y }),
-          w: border(prev, { x: x - 1, y: y })
-        }
-
-        curr[y][x].pressure = prev[y][x].pressure + tmpp[y][x].pressure
-        curr[y][x].velocity = {
-          x: tmpv[y][x].velocity.x + (p.w.p - p.e.p),
-          y: tmpv[y][x].velocity.y + (p.n.p - p.s.p)
-        }
-      }
-    }
-  }
-
-  draw(curr)
-
-  for (let y = 0; y < prev.length; y++) {
-    for (let x = 0; x < prev[y].length; x++) {
-      prev[y][x].pressure = curr[y][x].pressure
-      prev[y][x].velocity = {
-        x: curr[y][x].velocity.x,
-        y: curr[y][x].velocity.y
-      }
-    }
-  }
-}
-
 window.addEventListener('DOMContentLoaded', function () {
-  setInterval(run, 20)
+  const CELL_SIZE = 10
+  const COLS = 79
+  const ROWS = 19
+
+  // TODO: velocity profile at end of simulation
+
+  const running = document.querySelector('.js-running')
+  const ctxp = document.querySelector('.canvasp').getContext('2d')
+  const ctxx = document.querySelector('.canvasx').getContext('2d')
+  const ctxy = document.querySelector('.canvasy').getContext('2d')
+  const ctxpscale = document.querySelector('.canvaspscale').getContext('2d')
+  const ctxxscale = document.querySelector('.canvasxscale').getContext('2d')
+  const ctxyscale = document.querySelector('.canvasyscale').getContext('2d')
+
+  ctxp.canvas.width = COLS * CELL_SIZE + 1
+  ctxp.canvas.height = ROWS * CELL_SIZE + 1
+  ctxx.canvas.width = (COLS + 1) * CELL_SIZE + 1
+  ctxx.canvas.height = ROWS * CELL_SIZE + 1
+  ctxy.canvas.width = (COLS + 1) * CELL_SIZE + 1
+  ctxy.canvas.height = ROWS * CELL_SIZE + 1
+
+  let state = zeros(ROWS, COLS)
+
+  for (let j = 0; j < state.length; j++) {
+    for (let i = 0; i < state[j].length; i++) {
+      state[j][i] = 1 // sets all inner cells to water cells
+    }
+  }
+
+  let prevP = zeros(ROWS, COLS) //     ( 9R, 27C)
+  let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
+  let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
+
+  let oldP = zeros(ROWS, COLS)
+  let newP
+
+  let nextX = zeros(ROWS, COLS + 1)
+
+  const params = {
+    gamma: 0.2, // interface diffusion
+    size: 0.01, // 10mm face area
+    rho: 998.2, // 998.2kg/m^3 density
+    mu: 0.00089, //  viscosity
+    G: 0.002 / COLS
+  }
+
+  const constants = {
+    density: params.rho / 2,
+    diffuse: params.gamma / params.size
+  }
+
+  function zeros (ROWS, COLS) {
+    let grid = []
+    for (let j = 0; j < ROWS; j++) {
+      let line = []
+      for (let i = 0; i < COLS; i++) {
+        line.push(0)
+      }
+      grid.push(line)
+    }
+    return grid
+  }
+
+  function edge (arr, j, i) {
+    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)]
+  }
+
+  function cell (arr, j, i) {
+    const bx = (i >= 0) && (i < arr[0].length)
+    const by = (j >= 0) && (j < arr.length)
+    const bz = bx && by
+
+    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)] * bz
+  }
+
+  function draw (pArr, xArr, yArr) {
+    ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
+    ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
+    ctxy.clearRect(0, 0, ctxy.canvas.width, ctxy.canvas.height)
+
+    let maxp = 0
+    let maxv = 0
+
+    for (let y = 0; y < pArr.length; y++) {
+      for (let x = 0; x < pArr[y].length; x++) {
+        maxp = Math.max(maxp, Math.abs(pArr[y][x]))
+      }
+    }
+
+    for (let y = 0; y < xArr.length; y++) {
+      for (let x = 0; x < xArr[y].length; x++) {
+        maxv = Math.max(maxv, Math.abs(xArr[y][x]))
+      }
+    }
+
+    for (let y = 0; y < yArr.length; y++) {
+      for (let x = 0; x < yArr[y].length; x++) {
+        maxv = Math.max(maxv, Math.abs(yArr[y][x]))
+      }
+    }
+
+    for (let y = 0; y < pArr.length; y++) {
+      for (let x = 0; x < pArr[y].length; x++) {
+        const val = 120 - (pArr[y][x] / maxp) * 120
+
+        ctxp.fillStyle = `hsl(${val}, 100%, 50%)`
+        ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
+
+    for (let i = 0; i < xArr.length; i++) {
+      for (let j = 0; j < xArr[i].length; j++) {
+        const vel = xArr[i][j]
+
+        ctxx.fillStyle = `hsl(${Math.floor(240 - (vel / maxv) * 240)}, 100%, 50%)`
+        ctxx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
+
+    for (let i = 0; i < yArr.length; i++) {
+      for (let j = 0; j < yArr[i].length; j++) {
+        const vel = yArr[i][j]
+
+        ctxy.fillStyle = `hsl(${Math.floor(240 - (vel / maxv) * 240)}, 100%, 50%)`
+        ctxy.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+      }
+    }
+
+    document.querySelector('.xscale .min').textContent = '0'
+    document.querySelector('.xscale .max').textContent = maxv.toFixed(5)
+
+    document.querySelector('.yscale .min').textContent = '0'
+    document.querySelector('.yscale .max').textContent = maxv.toFixed(5)
+
+    document.querySelector('.pscale .min').textContent = '0'
+    document.querySelector('.pscale .max').textContent = maxp.toFixed(5)
+  }
+
+  for (let i = 0; i < ctxpscale.canvas.width; i++) {
+    ctxpscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxpscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxpscale.fillRect(i, 0, 10, 50)
+  }
+
+  for (let i = 0; i < ctxxscale.canvas.width; i++) {
+    ctxxscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxxscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxxscale.fillRect(i, 0, 10, 50)
+  }
+
+  for (let i = 0; i < ctxyscale.canvas.width; i++) {
+    ctxyscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxyscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxyscale.fillRect(i, 0, 10, 50)
+  }
+
+  function execute () {
+    if (running.checked) {
+      for (let j = 1; j < ROWS - 1; j++) {
+        state[j][0] = -2
+        state[ROWS - 1 - j][COLS - 1] = 2
+        prevX[j][0] = 0.00005
+      }
+
+      const h = ROWS
+      const l = COLS
+
+      for (let y = 0; y < prevX.length; y++) {
+        for (let z = 0; z < prevX[y].length; z++) {
+          let uTerm1 = (params.G / (2 * params.mu)) * y * (h - y)
+          let uTerm2 = (4 * params.G * Math.pow(h, 2)) / (params.mu * Math.pow(Math.PI, 3))
+          let uTerm3 = 0
+
+          for (let n = 1; n < 28; n++) {
+            let beta = ((2 * n - 1) * Math.PI) / h
+            let uSub1 = 1 / Math.pow(2 * n - 1, 3)
+            let uSub2 = (Math.sinh(beta * z) + Math.sinh(beta * (l - z))) / Math.sinh(beta * l)
+            let uSub3 = Math.sin(beta * y)
+
+            uTerm3 += uSub1 * uSub2 * uSub3
+          }
+
+          nextX[y][z] = uTerm1 - (uTerm2 * uTerm3)
+        }
+      }
+
+      draw(prevP, prevX, nextX)
+    }
+  }
+  // setInterval(execute, 1000)
+  requestAnimationFrame(execute)
 }, false)

@@ -2,7 +2,7 @@
 
 window.addEventListener('DOMContentLoaded', function () {
   const CELL_SIZE = 10
-  const COLS = 39
+  const COLS = 79
   const ROWS = 19
 
   // TODO: velocity profile at end of simulation
