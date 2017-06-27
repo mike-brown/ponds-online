@@ -2,7 +2,7 @@
 
 window.addEventListener('DOMContentLoaded', function () {
   const CELL_SIZE = 10
-  const COLS = 79
+  const COLS = 39
   const ROWS = 19
 
   // TODO: velocity profile at end of simulation
@@ -11,6 +11,7 @@ window.addEventListener('DOMContentLoaded', function () {
   const ctxp = document.querySelector('.canvasp').getContext('2d')
   const ctxx = document.querySelector('.canvasx').getContext('2d')
   const ctxy = document.querySelector('.canvasy').getContext('2d')
+  const ctxpscale = document.querySelector('.canvaspscale').getContext('2d')
   const ctxxscale = document.querySelector('.canvasxscale').getContext('2d')
   const ctxyscale = document.querySelector('.canvasyscale').getContext('2d')
 
@@ -32,12 +33,6 @@ window.addEventListener('DOMContentLoaded', function () {
   let prevP = zeros(ROWS, COLS) //     ( 9R, 27C)
   let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
   let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
-
-  for (let j = 0; j < prevX.length; j++) {
-    for (let i = 0; i < prevX[j].length; i++) {
-      prevX[j][i] = 0
-    }
-  }
 
   let oldP = zeros(ROWS, COLS)
   let newP
@@ -69,9 +64,6 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function edge (arr, j, i) {
-    const bx = (i >= 0) && (i < arr[0].length)
-    const by = (j >= 0) && (j < arr.length)
-
     return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)]
   }
 
@@ -360,7 +352,7 @@ window.addEventListener('DOMContentLoaded', function () {
     return kArr
   }
 
-  function correct (pArr, qArr, xArr, yArr) {
+  function correct (pArr, qArr, xArr, yArr, xA, yA) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
     let kArr = zeros(ROWS, COLS)
@@ -406,7 +398,7 @@ window.addEventListener('DOMContentLoaded', function () {
   function draw (pArr, xArr, yArr) {
     ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
     ctxx.clearRect(0, 0, ctxx.canvas.width, ctxx.canvas.height)
-    ctxx.clearRect(0, 0, ctxy.canvas.width, ctxy.canvas.height)
+    ctxy.clearRect(0, 0, ctxy.canvas.width, ctxy.canvas.height)
 
     let maxp = 0
     let maxv = 0
@@ -461,6 +453,14 @@ window.addEventListener('DOMContentLoaded', function () {
 
     document.querySelector('.yscale .min').textContent = '0'
     document.querySelector('.yscale .max').textContent = maxv.toFixed(5)
+
+    document.querySelector('.pscale .min').textContent = '0'
+    document.querySelector('.pscale .max').textContent = maxp.toFixed(5)
+  }
+
+  for (let i = 0; i < ctxpscale.canvas.width; i++) {
+    ctxpscale.fillStyle = `hsl(${Math.floor(240 - (i / ctxpscale.canvas.width) * 240)}, 100%, 50%)`
+    ctxpscale.fillRect(i, 0, 10, 50)
   }
 
   for (let i = 0; i < ctxxscale.canvas.width; i++) {
@@ -473,11 +473,36 @@ window.addEventListener('DOMContentLoaded', function () {
     ctxyscale.fillRect(i, 0, 10, 50)
   }
 
+  function converge (xArr, yArr, iArr, jArr) {
+    let diff = 0
+    let step = 0
+
+    for (let j = 0; j < state.length; j++) {
+      for (let i = 0; i < state[j].length; i++) {
+        step += state[j][i] !== 0 // increments if cell isn't a wall
+      }
+    }
+
+    for (let j = 0; j < xArr.length; j++) {
+      for (let i = 0; i < xArr[j].length; i++) {
+        diff += Math.abs(Math.abs(xArr[j][i]) - Math.abs(iArr[j][i]))
+      }
+    }
+
+    for (let j = 0; j < yArr.length; j++) {
+      for (let i = 0; i < yArr[j].length; i++) {
+        diff += Math.abs(Math.abs(yArr[j][i]) - Math.abs(jArr[j][i]))
+      }
+    }
+
+    return diff / step
+  }
+
   function execute () {
     if (running.checked) {
       for (let j = 1; j < ROWS - 1; j++) {
         state[j][0] = -2
-        state[j][COLS - 1] = 2
+        state[ROWS - 1 - j][COLS - 1] = 2
         prevX[j][0] = 0.00005
       }
 
@@ -497,7 +522,7 @@ window.addEventListener('DOMContentLoaded', function () {
         tempX[j][0] = 0.00005
       }
 
-      temp = correct(prevP, newP, tempX, tempY)
+      temp = correct(prevP, newP, tempX, tempY, valsX, valsY)
 
       nextX = temp.x
       nextY = temp.y
@@ -509,12 +534,15 @@ window.addEventListener('DOMContentLoaded', function () {
 
       draw(nextP, nextX, nextY)
 
-      prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
-      prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
-      prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
-    }
+      // invokes next animation frame if convergence is above threshold
+      if (converge(nextX, nextY, prevX, prevY) > 0.000000001) {
+        prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
+        prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
+        prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
 
-    requestAnimationFrame(execute)
+        requestAnimationFrame(execute)
+      }
+    }
   }
   // setInterval(execute, 1000)
   requestAnimationFrame(execute)
