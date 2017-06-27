@@ -11,15 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const dctx = $designCanvas.getContext('2d')
 
-  let mode = 'design'
+  let simulating = false
   let tool = 'water'
 
   dctx.fillStyle = 'red'
   dctx.fillRect(100, 100, 200, 200)
 
-  $run.addEventListener('click', () => {
-    mode = 'simulation'
-    $run.disabled = true
+  const startSim = () => {
+    $run.classList.remove('primary')
+    $run.classList.add('secondary')
+    $run.textContent = 'Stop Simulation'
     document.querySelector('.title').textContent = 'Simulation'
 
     let angle = 0
@@ -66,5 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
     $canvases.appendChild($simulationCanvas)
 
     $designCanvas.style.display = 'none'
+  }
+
+  const stopSim = () => {
+    $run.classList.remove('secondary')
+    $run.classList.add('primary')
+    $run.textContent = 'Run Simulation'
+    document.querySelector('.title').textContent = 'Design'
+  }
+
+  $run.addEventListener('click', () => {
+    if (!simulating) {
+      startSim()
+    } else {
+      stopSim()
+    }
+
+    simulating = !simulating
   })
 })

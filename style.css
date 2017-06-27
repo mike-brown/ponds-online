@@ -1,3 +1,12 @@
+header {
+  height: auto;
+}
+
+header a {
+  font-size: 1.25rem;
+  font-weight: normal;
+}
+
 .canvases {
   display: flex;
 }
