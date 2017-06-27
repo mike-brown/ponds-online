@@ -5,6 +5,8 @@ window.addEventListener('DOMContentLoaded', function () {
   const COLS = 39
   const ROWS = 19
 
+  // TODO: velocity profile at end of simulation
+
   const running = document.querySelector('.js-running')
   const ctxp = document.querySelector('.canvasp').getContext('2d')
   const ctxx = document.querySelector('.canvasx').getContext('2d')
@@ -21,9 +23,21 @@ window.addEventListener('DOMContentLoaded', function () {
 
   let state = zeros(ROWS, COLS)
 
+  for (let j = 0; j < state.length; j++) {
+    for (let i = 0; i < state[j].length; i++) {
+      state[j][i] = 1 // sets all inner cells to water cells
+    }
+  }
+
   let prevP = zeros(ROWS, COLS) //     ( 9R, 27C)
   let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
   let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
+
+  for (let j = 0; j < prevX.length; j++) {
+    for (let i = 0; i < prevX[j].length; i++) {
+      prevX[j][i] = 0
+    }
+  }
 
   let oldP = zeros(ROWS, COLS)
   let newP
@@ -38,10 +52,15 @@ window.addEventListener('DOMContentLoaded', function () {
   let nextY
 
   const params = {
-    gamma: 1.0, // interface diffusion
+    gamma: 0.2, // interface diffusion
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
-    mu: 0.0 // viscosity
+    mu: 0.001 // viscosity
+  }
+
+  const constants = {
+    density: (params.rho / 2),
+    diffuse: (params.gamma / params.size)
   }
 
   function zeros (ROWS, COLS) {
@@ -56,45 +75,48 @@ window.addEventListener('DOMContentLoaded', function () {
     return grid
   }
 
-  function cell (arr, j, i) {
+  function edge (arr, j, i) {
     const bx = (i >= 0) && (i < arr[0].length)
     const by = (j >= 0) && (j < arr.length)
 
-    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)] * bx * by
+    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)]
+  }
+
+  function cell (arr, j, i) {
+    const bx = (i >= 0) && (i < arr[0].length)
+    const by = (j >= 0) && (j < arr.length)
+    const bz = bx && by
+
+    return arr[Math.max(Math.min(j, arr.length - 1), 0)][Math.max(Math.min(i, arr[0].length - 1), 0)] * bz
   }
 
   function coefficients (xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
 
-    const constants = {
-      density: (params.rho / 2),
-      diffuse: (params.gamma / params.size)
-    }
-
     for (let j = 0; j < iArr.length; j++) {
       for (let i = 0; i < iArr[j].length; i++) {
         const f = {
-          n: constants.density * (cell(yArr, j, i - 1) + cell(yArr, j, i)),
-          s: constants.density * (cell(yArr, j + 1, i - 1) + cell(yArr, j + 1, i)),
-          w: constants.density * (cell(xArr, j, i - 1) + cell(xArr, j, i)),
-          e: constants.density * (cell(xArr, j, i) + cell(xArr, j, i + 1))
+          n: constants.density * (edge(yArr, j, i - 1) + edge(yArr, j, i)),
+          s: constants.density * (edge(yArr, j + 1, i - 1) + edge(yArr, j + 1, i)),
+          w: constants.density * (edge(xArr, j, i - 1) + edge(xArr, j, i)),
+          e: constants.density * (edge(xArr, j, i) + edge(xArr, j, i + 1))
         }
 
-        iArr[j][i] = diffuse(f, constants)
+        iArr[j][i] = diffuse(f)
       }
     }
 
     for (let j = 0; j < jArr.length; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
         const f = {
-          n: constants.density * (cell(yArr, j - 1, i) + cell(yArr, j, i)),
-          s: constants.density * (cell(yArr, j, i) + cell(yArr, j + 1, i)),
-          w: constants.density * (cell(xArr, j - 1, i) + cell(xArr, j, i)),
-          e: constants.density * (cell(xArr, j - 1, i + 1) + cell(xArr, j, i + 1))
+          n: constants.density * (edge(yArr, j - 1, i) + edge(yArr, j, i)),
+          s: constants.density * (edge(yArr, j, i) + edge(yArr, j + 1, i)),
+          w: constants.density * (edge(xArr, j - 1, i) + edge(xArr, j, i)),
+          e: constants.density * (edge(xArr, j - 1, i + 1) + edge(xArr, j, i + 1))
         }
 
-        jArr[j][i] = diffuse(f, constants)
+        jArr[j][i] = diffuse(f)
       }
     }
 
@@ -104,7 +126,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function diffuse (f, constants) {
+  function diffuse (f) {
     const a = {
       n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
       s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
@@ -228,42 +250,59 @@ window.addEventListener('DOMContentLoaded', function () {
     return v // TODO: implement proper psi function
   }
 
-  function couple (cArr, pArr, xArr, yArr, aX, aY) {
+  function couple (pArr, xArr, yArr, aX, aY) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
 
-    let {
-      x: uArr,
-      y: vArr
-    } = momentum(xArr, yArr)
+    // let {
+    //   x: uArr,
+    //   y: vArr
+    // } = momentum(xArr, yArr)
 
     // performs velocity calculation in x-axis
-    for (let j = 1; j < iArr.length - 1; j++) {
-      for (let i = 1; i < iArr[j].length - 1; i++) {
+    for (let j = 0; j < iArr.length; j++) {
+      for (let i = 0; i < iArr[j].length; i++) {
         const vx = {
-          n: aX[j][i].n * cell(xArr, j - 1, i),
-          s: aX[j][i].s * cell(xArr, j + 1, i),
-          w: aX[j][i].w * cell(xArr, j, i - 1),
-          e: aX[j][i].e * cell(xArr, j, i + 1)
+          n: aX[j][i].n * edge(xArr, j - 1, i),
+          s: aX[j][i].s * edge(xArr, j + 1, i),
+          w: aX[j][i].w * edge(xArr, j, i - 1),
+          e: aX[j][i].e * edge(xArr, j, i + 1)
         }
 
-        const ox = vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - pArr[j][i]) * params.size // + uArr[j][i]
+        // TODO: generalise state for all axes
+        const wx = cell(state, j, i - 1) === 2 ||
+                  (cell(state, j, i) !== 0 &&
+                   cell(state, j - 1, i) !== 0 &&
+                   cell(state, j + 1, i) !== 0 &&
+                   cell(state, j, i - 1) !== 0 &&
+                   cell(state, j - 1, i - 1) !== 0 &&
+                   cell(state, j + 1, i - 1) !== 0)
+
+        const ox = (vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) * wx // + uArr[j][i]
 
         iArr[j][i] = ox / aX[j][i].c
       }
     }
 
     // performs velocity calculation in y-axis
-    for (let j = 1; j < jArr.length - 1; j++) {
-      for (let i = 1; i < jArr[j].length - 1; i++) {
+    for (let j = 0; j < jArr.length; j++) {
+      for (let i = 0; i < jArr[j].length; i++) {
         const vy = {
-          n: aY[j][i].n * cell(yArr, j - 1, i),
-          s: aY[j][i].s * cell(yArr, j + 1, i),
-          w: aY[j][i].w * cell(yArr, j, i - 1),
-          e: aY[j][i].e * cell(yArr, j, i + 1)
+          n: aY[j][i].n * edge(yArr, j - 1, i),
+          s: aY[j][i].s * edge(yArr, j + 1, i),
+          w: aY[j][i].w * edge(yArr, j, i - 1),
+          e: aY[j][i].e * edge(yArr, j, i + 1)
         }
 
-        const oy = vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - pArr[j][i]) * params.size // + vArr[j][i]
+        const wy =
+                  (cell(state, j, i) !== 0 &&
+                   cell(state, j, i - 1) !== 0 &&
+                   cell(state, j, i + 1) !== 0 &&
+                   cell(state, j - 1, i) !== 0 &&
+                   cell(state, j - 1, i - 1) !== 0 &&
+                   cell(state, j - 1, i + 1) !== 0)
+
+        const oy = (vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) * wy // + vArr[j][i]
 
         jArr[j][i] = oy / aY[j][i].c
       }
@@ -272,8 +311,8 @@ window.addEventListener('DOMContentLoaded', function () {
     // traverses y-axis and sets x-edge values
     for (let j = 0; j < ROWS; j++) {
       const bool = {
-        w: cArr[j][0] === 1,
-        e: cArr[j][COLS - 1] === 1
+        w: state[j][0] === -2,
+        e: state[j][COLS - 1] === -2
       }
 
       iArr[j][0] += bool.w * 0.00005 // west wall inlets
@@ -284,8 +323,8 @@ window.addEventListener('DOMContentLoaded', function () {
     // traverses x-axis and sets y-edge values
     for (let i = 0; i < COLS; i++) {
       const bool = {
-        n: cArr[0][i] === 1,
-        s: cArr[ROWS - 1][i] === 1
+        n: state[0][i] === -2,
+        s: state[ROWS - 1][i] === -2
       }
 
       jArr[0][i] += bool.n * 0.00005 // north wall inlets
@@ -293,59 +332,59 @@ window.addEventListener('DOMContentLoaded', function () {
       jArr[ROWS][i] -= bool.s * 0.00005 // south wall inlets
     }
 
-    // west edge
-    for (let j = 1; j < ROWS - 1; j++) {
-      const bx = cArr[j][0] === 2
-
-      const vx = {
-        n: aX[j][0].n * xArr[j - 1][0],
-        s: aX[j][0].s * xArr[j + 1][0],
-        e: aX[j][0].e * xArr[j][1]
-      }
-
-      iArr[j][0] = (bx * (vx.n + vx.s + xArr[j][0] + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
-    }
-
-    // east edge
-    for (let j = 1; j < ROWS - 1; j++) {
-      const bx = cArr[j][COLS - 1] === 2
-
-      const vx = {
-        n: aX[j][COLS].n * xArr[j - 1][COLS],
-        s: aX[j][COLS].s * xArr[j + 1][COLS],
-        w: aX[j][COLS].w * xArr[j][COLS - 1]
-      }
-
-      iArr[j][COLS] = (bx * (vx.n + vx.s + vx.w + xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
-    }
-
-    // north edge
-    for (let i = 1; i < COLS - 1; i++) {
-      const by = cArr[0][i] === 2
-
-      const vy = {
-        s: aY[0][i].s * yArr[1][i],
-        w: aY[0][i].w * yArr[0][i - 1],
-        e: aY[0][i].e * yArr[0][i + 1]
-      }
-
-      jArr[0][i] = (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
-    }
-
-    // south edge
-    for (let i = 1; i < COLS - 1; i++) {
-      const by = cArr[ROWS - 1][i] === 2
-
-      const vy = {
-        n: aY[ROWS][i].n * yArr[ROWS - 1][i],
-        w: aY[ROWS][i].w * yArr[ROWS][i - 1],
-        e: aY[ROWS][i].e * yArr[ROWS][i + 1]
-      }
-
-      jArr[ROWS][i] = (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
-    }
-
-    // TODO: write corner-cases
+    // // west edge
+    // for (let j = 1; j < ROWS - 1; j++) {
+    //   const bx = state[j][0] === 2
+    //
+    //   const vx = {
+    //     n: aX[j][0].n * xArr[j - 1][0],
+    //     s: aX[j][0].s * xArr[j + 1][0],
+    //     w: aX[j][0].w * xArr[j][0],
+    //     e: aX[j][0].e * xArr[j][1]
+    //   }
+    //
+    //   iArr[j][0] = (bx * (vx.n + vx.s + vx.w + vx.e + (0 - pArr[j][0]) * params.size)) / aX[j][0].c // west wall inlets
+    // }
+    //
+    // // east edge
+    // for (let j = 1; j < ROWS - 1; j++) {
+    //   const bx = state[j][COLS - 1] === 2
+    //
+    //   const vx = {
+    //     n: aX[j][COLS].n * xArr[j - 1][COLS],
+    //     s: aX[j][COLS].s * xArr[j + 1][COLS],
+    //     w: aX[j][COLS].w * xArr[j][COLS - 2],
+    //     e: aX[j][COLS].e * xArr[j][COLS - 1]
+    //   }
+    //
+    //   iArr[j][COLS] = (bx * (vx.n + vx.s + vx.w + vx.e + (pArr[j][COLS - 1] - 0) * params.size)) / aX[j][COLS].c // east wall inlets
+    // }
+    //
+    // // north edge
+    // for (let i = 1; i < COLS - 1; i++) {
+    //   const by = state[0][i] === 2
+    //
+    //   const vy = {
+    //     s: aY[0][i].s * yArr[1][i],
+    //     w: aY[0][i].w * yArr[0][i - 1],
+    //     e: aY[0][i].e * yArr[0][i + 1]
+    //   }
+    //
+    //   jArr[0][i] = (by * (yArr[0][i] + vy.s + vy.w + vy.e + (0 - pArr[0][i]) * params.size)) / aY[0][i].c // north wall inlets
+    // }
+    //
+    // // south edge
+    // for (let i = 1; i < COLS - 1; i++) {
+    //   const by = state[ROWS - 1][i] === 2
+    //
+    //   const vy = {
+    //     n: aY[ROWS][i].n * yArr[ROWS - 1][i],
+    //     w: aY[ROWS][i].w * yArr[ROWS][i - 1],
+    //     e: aY[ROWS][i].e * yArr[ROWS][i + 1]
+    //   }
+    //
+    //   jArr[ROWS][i] = (by * (vy.n + yArr[ROWS][i] + vy.w + vy.e + (pArr[ROWS - 1][i] - 0) * params.size)) / aY[ROWS][i].c // south wall inlets
+    // }
 
     return {
       x: iArr,
@@ -353,7 +392,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function jacobi (cArr, pArr, xArr, yArr) {
+  function jacobi (pArr, xArr, yArr) {
     let kArr = zeros(ROWS, COLS)
 
     for (let j = 0; j < kArr.length; j++) {
@@ -382,7 +421,7 @@ window.addEventListener('DOMContentLoaded', function () {
     return kArr
   }
 
-  function correct (cArr, pArr, qArr, xArr, yArr) {
+  function correct (pArr, qArr, xArr, yArr) {
     let iArr = zeros(ROWS, COLS + 1)
     let jArr = zeros(ROWS + 1, COLS)
     let kArr = zeros(ROWS, COLS)
@@ -498,7 +537,7 @@ window.addEventListener('DOMContentLoaded', function () {
   function execute () {
     if (running.checked) {
       for (let j = 1; j < ROWS - 1; j++) {
-        state[j][0] = 1
+        state[j][0] = -2
         state[j][COLS - 1] = 2
         prevX[j][0] = 0.00005
       }
@@ -508,14 +547,18 @@ window.addEventListener('DOMContentLoaded', function () {
       valsX = temp.x
       valsY = temp.y
 
-      temp = couple(state, prevP, prevX, prevY, valsX, valsY)
+      temp = couple(prevP, prevX, prevY, valsX, valsY)
 
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(state, oldP, prevX, prevY)
+      newP = jacobi(oldP, prevX, prevY)
 
-      temp = correct(state, prevP, newP, tempX, tempY)
+      for (let j = 1; j < ROWS - 1; j++) {
+        tempX[j][0] = 0.00005
+      }
+
+      temp = correct(prevP, newP, tempX, tempY)
 
       nextX = temp.x
       nextY = temp.y
@@ -525,7 +568,7 @@ window.addEventListener('DOMContentLoaded', function () {
         nextX[j][0] = 0.00005
       }
 
-      draw(nextP, nextX, nextY)
+      draw(nextP, tempX, tempY)
 
       prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
       prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
