@@ -5,7 +5,8 @@
   "main": "index.html",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
+    "start": "lite-server"
   },
   "lint-staged": {
     "*": [
@@ -29,8 +30,9 @@
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
   "devDependencies": {
     "eclint": "^2.2.0",
-    "eslint": "^4.0.0",
-    "husky": "^0.13.4",
-    "lint-staged": "^4.0.0"
+    "eslint": "^4.1.1",
+    "husky": "^0.14.1",
+    "lint-staged": "^4.0.0",
+    "lite-server": "^2.3.0"
   }
 }

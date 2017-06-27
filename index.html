@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ponds Online</title>
+
+  <!-- Meta -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-dark.min.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Scripts -->
+  <script src="http://evanw.github.com/lightgl.js/lightgl.js"></script>
+  <script src="https://use.fontawesome.com/f0914e7b27.js" async></script>
+  <script src="/scripts/init.js" charset="utf-8"></script>
+</head>
+<body>
+  <header>
+    <a href="/" class="button">
+      <span class="fa fa-home" aria-hidden="true"></span> Home
+    </a>
+    <a href="/" class="button">
+      <span class="fa fa-play-circle" aria-hidden="true"></span> Simulation
+    </a>
+    <a href="/" class="button">
+      <span class="fa fa-info-circle" aria-hidden="true"></span> More Info
+    </a>
+    <a href="https://github.com/mike-brown/ponds-online" class="button" style="float: right;">
+      <span class="fa fa-github" aria-hidden="true"></span> GitHub Repo
+    </a>
+  </header>
+
+  <main class="container">
+    <div class="row">
+      <div class="col-sm-12 col-md-9 sim">
+        <h1 class="title">Design</h1>
+        <div class="canvases">
+          <canvas class="design"></canvas>
+        </div>
+
+        <button class="primary run">Run Simulation</button>
+      </div>
+
+      <div class="col-sm-12 col-sm-first col-md-3 col-md-last options">
+        <div class="tools">
+          <h2>Tools</h2>
+
+          <button class="primary">Set Water</button>
+          <button class="tertiary">Set Vegatation</button>
+          <button class="secondary">Set Walls</button>
+          <button class="inverse">Set Inlet(s)</button>
+          <button class="inverse">Set Outlet(s)</button>
+        </div>
+
+        <div class="presets">
+          <h2>Presets</h2>
+
+          <button>Linear Pipe</button>
+          <button>Basic Pond</button>
+          <button>Island</button>
+        </div>
+    </div>
+  </main>
+</body>
+</html>

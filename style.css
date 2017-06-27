@@ -1,0 +1,23 @@
+header {
+  height: auto;
+}
+
+header a {
+  font-size: 1.25rem;
+  font-weight: normal;
+}
+
+.canvases {
+  display: flex;
+}
+
+canvas.design,
+canvas.simulation {
+  flex: 1;
+  min-height: 80vh;
+  display: block;
+  margin: 0 0.5rem 10px;
+
+  border: 1px solid black;
+  background: black;
+}
