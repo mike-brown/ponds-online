@@ -366,26 +366,16 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // performs velocity calculation in x-axis
     for (let j = 0; j < iArr.length; j++) {
-      for (let i = 1; i < iArr[j].length - 1; i++) {
-        iArr[j][i] = cell(xArr, j, i) + (pArr[j][i - 1] - pArr[j][i]) * params.size
+      for (let i = 0; i < iArr[j].length; i++) {
+        iArr[j][i] = cell(xArr, j, i) + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size
       }
     }
 
     // performs velocity calculation in y-axis
-    for (let j = 1; j < jArr.length - 1; j++) {
+    for (let j = 0; j < jArr.length; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
-        jArr[j][i] = cell(yArr, j, i) + (pArr[j - 1][i] - pArr[j][i]) * params.size
+        jArr[j][i] = cell(yArr, j, i) + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size
       }
-    }
-
-    for (let j = 0; j < iArr.length; j++) {
-      iArr[j][0] = xArr[j][0] + (0 - pArr[j][0]) * params.size
-      iArr[j][COLS] = xArr[j][COLS] + (pArr[j][COLS - 1] - 0) * params.size
-    }
-
-    for (let i = 0; i < jArr[0].length; i++) {
-      jArr[0][i] = yArr[0][i] + (0 - pArr[0][i]) * params.size
-      jArr[ROWS][i] = yArr[ROWS][i] + (pArr[ROWS - 1][i] - 0) * params.size
     }
 
     return {
@@ -541,6 +531,10 @@ window.addEventListener('DOMContentLoaded', function () {
         prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
 
         requestAnimationFrame(execute)
+      } else {
+        for (let j = 0; j < nextX.length; j++) {
+          console.log(nextX[j][COLS])
+        }
       }
     }
   }

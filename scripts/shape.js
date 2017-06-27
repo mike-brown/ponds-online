@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', function () {
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.00089, //  viscosity
-    G: 0.002 / COLS
+    G: (0.00005 * ((ROWS - 1) / 100)) * 12 * 0.00089 / Math.pow((ROWS - 1) / 100, 3)
   }
 
   const constants = {
@@ -162,26 +162,14 @@ window.addEventListener('DOMContentLoaded', function () {
         prevX[j][0] = 0.00005
       }
 
-      const h = ROWS
-      const l = COLS
+      const h = (ROWS - 1) / 100
 
       for (let y = 0; y < prevX.length; y++) {
         for (let z = 0; z < prevX[y].length; z++) {
-          let uTerm1 = (params.G / (2 * params.mu)) * y * (h - y)
-          let uTerm2 = (4 * params.G * Math.pow(h, 2)) / (params.mu * Math.pow(Math.PI, 3))
-          let uTerm3 = 0
-
-          for (let n = 1; n < 28; n++) {
-            let beta = ((2 * n - 1) * Math.PI) / h
-            let uSub1 = 1 / Math.pow(2 * n - 1, 3)
-            let uSub2 = (Math.sinh(beta * z) + Math.sinh(beta * (l - z))) / Math.sinh(beta * l)
-            let uSub3 = Math.sin(beta * y)
-
-            uTerm3 += uSub1 * uSub2 * uSub3
-          }
-
-          nextX[y][z] = uTerm1 - (uTerm2 * uTerm3)
+          let uTerm1 = (params.G / (2 * params.mu)) * (y / 100) * (h - (y / 100))
+          nextX[y][z] = uTerm1
         }
+        console.log(nextX[y][0])
       }
 
       draw(prevP, prevX, nextX)
