@@ -22,21 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
   tool.onMouseDown = ev => {
     drawing = true
 
-    path.strokeColor = 'white'
-    path.add(ev.point)
+    if (!path.intersects(path) || path.segments.length < 3) {
+      path.add(ev.point)
+    }
   }
 
   tool.onMouseMove = ev => {
     if (drawing) {
       path.removeSegment(path.segments.length - 1)
       path.add(ev.point)
+
+      path.fillColor = path.intersects(path) ? 'red' : 'lightblue'
     }
   }
 
   tool.onKeyDown = ev => {
     if (ev.key === 'enter' && drawing) {
-      path.removeSegment(path.segments.length - 1)
       drawing = false
+
+      path.removeSegment(path.segments.length - 1)
+      path.fillColor = path.intersects(path) ? 'red' : 'lightblue'
     }
   }
 })
