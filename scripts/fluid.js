@@ -535,14 +535,16 @@ window.addEventListener('DOMContentLoaded', function () {
       draw(nextP, nextX, nextY)
 
       // invokes next animation frame if convergence is above threshold
-      if (true) { // converge(nextX, nextY, prevX, prevY) > 0.000000001) {
+      if (converge(nextX, nextY, prevX, prevY) > 0.000000001) {
         prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
         prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
         prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
 
-        // primeP = newP.map(arr => [...arr])
-
         requestAnimationFrame(execute)
+      } else {
+        for (let j = 0; j < nextX.length; j++) {
+          console.log(nextX[j][COLS - 1])
+        }
       }
     }
   }
