@@ -6,9 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const $designCanvas = $canvases.querySelector('canvas.design')
   const $run = document.querySelector('button.run')
 
-  $designCanvas.height = $designCanvas.clientHeight
-  $designCanvas.width = $designCanvas.clientWidth
-
   let simulating = false
 
   const startSim = () => {

@@ -47,3 +47,5 @@ jspm_packages
 .yarn-integrity
 
 .DS_Store
+
+scripts/editor-bundle.js

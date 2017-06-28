@@ -1,93 +1,74 @@
-/* global paper:false Path:false Tool:false */
 'use strict'
 
-paper.install(window)
+const { paper, Path } = require('paper')
 
-document.addEventListener('DOMContentLoaded', () => {
-  const $canvas = document.querySelector('canvas.design')
-  paper.setup($canvas)
+class Editor {
+  constructor ($canvas) {
+    paper.setup($canvas)
 
-  let pond = new Path()
-  pond.strokeColor = 'lightblue'
-  pond.fillColor = 'lightblue'
-  pond.closed = true
-  window.pond = pond
+    this._activeTool = undefined
+    this._drawing = false
+    this._tools = {}
 
-  let mask = new Path()
-  mask.strokeColor = 'white'
-  mask.fillColor = 'black'
-  mask.closed = true
-  window.mask = mask
-
-  const addTool = new Tool()
-  const removeTool = new Tool()
-  window.addTool = addTool
-  window.removeTool = removeTool
-
-  let drawing = false
-  const getDrawing = () => drawing
-  const setDrawing = state => {
-    console.log('setting to', state)
-    drawing = state
-  }
-  window.setDrawing = setDrawing
-  window.getDrawing = getDrawing
-
-  // add tool
-  addTool.onMouseDown = ev => {
-    if (getDrawing() && (!pond.intersects(pond) || pond.segments.length < 3)) {
-      pond.add(ev.point)
-    }
+    this.pond = Editor.createPond()
+    this.mask = Editor.createMask()
   }
 
-  addTool.onMouseMove = ev => {
-    if (getDrawing()) {
-      pond.removeSegment(pond.segments.length - 1)
-      pond.add(ev.point)
-
-      pond.fillColor = pond.intersects(pond) ? 'red' : 'lightblue'
-    }
+  get drawing () {
+    return this._drawing
   }
 
-  addTool.onKeyDown = ev => {
-    if (ev.key === 'shift' && getDrawing()) {
-      setDrawing(false)
-
-      pond.removeSegment(pond.segments.length - 1)
-      pond.fillColor = pond.intersects(pond) ? 'red' : 'lightblue'
-    }
+  set drawing (value) {
+    this._drawing = value
   }
 
-  // remove tool
-  removeTool.onMouseDown = ev => {
-    if (getDrawing()) {
-      mask.add(ev.point)
-    }
+  registerTool (name, tool) {
+    this._tools[name] = tool
   }
 
-  removeTool.onMouseMove = ev => {
-    if (getDrawing()) {
-      mask.removeSegment(mask.segments.length - 1)
-      mask.add(ev.point)
-    }
+  deregisterTool (name) {
+    delete this._tools[name]
   }
 
-  removeTool.onKeyDown = ev => {
-    if (ev.key === 'shift' && getDrawing()) {
-      setDrawing(false)
-
-      mask.removeSegment(mask.segments.length - 1)
-      const newPond = pond.subtract(mask)
-      pond.remove()
-      mask.remove()
-      pond = newPond
-      window.pond = pond
-
-      mask = new Path()
-      mask.strokeColor = 'white'
-      mask.fillColor = 'black'
-      mask.closed = true
-      window.mask = mask
-    }
+  activateTool (name) {
+    this._tools[name].activate()
   }
-})
+
+  reset () {
+    this._activeTool = undefined
+    this._drawing = false
+
+    this.pond = Editor.createPond()
+    this.mask = Editor.createMask()
+  }
+
+  fillPond () {
+    this.pond.fillColor = this.pond.intersects(this.pond) ? 'red' : 'lightblue'
+  }
+
+  static removeLastSegment (path) {
+    path.removeSegment(path.segments.length - 1)
+  }
+
+  static createPond () {
+    const pond = new Path()
+    pond.strokeColor = 'lightblue'
+    pond.fillColor = 'lightblue'
+    pond.closed = true
+
+    return pond
+  }
+
+  static createMask () {
+    const mask = new Path()
+    mask.strokeColor = 'white'
+    mask.fillColor = 'black'
+    mask.closed = true
+
+    return mask
+  }
+}
+
+module.exports = {
+  Editor
+}
