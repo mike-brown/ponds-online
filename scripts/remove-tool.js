@@ -18,7 +18,7 @@ class RemoveTool extends Tool {
   }
 
   onKeyDown (ev) {
-    if (ev.key === 'shift' && this.editor.drawing) {
+    if (ev.key === 'enter' && this.editor.drawing) {
       this.editor.drawing = false
 
       Editor.removeLastSegment(this.editor.mask)

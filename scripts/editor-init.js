@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.js-add-tool').addEventListener('click', () => {
     editor.drawing = true
     editor.activateTool('add')
+
+    document.querySelector('.js-add-tool').blur()
   })
 
   document.querySelector('.js-remove-tool').addEventListener('click', () => {
@@ -27,5 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editor.drawing = true
     editor.activateTool('remove')
+
+    document.querySelector('.js-remove-tool').blur()
   })
 })
