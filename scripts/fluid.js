@@ -5,8 +5,6 @@ window.addEventListener('DOMContentLoaded', function () {
   const COLS = 79
   const ROWS = 19
 
-  // TODO: velocity profile at end of simulation
-
   const running = document.querySelector('.js-running')
   const ctxp = document.querySelector('.canvasp').getContext('2d')
   const ctxx = document.querySelector('.canvasx').getContext('2d')
@@ -113,10 +111,10 @@ window.addEventListener('DOMContentLoaded', function () {
 
   function diffuse (f) {
     const a = {
-      n: constants.diffuse + (f.n > 0) * f.n, // a_n = D_n + max(F_n, 0)
-      s: constants.diffuse + (-f.s > 0) * -f.s, // a_s = D_s + max(-F_s, 0)
-      w: constants.diffuse + (f.w > 0) * f.w, // a_w = D_w + max(F_w, 0)
-      e: constants.diffuse + (-f.e > 0) * -f.e // a_e = D_e + max(-F_e, 0)
+      n: constants.diffuse + Math.max(f.n, 0), // a_n = D_n + max(F_n, 0)
+      s: constants.diffuse + Math.max(-f.s, 0), // a_s = D_s + max(-F_s, 0)
+      w: constants.diffuse + Math.max(f.w, 0), // a_w = D_w + max(F_w, 0)
+      e: constants.diffuse + Math.max(-f.e, 0) // a_e = D_e + max(-F_e, 0)
     }
 
     return {
@@ -124,7 +122,7 @@ window.addEventListener('DOMContentLoaded', function () {
       s: a.s,
       w: a.w,
       e: a.e,
-      c: a.n + a.s + a.w + a.e + (f.e - f.w + f.s - f.n) // a_c = a_n + a_s + a_w + a_e +
+      c: a.n + a.s + a.w + a.e + (f.e - f.w) + (f.s - f.n) // a_c = a_n + a_s + a_w + a_e +
     }
   }
 
@@ -323,7 +321,7 @@ window.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  function jacobi (pArr, xArr, yArr) {
+  function jacobi (pArr, xArr, yArr, xA, yA) {
     let kArr = zeros(ROWS, COLS)
 
     for (let j = 0; j < kArr.length; j++) {
@@ -345,7 +343,20 @@ window.addEventListener('DOMContentLoaded', function () {
           e: cell(pArr, j, i + 1)
         }
 
-        kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
+        const a = {
+          n: yA[j][i].c,
+          s: yA[j + 1][i].c,
+          w: xA[j][i].c,
+          e: xA[j][i + 1].c
+        }
+
+        let pSub1 = p.n / a.n + p.s / a.s + p.w / a.w + p.e / a.e // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
+        let pSub2 = (vx.w - vx.e + vy.n - vy.s) / params.size // b_ij
+        let pSub3 = (1 / a.n + 1 / a.s + 1 / a.w + 1 / a.e)
+
+        kArr[j][i] = (pSub1 + pSub2) / pSub3
+
+        // kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
       }
     }
 
@@ -367,14 +378,14 @@ window.addEventListener('DOMContentLoaded', function () {
     // performs velocity calculation in x-axis
     for (let j = 0; j < iArr.length; j++) {
       for (let i = 0; i < iArr[j].length; i++) {
-        iArr[j][i] = cell(xArr, j, i) + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size
+        iArr[j][i] = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
       }
     }
 
     // performs velocity calculation in y-axis
     for (let j = 0; j < jArr.length; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
-        jArr[j][i] = cell(yArr, j, i) + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size
+        jArr[j][i] = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
       }
     }
 
@@ -506,7 +517,7 @@ window.addEventListener('DOMContentLoaded', function () {
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(oldP, prevX, prevY)
+      newP = jacobi(oldP, prevX, prevY, valsX, valsY)
 
       for (let j = 1; j < ROWS - 1; j++) {
         tempX[j][0] = 0.00005
@@ -514,9 +525,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
       temp = correct(prevP, newP, tempX, tempY, valsX, valsY)
 
+      nextP = temp.p
       nextX = temp.x
       nextY = temp.y
-      nextP = temp.p
 
       for (let j = 1; j < ROWS - 1; j++) {
         nextX[j][0] = 0.00005
@@ -530,14 +541,12 @@ window.addEventListener('DOMContentLoaded', function () {
         prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
         prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
 
+        oldP = newP.map(arr => [...arr])
+
         requestAnimationFrame(execute)
-      } else {
-        for (let j = 0; j < nextX.length; j++) {
-          console.log(nextX[j][COLS])
-        }
       }
     }
   }
-  // setInterval(execute, 1000)
+  // setInterval(execute, 3000)
   requestAnimationFrame(execute)
 }, false)
