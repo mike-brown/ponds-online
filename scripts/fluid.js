@@ -32,8 +32,7 @@ window.addEventListener('DOMContentLoaded', function () {
   let prevX = zeros(ROWS, COLS + 1) // ( 9R, 28C)
   let prevY = zeros(ROWS + 1, COLS) // (10R, 27C)
 
-  let oldP = zeros(ROWS, COLS)
-  let newP
+  let primeP = zeros(ROWS, COLS)
 
   let tempX, tempY, valsX, valsY, nextP, nextX, nextY
 
@@ -322,7 +321,7 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function jacobi (pArr, xArr, yArr, xA, yA) {
-    let kArr = zeros(ROWS, COLS)
+    const kArr = zeros(ROWS, COLS)
 
     for (let j = 0; j < kArr.length; j++) {
       for (let i = 0; i < kArr[j].length; i++) {
@@ -354,7 +353,7 @@ window.addEventListener('DOMContentLoaded', function () {
         let pSub2 = (vx.w - vx.e + vy.n - vy.s) / params.size // b_ij
         let pSub3 = (1 / a.n + 1 / a.s + 1 / a.w + 1 / a.e)
 
-        kArr[j][i] = (pSub1 + pSub2) / pSub3
+        kArr[j][i] = (pSub1 + pSub2 / pSub3)
 
         // kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
       }
@@ -364,9 +363,9 @@ window.addEventListener('DOMContentLoaded', function () {
   }
 
   function correct (pArr, qArr, xArr, yArr, xA, yA) {
-    let iArr = zeros(ROWS, COLS + 1)
-    let jArr = zeros(ROWS + 1, COLS)
-    let kArr = zeros(ROWS, COLS)
+    const iArr = zeros(ROWS, COLS + 1)
+    const jArr = zeros(ROWS + 1, COLS)
+    const kArr = zeros(ROWS, COLS)
 
     // performs velocity calculation in x-axis
     for (let j = 0; j < kArr.length; j++) {
@@ -503,7 +502,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (running.checked) {
       for (let j = 1; j < ROWS - 1; j++) {
         state[j][0] = -2
-        state[ROWS - 1 - j][COLS - 1] = 2
+        state[j][COLS - 1] = 2
         prevX[j][0] = 0.00005
       }
 
@@ -517,13 +516,13 @@ window.addEventListener('DOMContentLoaded', function () {
       tempX = temp.x
       tempY = temp.y
 
-      newP = jacobi(oldP, prevX, prevY, valsX, valsY)
+      primeP = jacobi(primeP, tempX, tempY, valsX, valsY)
 
       for (let j = 1; j < ROWS - 1; j++) {
         tempX[j][0] = 0.00005
       }
 
-      temp = correct(prevP, newP, tempX, tempY, valsX, valsY)
+      temp = correct(prevP, primeP, tempX, tempY, valsX, valsY)
 
       nextP = temp.p
       nextX = temp.x
@@ -536,17 +535,17 @@ window.addEventListener('DOMContentLoaded', function () {
       draw(nextP, nextX, nextY)
 
       // invokes next animation frame if convergence is above threshold
-      if (converge(nextX, nextY, prevX, prevY) > 0.000000001) {
+      if (true) { // converge(nextX, nextY, prevX, prevY) > 0.000000001) {
         prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
         prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
         prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
 
-        oldP = newP.map(arr => [...arr])
+        // primeP = newP.map(arr => [...arr])
 
         requestAnimationFrame(execute)
       }
     }
   }
-  // setInterval(execute, 3000)
+  // setInterval(execute, 300)
   requestAnimationFrame(execute)
 }, false)
