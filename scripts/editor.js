@@ -3,45 +3,91 @@
 
 paper.install(window)
 
-let mode = 'line'
-const boundaries = []
-
 document.addEventListener('DOMContentLoaded', () => {
   const $canvas = document.querySelector('canvas.design')
   paper.setup($canvas)
 
-  let drawing = true
+  let pond = new Path()
+  pond.strokeColor = 'lightblue'
+  pond.fillColor = 'lightblue'
+  pond.closed = true
+  window.pond = pond
 
-  var tool = new Tool()
-  const path = new Path()
-  path.strokeColor = 'white'
-  path.fillColor = 'lightblue'
-  path.closed = true
+  let mask = new Path()
+  mask.strokeColor = 'white'
+  mask.fillColor = 'black'
+  mask.closed = true
+  window.mask = mask
 
-  // Define a mousedown and mousedrag handler
-  tool.onMouseDown = ev => {
-    drawing = true
+  const addTool = new Tool()
+  const removeTool = new Tool()
+  window.addTool = addTool
+  window.removeTool = removeTool
 
-    if (!path.intersects(path) || path.segments.length < 3) {
-      path.add(ev.point)
+  let drawing = false
+  const getDrawing = () => drawing
+  const setDrawing = state => {
+    console.log('setting to', state)
+    drawing = state
+  }
+  window.setDrawing = setDrawing
+  window.getDrawing = getDrawing
+
+  // add tool
+  addTool.onMouseDown = ev => {
+    if (getDrawing() && (!pond.intersects(pond) || pond.segments.length < 3)) {
+      pond.add(ev.point)
     }
   }
 
-  tool.onMouseMove = ev => {
-    if (drawing) {
-      path.removeSegment(path.segments.length - 1)
-      path.add(ev.point)
+  addTool.onMouseMove = ev => {
+    if (getDrawing()) {
+      pond.removeSegment(pond.segments.length - 1)
+      pond.add(ev.point)
 
-      path.fillColor = path.intersects(path) ? 'red' : 'lightblue'
+      pond.fillColor = pond.intersects(pond) ? 'red' : 'lightblue'
     }
   }
 
-  tool.onKeyDown = ev => {
-    if (ev.key === 'enter' && drawing) {
-      drawing = false
+  addTool.onKeyDown = ev => {
+    if (ev.key === 'shift' && getDrawing()) {
+      setDrawing(false)
 
-      path.removeSegment(path.segments.length - 1)
-      path.fillColor = path.intersects(path) ? 'red' : 'lightblue'
+      pond.removeSegment(pond.segments.length - 1)
+      pond.fillColor = pond.intersects(pond) ? 'red' : 'lightblue'
+    }
+  }
+
+  // remove tool
+  removeTool.onMouseDown = ev => {
+    if (getDrawing()) {
+      mask.add(ev.point)
+    }
+  }
+
+  removeTool.onMouseMove = ev => {
+    if (getDrawing()) {
+      mask.removeSegment(mask.segments.length - 1)
+      mask.add(ev.point)
+    }
+  }
+
+  removeTool.onKeyDown = ev => {
+    if (ev.key === 'shift' && getDrawing()) {
+      setDrawing(false)
+
+      mask.removeSegment(mask.segments.length - 1)
+      const newPond = pond.subtract(mask)
+      pond.remove()
+      mask.remove()
+      pond = newPond
+      window.pond = pond
+
+      mask = new Path()
+      mask.strokeColor = 'white'
+      mask.fillColor = 'black'
+      mask.closed = true
+      window.mask = mask
     }
   }
 })

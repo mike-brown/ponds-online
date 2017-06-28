@@ -13,10 +13,12 @@ header a {
 
 canvas.design,
 canvas.simulation {
-  flex: 1;
+  --margin: 0.5rem;
+  flex: 1 1 auto;
+  max-width: calc(100% - 2 * var(--margin));
   min-height: 80vh;
   display: block;
-  margin: 0 0.5rem 10px;
+  margin: 0 var(--margin) var(--margin);
 
   border: 1px solid black;
   background: black;
