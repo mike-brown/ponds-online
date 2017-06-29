@@ -261,9 +261,13 @@ window.addEventListener('DOMContentLoaded', function () {
                    cell(state, j - 1, i - 1) !== 0 &&
                    cell(state, j + 1, i - 1) !== 0)
 
-        const ox = (vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) * wx // + uArr[j][i]
+        // returns true if inlet cell adjacent to wall in x-axis
+        const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
+        const inR = cell(state, j, i - 1) === -2 && cell(state, j, i) === 0
 
-        iArr[j][i] = ox / aX[j][i].c
+        const outX = (vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) * wx // + uArr[j][i]
+
+        iArr[j][i] = (outX * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
       }
     }
 
@@ -286,32 +290,14 @@ window.addEventListener('DOMContentLoaded', function () {
                    cell(state, j - 1, i - 1) !== 0 &&
                    cell(state, j - 1, i + 1) !== 0)
 
-        const oy = (vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) * wy // + vArr[j][i]
+        // returns true if inlet cell adjacent to wall in y-axis
+        const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
+        const inD = cell(state, j - 1, i) === -2 && cell(state, j, i) === 0
 
-        jArr[j][i] = oy / aY[j][i].c
+        const outY = (vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) * wy // + vArr[j][i]
+
+        jArr[j][i] = (outY * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
       }
-    }
-
-    // traverses y-axis and sets x-edge values
-    for (let j = 0; j < ROWS; j++) {
-      const bool = {
-        w: state[j][0] === -2,
-        e: state[j][COLS - 1] === -2
-      }
-
-      iArr[j][0] += bool.w * 0.00005 // west wall inlets
-      iArr[j][COLS] -= bool.e * 0.00005 // east wall inlets
-    }
-
-    // traverses x-axis and sets y-edge values
-    for (let i = 0; i < COLS; i++) {
-      const bool = {
-        n: state[0][i] === -2,
-        s: state[ROWS - 1][i] === -2
-      }
-
-      jArr[0][i] += bool.n * 0.00005 // north wall inlets
-      jArr[ROWS][i] -= bool.s * 0.00005 // south wall inlets
     }
 
     return {
@@ -377,14 +363,26 @@ window.addEventListener('DOMContentLoaded', function () {
     // performs velocity calculation in x-axis
     for (let j = 0; j < iArr.length; j++) {
       for (let i = 0; i < iArr[j].length; i++) {
-        iArr[j][i] = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
+        // returns true if inlet cell adjacent to wall in x-axis
+        const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
+        const inR = cell(state, j, i - 1) === -2 && cell(state, j, i) === 0
+
+        const outX = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
+
+        iArr[j][i] = outX * !(inL || inR) + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
       }
     }
 
     // performs velocity calculation in y-axis
     for (let j = 0; j < jArr.length; j++) {
       for (let i = 0; i < jArr[j].length; i++) {
-        jArr[j][i] = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
+        // returns true if inlet cell adjacent to wall in y-axis
+        const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
+        const inD = cell(state, j - 1, i) === -2 && cell(state, j, i) === 0
+
+        const outY = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
+
+        jArr[j][i] = outY * !(inU || inD) + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
       }
     }
 
@@ -502,8 +500,7 @@ window.addEventListener('DOMContentLoaded', function () {
     if (running.checked) {
       for (let j = 1; j < ROWS - 1; j++) {
         state[j][0] = -2
-        state[j][COLS - 1] = 2
-        prevX[j][0] = 0.00005
+        state[ROWS - 1 - j][COLS - 1] = 2
       }
 
       let temp = coefficients(prevX, prevY)
@@ -518,19 +515,11 @@ window.addEventListener('DOMContentLoaded', function () {
 
       primeP = jacobi(primeP, tempX, tempY, valsX, valsY)
 
-      for (let j = 1; j < ROWS - 1; j++) {
-        tempX[j][0] = 0.00005
-      }
-
       temp = correct(prevP, primeP, tempX, tempY, valsX, valsY)
 
       nextP = temp.p
       nextX = temp.x
       nextY = temp.y
-
-      for (let j = 1; j < ROWS - 1; j++) {
-        nextX[j][0] = 0.00005
-      }
 
       draw(nextP, nextX, nextY)
 
@@ -542,8 +531,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
         requestAnimationFrame(execute)
       } else {
-        for (let j = 0; j < nextX.length; j++) {
-          console.log(nextX[j][COLS - 1])
+        for (let j = 0; j < nextX[0].length; j++) {
+          console.log(nextX[9][j])
         }
       }
     }
