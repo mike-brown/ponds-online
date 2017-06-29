@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "precommit": "lint-staged",
     "start": "npm run build && lite-server",
-    "build": "browserify ./scripts/editor-init.js -o ./scripts/editor-bundle.js",
-    "build:w": "watchify ./scripts/editor-init.js -v -o ./scripts/editor-bundle.js"
+    "build": "browserify ./scripts/init.js -o ./scripts/bundle.js",
+    "build:w": "watchify ./scripts/init.js -v -o ./scripts/bundle.js"
   },
   "lint-staged": {
     "concurrent": false,

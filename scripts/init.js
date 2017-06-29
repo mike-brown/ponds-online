@@ -1,7 +1,12 @@
 /* global GL:false */
 'use strict'
 
+const { AddTool } = require('./add-tool')
+const { RemoveTool } = require('./remove-tool')
+const { Editor } = require('./editor')
+
 document.addEventListener('DOMContentLoaded', () => {
+  // canvas
   const $canvases = document.querySelector('.canvases')
   const $designCanvas = $canvases.querySelector('canvas.design')
   const $run = document.querySelector('button.run')
@@ -32,5 +37,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     simulating = !simulating
+  })
+
+  const $canvas = document.querySelector('canvas.design')
+
+  // initialise editor
+  const editor = new Editor($canvas)
+  const addTool = new AddTool(editor)
+  const removeTool = new RemoveTool(editor)
+
+  editor.registerTool('add', addTool)
+  editor.registerTool('remove', removeTool)
+
+  const $addTool = document.querySelector('.js-add-tool')
+  const $removeTool = document.querySelector('.js-remove-tool')
+
+  $addTool.addEventListener('click', () => {
+    editor.drawing = true
+    editor.activateTool('add')
+
+    $addTool.blur()
+  })
+
+  $removeTool.addEventListener('click', () => {
+    if (editor.drawing) {
+      editor.removeLastSegment(editor.pond)
+      editor.fillPond()
+    }
+
+    editor.drawing = true
+    editor.activateTool('remove')
+
+    $removeTool.blur()
   })
 })

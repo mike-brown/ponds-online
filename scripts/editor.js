@@ -52,7 +52,7 @@ class Editor {
 
   static createPond () {
     const pond = new Path()
-    pond.strokeColor = 'lightblue'
+    pond.strokeColor = 'white'
     pond.fillColor = 'lightblue'
     pond.closed = true
 
