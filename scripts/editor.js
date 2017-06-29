@@ -9,9 +9,11 @@ class Editor {
     this._activeTool = undefined
     this._drawing = false
     this._tools = {}
+    this._veg = []
 
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
+    this.vegmask = Editor.createVegMask()
   }
 
   get drawing () {
@@ -63,6 +65,15 @@ class Editor {
     const mask = new Path()
     mask.strokeColor = 'white'
     mask.fillColor = 'black'
+    mask.closed = true
+
+    return mask
+  }
+
+  static createVegMask () {
+    const mask = new Path()
+    mask.strokeColor = 'white'
+    mask.fillColor = 'lightgreen'
     mask.closed = true
 
     return mask

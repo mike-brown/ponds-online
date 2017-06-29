@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // initialise editor
   const editor = new Editor($canvas)
-  const addTool = new AddTool(editor)
-  const removeTool = new RemoveTool(editor)
 
-  editor.registerTool('add', addTool)
-  editor.registerTool('remove', removeTool)
+  editor.registerTool('add', new AddTool(editor))
+  editor.registerTool('remove', new RemoveTool(editor))
+  editor.registerTool('veg', new VegTool(editor))
 
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
+  const $vegTool = document.querySelector('.js-veg-tool')
 
   $addTool.addEventListener('click', () => {
     editor.drawing = true
@@ -69,5 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.activateTool('remove')
 
     $removeTool.blur()
+  })
+
+  $vegTool.addEventListener('click', () => {
+    if (editor.drawing) {
+      editor.removeLastSegment(editor.pond)
+      editor.fillPond()
+    }
+
+    editor.drawing = true
+    editor.activateTool('veg')
+
+    $vegTool.blur()
   })
 })
