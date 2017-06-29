@@ -1,8 +1,7 @@
 /* global GL:false */
 'use strict'
 
-const { AddTool } = require('./add-tool')
-const { RemoveTool } = require('./remove-tool')
+const { AddTool, RemoveTool, VegTool } = require('./tools')
 const { Editor } = require('./editor')
 
 document.addEventListener('DOMContentLoaded', () => {
