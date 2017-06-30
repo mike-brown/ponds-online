@@ -26,8 +26,11 @@
   },
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
   "devDependencies": {
+    "ava": "^0.20.0",
+    "browserify": "^14.4.0",
     "eslint": "^4.0.0",
     "husky": "^0.13.4",
-    "lint-staged": "^4.0.0"
+    "lint-staged": "^4.0.0",
+    "watchify": "^3.9.0"
   }
 }

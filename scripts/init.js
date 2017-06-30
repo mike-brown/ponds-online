@@ -1,6 +1,6 @@
 'use strict'
 
-const { zeros } = require('./fluid')
+const { zeros, cell } = require('./fluid')
 
 window.addEventListener(
   'DOMContentLoaded',
@@ -59,27 +59,15 @@ window.addEventListener(
     }
 
     function edge (arr, j, i, dj, di) {
+      const wz = cell(state, j, i) !== 0 // returns zero if wall
+
       const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
       const mj = Math.max(Math.min(j, arr.length - 1), 0)
       const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
       const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
-      const wz = cell(state, j, i) !== 0 // returns zero if wall
 
       // returns cell on closest edge of array, based on supplied j and i values
       return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
-    }
-
-    function cell (arr, j, i) {
-      const bx = i >= 0 && i < arr[0].length
-      const by = j >= 0 && j < arr.length
-      const bz = bx && by
-
-      // returns zero if cell does not fall within the supplied array range
-      return (
-        arr[Math.max(Math.min(j, arr.length - 1), 0)][
-          Math.max(Math.min(i, arr[0].length - 1), 0)
-        ] * bz
-      )
     }
 
     function coefficients (xArr, yArr) {
@@ -89,18 +77,10 @@ window.addEventListener(
       for (let j = 0; j < iArr.length; j++) {
         for (let i = 0; i < iArr[j].length; i++) {
           const f = {
-            n:
-              constants.density *
-                (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i)),
-            s:
-              constants.density *
-                (edge(yArr, j + 1, i - 1, j, i) + edge(yArr, j + 1, i, j, i)),
-            w:
-              constants.density *
-                (edge(xArr, j, i - 1, j, i) + edge(xArr, j, i, j, i)),
-            e:
-              constants.density *
-                (edge(xArr, j, i, j, i) + edge(xArr, j, i + 1, j, i))
+            n: constants.density * (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i)),
+            s: constants.density * (edge(yArr, j + 1, i - 1, j, i) + edge(yArr, j + 1, i, j, i)),
+            w: constants.density * (edge(xArr, j, i - 1, j, i) + edge(xArr, j, i, j, i)),
+            e: constants.density * (edge(xArr, j, i, j, i) + edge(xArr, j, i + 1, j, i))
           }
 
           iArr[j][i] = diffuse(f)
@@ -110,18 +90,10 @@ window.addEventListener(
       for (let j = 0; j < jArr.length; j++) {
         for (let i = 0; i < jArr[j].length; i++) {
           const f = {
-            n:
-              constants.density *
-                (edge(yArr, j - 1, i, j, i) + edge(yArr, j, i, j, i)),
-            s:
-              constants.density *
-                (edge(yArr, j, i, j, i) + edge(yArr, j + 1, i, j, i)),
-            w:
-              constants.density *
-                (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j, i)),
-            e:
-              constants.density *
-                (edge(xArr, j - 1, i + 1, j, i) + edge(xArr, j, i + 1, j, i))
+            n: constants.density * (edge(yArr, j - 1, i, j, i) + edge(yArr, j, i, j, i)),
+            s: constants.density * (edge(yArr, j, i, j, i) + edge(yArr, j + 1, i, j, i)),
+            w: constants.density * (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j, i)),
+            e: constants.density * (edge(xArr, j - 1, i + 1, j, i) + edge(xArr, j, i + 1, j, i))
           }
 
           jArr[j][i] = diffuse(f)
@@ -165,27 +137,20 @@ window.addEventListener(
             e: aX[j][i].e * edge(xArr, j, i + 1, j, i)
           }
 
-          const wx =
-            (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
-            (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
-            (cell(state, j, i) !== 0 &&
-              cell(state, j - 1, i) !== 0 &&
-              cell(state, j + 1, i) !== 0 &&
-              cell(state, j, i - 1) !== 0 &&
-              cell(state, j - 1, i - 1) !== 0 &&
-              cell(state, j + 1, i - 1) !== 0)
+          const wx = (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
+                     (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
+                     (cell(state, j, i) !== 0 &&
+                      cell(state, j - 1, i) !== 0 &&
+                      cell(state, j + 1, i) !== 0 &&
+                      cell(state, j, i - 1) !== 0 &&
+                      cell(state, j - 1, i - 1) !== 0 &&
+                      cell(state, j + 1, i - 1) !== 0)
 
           // returns true if inlet cell adjacent to wall in x-axis
           const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
           const inR = cell(state, j, i) === 0 && cell(state, j, i - 1) === -2
 
-          const outX =
-            (vx.n +
-              vx.s +
-              vx.w +
-              vx.e +
-              (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) *
-            wx // + uArr[j][i]
+          const outX = (vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) * wx // + uArr[j][i]
 
           iArr[j][i] = outX * !(inL || inR) / aX[j][i].c + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
         }
@@ -201,27 +166,20 @@ window.addEventListener(
             e: aY[j][i].e * edge(yArr, j, i + 1, j, i)
           }
 
-          const wy =
-            (cell(state, j - 1, i) === 0 && cell(state, j, i) === 2) ||
-            (cell(state, j - 1, i) === 2 && cell(state, j, i) === 0) ||
-            (cell(state, j, i) !== 0 &&
-              cell(state, j, i - 1) !== 0 &&
-              cell(state, j, i + 1) !== 0 &&
-              cell(state, j - 1, i) !== 0 &&
-              cell(state, j - 1, i - 1) !== 0 &&
-              cell(state, j - 1, i + 1) !== 0)
+          const wy = (cell(state, j - 1, i) === 0 && cell(state, j, i) === 2) ||
+                     (cell(state, j - 1, i) === 2 && cell(state, j, i) === 0) ||
+                     (cell(state, j, i) !== 0 &&
+                      cell(state, j, i - 1) !== 0 &&
+                      cell(state, j, i + 1) !== 0 &&
+                      cell(state, j - 1, i) !== 0 &&
+                      cell(state, j - 1, i - 1) !== 0 &&
+                      cell(state, j - 1, i + 1) !== 0)
 
           // returns true if inlet cell adjacent to wall in y-axis
           const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
           const inD = cell(state, j, i) === 0 && cell(state, j - 1, i) === -2
 
-          const outY =
-            (vy.n +
-              vy.s +
-              vy.w +
-              vy.e +
-              (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) *
-            wy // + vArr[j][i]
+          const outY = (vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) * wy // + vArr[j][i]
 
           jArr[j][i] = outY * !(inU || inD) / aY[j][i].c + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
         }
@@ -294,20 +252,16 @@ window.addEventListener(
           const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
           const inR = cell(state, j, i - 1) === -2 && cell(state, j, i) === 0
 
-          const wx =
-            (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
-            (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
-            (cell(state, j, i) !== 0 &&
-              cell(state, j - 1, i) !== 0 &&
-              cell(state, j + 1, i) !== 0 &&
-              cell(state, j, i - 1) !== 0 &&
-              cell(state, j - 1, i - 1) !== 0 &&
-              cell(state, j + 1, i - 1) !== 0)
+          const wx = (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
+                     (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
+                     (cell(state, j, i) !== 0 &&
+                      cell(state, j - 1, i) !== 0 &&
+                      cell(state, j + 1, i) !== 0 &&
+                      cell(state, j, i - 1) !== 0 &&
+                      cell(state, j - 1, i - 1) !== 0 &&
+                      cell(state, j + 1, i - 1) !== 0)
 
-          const outX =
-            cell(xArr, j, i) +
-            (cell(qArr, j, i - 1) - cell(qArr, j, i)) *
-              (params.size / xA[j][i].c)
+          const outX = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
 
           iArr[j][i] = wx * outX * !(inL || inR) + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
         }
@@ -318,15 +272,21 @@ window.addEventListener(
         for (let i = 0; i < jArr[j].length; i++) {
           // returns true if inlet cell adjacent to wall in y-axis
 
+          const wy = (cell(state, j - 1, i) === 0 && cell(state, j, i) === 2) ||
+                     (cell(state, j - 1, i) === 2 && cell(state, j, i) === 0) ||
+                     (cell(state, j, i) !== 0 &&
+                      cell(state, j, i - 1) !== 0 &&
+                      cell(state, j, i + 1) !== 0 &&
+                      cell(state, j - 1, i) !== 0 &&
+                      cell(state, j - 1, i - 1) !== 0 &&
+                      cell(state, j - 1, i + 1) !== 0)
+
           const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
           const inD = cell(state, j - 1, i) === -2 && cell(state, j, i) === 0
 
-          const outY =
-            cell(yArr, j, i) +
-            (cell(qArr, j - 1, i) - cell(qArr, j, i)) *
-              (params.size / yA[j][i].c)
+          const outY = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
 
-          jArr[j][i] = outY * !(inU || inD) + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
+          jArr[j][i] = wy * outY * !(inU || inD) + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
         }
       }
 
@@ -426,7 +386,7 @@ window.addEventListener(
       document.querySelector('.yscale .min').textContent = '0'
       document.querySelector('.yscale .max').textContent = maxv.toFixed(5)
 
-      document.querySelector('.pscale .min').textContent = '0'
+      document.querySelector('.pscale .min').textContent = -maxp.toFixed(5)
       document.querySelector('.pscale .max').textContent = maxp.toFixed(5)
     }
 
