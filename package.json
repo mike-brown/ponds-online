@@ -4,7 +4,10 @@
   "description": "A SURE2017 project (University of Sheffield)",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "ava \"./tests/**/*.test.js\"",
+    "test:w": "npm test -- --watch",
+    "build": "browserify ./scripts/init.js -o ./scripts/bundle.js",
+    "build:w": "watchify ./scripts/init.js -o ./scripts/bundle.js",
     "precommit": "lint-staged"
   },
   "lint-staged": {
