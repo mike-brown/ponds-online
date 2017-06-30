@@ -5,11 +5,13 @@ const { paper, Path } = require('paper')
 class Editor {
   constructor ($canvas) {
     paper.setup($canvas)
+    paper.settings.hitTolerance = 5
 
     this._activeTool = undefined
     this._drawing = false
     this._tools = {}
     this._veg = []
+    this._hitTarget = undefined
 
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
@@ -33,6 +35,7 @@ class Editor {
   }
 
   activateTool (name) {
+    console.log(`activating ${name} tool`)
     this._tools[name].activate()
   }
 
