@@ -6,11 +6,18 @@ const { Tool } = require('./tool')
 const { Editor } = require('./editor')
 
 class InletTool extends Tool {
-  // onMouseDown (ev) {
-  //   if (this.editor.drawing) {
-  //     this.editor.vegmask.add(ev.point)
-  //   }
-  // }
+  onMouseDown (ev) {
+    if (this.editor._hitTarget) {
+      if (this.editor.inlet) {
+        this.editor.inlet.remove()
+      }
+
+      this.editor.inlet = this.editor._hitTarget
+      this.editor._hitTarget = undefined
+
+      this.editor.inlet.strokeColor = Editor.colors.blue
+    }
+  }
 
   onMouseMove (ev) {
     const hit = this.editor.pond.hitTest(ev.point)
@@ -22,13 +29,19 @@ class InletTool extends Tool {
       }
 
       const segment = new Line(
-        hit.location.segment.curve.point1,
-        hit.location.segment.curve.point2
+        hit.location.curve.point1,
+        hit.location.curve.point2
       )
-      segment.strokeColor = 'red'
+      segment.strokeCap = 'round'
+      segment.strokeColor = Editor.colors.red
       segment.strokeWidth = 5
 
       this.editor._hitTarget = segment
+    } else {
+      if (this.editor._hitTarget) {
+        this.editor._hitTarget.remove()
+        this.editor._hitTarget = undefined
+      }
     }
   }
 }
