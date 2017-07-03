@@ -11,6 +11,7 @@ class Editor {
     this._drawing = false
     this._tools = {}
     this._hitTarget = undefined
+    this._veg = []
     this.inlet = undefined
     this.outlet = undefined
 
@@ -49,10 +50,12 @@ class Editor {
     if (this.vegmask) this.vegmask.remove()
     if (this.inlet) this.inlet.remove()
     if (this.outlet) this.outlet.remove()
+    this._veg.forEach(veg => veg.remove())
 
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
     this.vegmask = Editor.createVegMask()
+    this._veg = []
     this.inlet = undefined
     this.outlet = undefined
   }
