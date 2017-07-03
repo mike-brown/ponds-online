@@ -11,7 +11,7 @@
   "lint-staged": {
     "concurrent": false,
     "linters": {
-      "!*.js": ["eclint fix", "git add"],
+      "*.{html,css}": ["eclint fix", "git add"],
       "*.js": ["eclint fix", "eslint --fix", "git add"]
     }
   },
