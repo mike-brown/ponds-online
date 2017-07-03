@@ -9,14 +9,11 @@
     "start": "lite-server"
   },
   "lint-staged": {
-    "*": [
-      "eclint fix",
-      "git add"
-    ],
-    "*.js": [
-      "eslint --fix",
-      "git add"
-    ]
+    "concurrent": false,
+    "linters": {
+      "*.{html,css}": ["eclint fix", "git add"],
+      "*.js": ["eclint fix", "eslint --fix", "git add"]
+    }
   },
   "repository": {
     "type": "git",
