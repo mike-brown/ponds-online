@@ -104,4 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     $outletTool.blur()
   })
+
+  $resetTool.addEventListener('click', () => {
+    editor.reset()
+    $resetTool.blur()
+  })
 })

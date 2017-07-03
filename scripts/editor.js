@@ -44,8 +44,17 @@ class Editor {
     this._activeTool = undefined
     this._drawing = false
 
+    if (this.pond) this.pond.remove()
+    if (this.mask) this.mask.remove()
+    if (this.vegmask) this.vegmask.remove()
+    if (this.inlet) this.inlet.remove()
+    if (this.outlet) this.outlet.remove()
+
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
+    this.vegmask = Editor.createVegMask()
+    this.inlet = undefined
+    this.outlet = undefined
   }
 
   fillPond () {
