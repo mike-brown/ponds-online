@@ -1,14 +1,22 @@
 'use strict'
 
-const { zeros, cell } = require('./fluid')
+const {
+  zeros,
+  cell,
+  viscosity
+} = require('./fluid')
+
+const {
+  CELL_SIZE,
+  COLS,
+  ROWS,
+  params,
+  constants
+} = require('./config')
 
 window.addEventListener(
   'DOMContentLoaded',
   function () {
-    const CELL_SIZE = 10
-    const COLS = 79
-    const ROWS = 19
-
     const running = document.querySelector('.js-running')
     const ctxp = document.querySelector('.canvasp').getContext('2d')
     const ctxx = document.querySelector('.canvasx').getContext('2d')
@@ -34,28 +42,16 @@ window.addEventListener(
 
     let tempX, tempY, valsX, valsY, nextP, nextX, nextY
 
-    for (let j = 1; j < state.length - 1; j++) {
-      for (let i = 1; i < state[j].length - 1; i++) {
+    for (let j = 0; j < state.length - 0; j++) {
+      for (let i = 0; i < state[j].length - 0; i++) {
         state[j][i] = 1 // sets all inner cells to water cells
       }
     }
 
-    for (let j = 2; j < ROWS - 2; j++) {
-      state[j][1] = -2
-      state[ROWS - 1 - j][COLS - 2] = 2
+    for (let j = 1; j < ROWS - 1; j++) {
+      state[j][0] = -2
+      state[ROWS - 1 - j][COLS - 1] = 2
       // state[ROWS - 1 - j][COLS - 1] = 0
-    }
-
-    const params = {
-      gamma: 0.2, // interface diffusion
-      size: 0.01, // 10mm face area
-      rho: 998.2, // 998.2kg/m^3 density
-      mu: 0.001 // viscosity
-    }
-
-    const constants = {
-      density: params.rho / 2,
-      diffuse: params.gamma / params.size
     }
 
     function edge (arr, j, i, dj, di) {
@@ -127,6 +123,11 @@ window.addEventListener(
       let iArr = zeros(ROWS, COLS + 1)
       let jArr = zeros(ROWS + 1, COLS)
 
+      let {
+        x: iVis,
+        y: jVis
+      } = viscosity(xArr, yArr, aX, aY)
+
       // performs velocity calculation in x-axis
       for (let j = 0; j < iArr.length; j++) {
         for (let i = 0; i < iArr[j].length; i++) {
@@ -150,9 +151,11 @@ window.addEventListener(
           const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
           const inR = cell(state, j, i) === 0 && cell(state, j, i - 1) === -2
 
-          const outX = (vx.n + vx.s + vx.w + vx.e + (cell(pArr, j, i - 1) - cell(pArr, j, i)) * params.size) * wx // + uArr[j][i]
+          const uSub1 = vx.n + vx.s + vx.w + vx.e
+          const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
+          const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i]) * wx
 
-          iArr[j][i] = outX * !(inL || inR) / aX[j][i].c + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
+          iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
         }
       }
 
@@ -179,9 +182,11 @@ window.addEventListener(
           const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
           const inD = cell(state, j, i) === 0 && cell(state, j - 1, i) === -2
 
-          const outY = (vy.n + vy.s + vy.w + vy.e + (cell(pArr, j - 1, i) - cell(pArr, j, i)) * params.size) * wy // + vArr[j][i]
+          const vSub1 = vy.n + vy.s + vy.w + vy.e
+          const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
+          const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i]) * wy
 
-          jArr[j][i] = outY * !(inU || inD) / aY[j][i].c + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
+          jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
         }
       }
 
@@ -441,8 +446,8 @@ window.addEventListener(
 
           requestAnimationFrame(execute)
         } else {
-          for (let j = 0; j < nextX[0].length; j++) {
-            console.log(nextX[9][j])
+          for (let j = 0; j < nextX.length; j++) {
+            console.log(nextX[j][COLS - 1])
           }
         }
       }
