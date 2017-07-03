@@ -1,7 +1,13 @@
 /* global GL:false */
 'use strict'
 
-const { AddTool, RemoveTool, VegTool, InletTool } = require('./tools')
+const {
+  AddTool,
+  RemoveTool,
+  VegTool,
+  InletTool,
+  OutletTool
+} = require('./tools')
 const { Editor } = require('./editor')
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
   editor.registerTool('remove', new RemoveTool(editor))
   editor.registerTool('veg', new VegTool(editor))
   editor.registerTool('inlet', new InletTool(editor))
+  editor.registerTool('outlet', new OutletTool(editor))
 
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
@@ -90,5 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.activateTool('inlet')
 
     $inletTool.blur()
+  })
+
+  $outletTool.addEventListener('click', () => {
+    editor.activateTool('outlet')
+
+    $outletTool.blur()
   })
 })

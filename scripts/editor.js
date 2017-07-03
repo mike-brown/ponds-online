@@ -12,6 +12,7 @@ class Editor {
     this._tools = {}
     this._hitTarget = undefined
     this.inlet = undefined
+    this.outlet = undefined
 
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
@@ -87,6 +88,7 @@ class Editor {
       white: '#ffffff',
       black: '#000000',
       red: '#ff4136',
+      orange: '#ff851b',
       blue: '#0074d9',
       green: '#2ecc40',
       aqua: '#7fdbff'
