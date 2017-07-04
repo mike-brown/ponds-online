@@ -4,6 +4,17 @@ const { Tool } = require('./tool')
 const { Editor } = require('./editor')
 
 class RemoveTool extends Tool {
+  activate () {
+    super.activate()
+
+    if (this.editor.drawing) {
+      Editor.removeLastSegment(this.editor.pond)
+      this.editor.fillPond()
+    }
+
+    this.editor.drawing = true
+  }
+
   onMouseDown (ev) {
     if (this.editor.drawing) {
       this.editor.mask.add(ev.point)

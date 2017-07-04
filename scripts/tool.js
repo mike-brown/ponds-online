@@ -15,7 +15,9 @@ class Tool {
 
   activate () {
     this.tool.activate()
+
     this.button.textContent = `> ${this.button.textContent}`
+    this.button.blur()
   }
 
   deactivate () {

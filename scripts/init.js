@@ -63,56 +63,61 @@ document.addEventListener('DOMContentLoaded', () => {
   editor.registerTool('outlet', new OutletTool(editor, $outletTool))
 
   $addTool.addEventListener('click', () => {
-    editor.drawing = true
     editor.activateTool('add')
-
-    $addTool.blur()
   })
 
   $removeTool.addEventListener('click', () => {
-    if (editor.drawing) {
-      Editor.removeLastSegment(editor.pond)
-      editor.fillPond()
-    }
-
-    editor.drawing = true
     editor.activateTool('remove')
-
-    $removeTool.blur()
   })
 
   $vegTool.addEventListener('click', () => {
-    if (editor.drawing) {
-      Editor.removeLastSegment(editor.pond)
-      editor.fillPond()
-    }
-
-    editor.drawing = true
     editor.activateTool('veg')
-
-    $vegTool.blur()
   })
 
   $inletTool.addEventListener('click', () => {
     editor.activateTool('inlet')
-
-    $inletTool.blur()
   })
 
   $outletTool.addEventListener('click', () => {
     editor.activateTool('outlet')
-
-    $outletTool.blur()
   })
 
   $resetTool.addEventListener('click', () => {
     editor.reset()
-    $resetTool.blur()
   })
 
   window.addEventListener('keydown', ev => {
-    if (ev.keyCode === 27) {
-      editor.deactivateActiveTool()
+    const keys = {
+      Escape: ev => {
+        editor.deactivateActiveTool()
+      },
+
+      KeyA: ev => {
+        editor.activateTool('add')
+      },
+
+      KeyS: ev => {
+        editor.activateTool('remove')
+      },
+
+      KeyV: ev => {
+        editor.activateTool('veg')
+      },
+
+      KeyI: ev => {
+        editor.activateTool('inlet')
+      },
+
+      KeyO: ev => {
+        editor.activateTool('outlet')
+      },
+
+      KeyR: ev => {
+        editor.reset()
+        editor.deactivateActiveTool()
+      }
     }
+
+    if (ev.code in keys) keys[ev.code](ev)
   })
 })

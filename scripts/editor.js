@@ -5,8 +5,12 @@ const { paper, Path, Tool: PaperTool } = require('paper')
 class Editor {
   constructor ($canvas) {
     this.scope = paper.setup($canvas)
-    this.scope.settings.hitTolerance = 5
-    // this.scope.settings.insertItems = false
+    this.scope.settings = Object.assign(this.scope.settings, {
+      // insertItems: false,
+      hitTolerance: 5
+    })
+
+    console.log(this.scope)
 
     this.nullTool = new PaperTool()
 
@@ -73,7 +77,7 @@ class Editor {
   fillPond () {
     this.pond.fillColor = this.pond.intersects(this.pond)
       ? Editor.colors.red
-      : Editor.colors.cyan
+      : Editor.colors.aqua
   }
 
   static removeLastSegment (path) {

@@ -4,6 +4,12 @@ const { Tool } = require('./tool')
 const { Editor } = require('./editor')
 
 class AddTool extends Tool {
+  activate () {
+    super.activate()
+
+    this.editor.drawing = true
+  }
+
   onMouseDown (ev) {
     if (this.editor.drawing) {
       this.editor.pond.add(ev.point)

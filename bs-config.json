@@ -1,0 +1,4 @@
+{
+  "files": [ "./**/*.{html,css}", "./scripts/bundle.js" ],
+  "watchOptions": { "ignored": "node_modules"} 
+}
