@@ -3,6 +3,8 @@
 const {
   zeros,
   cell,
+  slot,
+  diffuse,
   viscosity
 } = require('./fluid')
 
@@ -11,7 +13,8 @@ const {
   COLS,
   ROWS,
   params,
-  constants
+  values,
+  plants
 } = require('./config')
 
 window.addEventListener(
@@ -44,12 +47,12 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 1 // sets all inner cells to water cells
+        state[j][i] = 10// + (j > 9) // sets all inner cells to water cells
       }
     }
 
     for (let j = 1; j < ROWS - 1; j++) {
-      state[j][0] = -2
+      state[j][0] = 1
       state[ROWS - 1 - j][COLS - 1] = 2
       // state[ROWS - 1 - j][COLS - 1] = 0
     }
@@ -73,10 +76,10 @@ window.addEventListener(
       for (let j = 0; j < iArr.length; j++) {
         for (let i = 0; i < iArr[j].length; i++) {
           const f = {
-            n: constants.density * (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i)),
-            s: constants.density * (edge(yArr, j + 1, i - 1, j, i) + edge(yArr, j + 1, i, j, i)),
-            w: constants.density * (edge(xArr, j, i - 1, j, i) + edge(xArr, j, i, j, i)),
-            e: constants.density * (edge(xArr, j, i, j, i) + edge(xArr, j, i + 1, j, i))
+            n: values.density * (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i)),
+            s: values.density * (edge(yArr, j + 1, i - 1, j, i) + edge(yArr, j + 1, i, j, i)),
+            w: values.density * (edge(xArr, j, i - 1, j, i) + edge(xArr, j, i, j, i)),
+            e: values.density * (edge(xArr, j, i, j, i) + edge(xArr, j, i + 1, j, i))
           }
 
           iArr[j][i] = diffuse(f)
@@ -86,10 +89,10 @@ window.addEventListener(
       for (let j = 0; j < jArr.length; j++) {
         for (let i = 0; i < jArr[j].length; i++) {
           const f = {
-            n: constants.density * (edge(yArr, j - 1, i, j, i) + edge(yArr, j, i, j, i)),
-            s: constants.density * (edge(yArr, j, i, j, i) + edge(yArr, j + 1, i, j, i)),
-            w: constants.density * (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j, i)),
-            e: constants.density * (edge(xArr, j - 1, i + 1, j, i) + edge(xArr, j, i + 1, j, i))
+            n: values.density * (edge(yArr, j - 1, i, j, i) + edge(yArr, j, i, j, i)),
+            s: values.density * (edge(yArr, j, i, j, i) + edge(yArr, j + 1, i, j, i)),
+            w: values.density * (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j, i)),
+            e: values.density * (edge(xArr, j - 1, i + 1, j, i) + edge(xArr, j, i + 1, j, i))
           }
 
           jArr[j][i] = diffuse(f)
@@ -102,20 +105,41 @@ window.addEventListener(
       }
     }
 
-    function diffuse (f) {
-      const a = {
-        n: constants.diffuse + Math.max(f.n, 0), // a_n = D_n + max(F_n, 0)
-        s: constants.diffuse + Math.max(-f.s, 0), // a_s = D_s + max(-F_s, 0)
-        w: constants.diffuse + Math.max(f.w, 0), // a_w = D_w + max(F_w, 0)
-        e: constants.diffuse + Math.max(-f.e, 0) // a_e = D_e + max(-F_e, 0)
+    function drag (xArr, yArr) {
+      let iArr = zeros(ROWS, COLS + 1)
+      let jArr = zeros(ROWS + 1, COLS)
+
+      // performs viscosity calculation in x-axis
+      for (let j = 0; j < iArr.length; j++) {
+        for (let i = 0; i < iArr[j].length; i++) {
+          const plant = slot(plants, cell(state, j, i) - 11)
+
+          const uSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
+          const uSub2 = 2 * ((plant.a0 * params.nu) / ((xArr[j][i] + (xArr[j][i] === 0)) * plant.diameter) + plant.a1)
+          const uSub3 = -(1 / 2) * uSub1 * params.rho * uSub2 * plant.density * plant.diameter
+          const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
+
+          iArr[j][i] = uSub4
+        }
+      }
+
+      // performs viscosity calculation in y-axis
+      for (let j = 0; j < jArr.length; j++) {
+        for (let i = 0; i < jArr[j].length; i++) {
+          const plant = slot(plants, cell(state, j, i) - 11)
+
+          const vSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
+          const vSub2 = 2 * ((plant.a0 * params.nu) / ((yArr[j][i] + (yArr[j][i] === 0)) * plant.diameter) + plant.a1)
+          const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * plant.density * plant.diameter
+          const vSub4 = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
+
+          jArr[j][i] = vSub4
+        }
       }
 
       return {
-        n: a.n,
-        s: a.s,
-        w: a.w,
-        e: a.e,
-        c: a.n + a.s + a.w + a.e + (f.e - f.w) + (f.s - f.n) // a_c = a_n + a_s + a_w + a_e +
+        x: iArr,
+        y: jArr
       }
     }
 
@@ -126,7 +150,12 @@ window.addEventListener(
       let {
         x: iVis,
         y: jVis
-      } = viscosity(xArr, yArr, aX, aY)
+      } = viscosity(xArr, yArr)
+
+      let {
+        x: iForce,
+        y: jForce
+      } = drag(xArr, yArr)
 
       // performs velocity calculation in x-axis
       for (let j = 0; j < iArr.length; j++) {
@@ -141,21 +170,21 @@ window.addEventListener(
           const wx = (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
                      (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
                      (cell(state, j, i) !== 0 &&
+                      cell(state, j, i - 1) !== 0 &&
                       cell(state, j - 1, i) !== 0 &&
                       cell(state, j + 1, i) !== 0 &&
-                      cell(state, j, i - 1) !== 0 &&
                       cell(state, j - 1, i - 1) !== 0 &&
                       cell(state, j + 1, i - 1) !== 0)
 
           // returns true if inlet cell adjacent to wall in x-axis
-          const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
-          const inR = cell(state, j, i) === 0 && cell(state, j, i - 1) === -2
+          const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === 1
+          const inR = cell(state, j, i) === 0 && cell(state, j, i - 1) === 1
 
           const uSub1 = vx.n + vx.s + vx.w + vx.e
           const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-          const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i]) * wx
+          const uSub3 = (uSub1 + (uSub2 * params.size)/* + iVis[j][i] + iForce[j][i]*/) * wx
 
-          iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
+          iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
         }
       }
 
@@ -172,21 +201,21 @@ window.addEventListener(
           const wy = (cell(state, j - 1, i) === 0 && cell(state, j, i) === 2) ||
                      (cell(state, j - 1, i) === 2 && cell(state, j, i) === 0) ||
                      (cell(state, j, i) !== 0 &&
+                      cell(state, j - 1, i) !== 0 &&
                       cell(state, j, i - 1) !== 0 &&
                       cell(state, j, i + 1) !== 0 &&
-                      cell(state, j - 1, i) !== 0 &&
                       cell(state, j - 1, i - 1) !== 0 &&
                       cell(state, j - 1, i + 1) !== 0)
 
           // returns true if inlet cell adjacent to wall in y-axis
-          const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
-          const inD = cell(state, j, i) === 0 && cell(state, j - 1, i) === -2
+          const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === 1
+          const inD = cell(state, j, i) === 0 && cell(state, j - 1, i) === 1
 
           const vSub1 = vy.n + vy.s + vy.w + vy.e
           const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-          const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i]) * wy
+          const vSub3 = (vSub1 + (vSub2 * params.size)/* + jVis[j][i] + jForce[j][i]*/) * wy
 
-          jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
+          jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
         }
       }
 
@@ -201,12 +230,12 @@ window.addEventListener(
 
       for (let j = 0; j < kArr.length; j++) {
         for (let i = 0; i < kArr[j].length; i++) {
-          const vx = {
+          let vx = {
             w: cell(xArr, j, i),
             e: cell(xArr, j, i + 1)
           }
 
-          const vy = {
+          let vy = {
             n: cell(yArr, j, i),
             s: cell(yArr, j + 1, i)
           }
@@ -253,10 +282,6 @@ window.addEventListener(
       // performs velocity calculation in x-axis
       for (let j = 0; j < iArr.length; j++) {
         for (let i = 0; i < iArr[j].length; i++) {
-          // returns true if inlet cell adjacent to wall in x-axis
-          const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === -2
-          const inR = cell(state, j, i - 1) === -2 && cell(state, j, i) === 0
-
           const wx = (cell(state, j, i - 1) === 0 && cell(state, j, i) === 2) ||
                      (cell(state, j, i - 1) === 2 && cell(state, j, i) === 0) ||
                      (cell(state, j, i) !== 0 &&
@@ -266,9 +291,13 @@ window.addEventListener(
                       cell(state, j - 1, i - 1) !== 0 &&
                       cell(state, j + 1, i - 1) !== 0)
 
+          // returns true if inlet cell adjacent to wall in x-axis
+          const inL = cell(state, j, i - 1) === 0 && cell(state, j, i) === 1
+          const inR = cell(state, j, i - 1) === 1 && cell(state, j, i) === 0
+
           const outX = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
 
-          iArr[j][i] = wx * outX * !(inL || inR) + (inL ^ inR) * 0.00005 // either returns calculated value or inlet value
+          iArr[j][i] = wx * outX * !(inL || inR) + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
         }
       }
 
@@ -286,12 +315,12 @@ window.addEventListener(
                       cell(state, j - 1, i - 1) !== 0 &&
                       cell(state, j - 1, i + 1) !== 0)
 
-          const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === -2
-          const inD = cell(state, j - 1, i) === -2 && cell(state, j, i) === 0
+          const inU = cell(state, j - 1, i) === 0 && cell(state, j, i) === 1
+          const inD = cell(state, j - 1, i) === 1 && cell(state, j, i) === 0
 
           const outY = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
 
-          jArr[j][i] = wy * outY * !(inU || inD) + (inU ^ inD) * 0.00005 // either returns calculated value or inlet value
+          jArr[j][i] = wy * outY * !(inU || inD) + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
         }
       }
 
