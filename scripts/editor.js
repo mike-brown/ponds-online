@@ -7,55 +7,43 @@ class Editor {
     paper.setup($canvas)
     paper.settings.hitTolerance = 5
 
-    this._activeTool = undefined
-    this._drawing = false
-    this._tools = {}
-    this._hitTarget = undefined
-    this._veg = []
-    this.inlet = undefined
-    this.outlet = undefined
+    this.project = paper.project
+    this.layer = this.project.activeLayer
 
-    this.pond = Editor.createPond()
-    this.mask = Editor.createMask()
-    this.vegmask = Editor.createVegMask()
-  }
+    this.tools = {}
 
-  get drawing () {
-    return this._drawing
-  }
-
-  set drawing (value) {
-    this._drawing = value
+    this.reset()
   }
 
   registerTool (name, tool) {
-    this._tools[name] = tool
+    this.tools[name] = tool
   }
 
   deregisterTool (name) {
-    delete this._tools[name]
+    delete this.tools[name]
   }
 
   activateTool (name) {
     console.log(`activating ${name} tool`)
-    this._tools[name].activate()
+    this.tools[name].activate()
   }
 
-  reset () {
-    this._activeTool = undefined
-    this._drawing = false
+  add (item) {}
 
+  reset () {
     if (this.pond) this.pond.remove()
     if (this.mask) this.mask.remove()
     if (this.vegmask) this.vegmask.remove()
     if (this.inlet) this.inlet.remove()
     if (this.outlet) this.outlet.remove()
-    this._veg.forEach(veg => veg.remove())
+    if (this.veg) this.veg.forEach(veg => veg.remove())
 
+    this._activeTool = undefined
+    this.drawing = false
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
     this.vegmask = Editor.createVegMask()
-    this._veg = []
+    this.veg = []
     this.inlet = undefined
     this.outlet = undefined
   }

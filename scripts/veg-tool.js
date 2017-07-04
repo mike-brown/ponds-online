@@ -24,7 +24,7 @@ class VegTool extends Tool {
       Editor.removeLastSegment(this.editor.vegmask)
       const vegArea = this.editor.vegmask.intersect(this.editor.pond)
       this.editor.vegmask.remove()
-      this.editor._veg.push(vegArea)
+      this.editor.veg.push(vegArea)
 
       this.editor.vegmask = Editor.createVegMask()
     }
