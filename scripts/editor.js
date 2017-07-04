@@ -1,16 +1,20 @@
 'use strict'
 
-const { paper, Path } = require('paper')
+const { paper, Path, Tool: PaperTool } = require('paper')
 
 class Editor {
   constructor ($canvas) {
-    paper.setup($canvas)
-    paper.settings.hitTolerance = 5
+    this.scope = paper.setup($canvas)
+    this.scope.settings.hitTolerance = 5
+    // this.scope.settings.insertItems = false
+
+    this.nullTool = new PaperTool()
 
     this.project = paper.project
     this.layer = this.project.activeLayer
 
     this.tools = {}
+    this.activeTool = undefined
 
     this.reset()
   }
@@ -24,11 +28,27 @@ class Editor {
   }
 
   activateTool (name) {
-    console.log(`activating ${name} tool`)
+    if (this.activeTool === name) {
+      console.warn(`${name} tool is already active`)
+      return
+    }
+
+    this.deactivateActiveTool()
+
+    console.info(`activating ${name} tool`)
+
     this.tools[name].activate()
+    this.activeTool = name
   }
 
-  add (item) {}
+  deactivateActiveTool () {
+    if (this.activeTool) {
+      this.tools[this.activeTool].deactivate()
+      this.activeTool = undefined
+
+      this.nullTool.activate()
+    }
+  }
 
   reset () {
     if (this.pond) this.pond.remove()
@@ -46,10 +66,14 @@ class Editor {
     this.veg = []
     this.inlet = undefined
     this.outlet = undefined
+
+    // this.layer.addChildren([this.pond, this.mask, this.vegmask])
   }
 
   fillPond () {
-    this.pond.fillColor = this.pond.intersects(this.pond) ? 'red' : 'lightblue'
+    this.pond.fillColor = this.pond.intersects(this.pond)
+      ? Editor.colors.red
+      : Editor.colors.cyan
   }
 
   static removeLastSegment (path) {

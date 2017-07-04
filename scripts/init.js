@@ -49,18 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // initialise editor
   const editor = new Editor($canvas)
 
-  editor.registerTool('add', new AddTool(editor))
-  editor.registerTool('remove', new RemoveTool(editor))
-  editor.registerTool('veg', new VegTool(editor))
-  editor.registerTool('inlet', new InletTool(editor))
-  editor.registerTool('outlet', new OutletTool(editor))
-
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
   const $vegTool = document.querySelector('.js-veg-tool')
   const $inletTool = document.querySelector('.js-inlet-tool')
   const $outletTool = document.querySelector('.js-outlet-tool')
   const $resetTool = document.querySelector('.js-reset-tool')
+
+  editor.registerTool('add', new AddTool(editor, $addTool))
+  editor.registerTool('remove', new RemoveTool(editor, $removeTool))
+  editor.registerTool('veg', new VegTool(editor, $vegTool))
+  editor.registerTool('inlet', new InletTool(editor, $inletTool))
+  editor.registerTool('outlet', new OutletTool(editor, $outletTool))
 
   $addTool.addEventListener('click', () => {
     editor.drawing = true
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $removeTool.addEventListener('click', () => {
     if (editor.drawing) {
-      editor.removeLastSegment(editor.pond)
+      Editor.removeLastSegment(editor.pond)
       editor.fillPond()
     }
 
@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $vegTool.addEventListener('click', () => {
     if (editor.drawing) {
-      editor.removeLastSegment(editor.pond)
+      Editor.removeLastSegment(editor.pond)
       editor.fillPond()
     }
 
@@ -108,5 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
   $resetTool.addEventListener('click', () => {
     editor.reset()
     $resetTool.blur()
+  })
+
+  window.addEventListener('keydown', ev => {
+    if (ev.keyCode === 27) {
+      editor.deactivateActiveTool()
+    }
   })
 })

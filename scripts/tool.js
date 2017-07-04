@@ -3,8 +3,9 @@
 const { Tool: PaperTool } = require('paper')
 
 class Tool {
-  constructor (editor) {
+  constructor (editor, button) {
     this.editor = editor
+    this.button = button
 
     this.tool = new PaperTool()
     this.tool.onMouseDown = this.onMouseDown.bind(this)
@@ -14,6 +15,11 @@ class Tool {
 
   activate () {
     this.tool.activate()
+    this.button.textContent = `> ${this.button.textContent}`
+  }
+
+  deactivate () {
+    this.button.textContent = this.button.textContent.slice(2)
   }
 
   onMouseDown (ev) {}
