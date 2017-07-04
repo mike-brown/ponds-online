@@ -48,13 +48,13 @@ window.addEventListener(
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
         state[j][i] = 10// + (j > 9) // sets all inner cells to water cells
+        // prevX[j][i] = params.input.x
       }
     }
 
     for (let j = 1; j < ROWS - 1; j++) {
       state[j][0] = 1
       state[ROWS - 1 - j][COLS - 1] = 2
-      // state[ROWS - 1 - j][COLS - 1] = 0
     }
 
     function edge (arr, j, i, dj, di) {
@@ -76,8 +76,8 @@ window.addEventListener(
       for (let j = 0; j < iArr.length; j++) {
         for (let i = 0; i < iArr[j].length; i++) {
           const f = {
-            n: values.density * (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i)),
-            s: values.density * (edge(yArr, j + 1, i - 1, j, i) + edge(yArr, j + 1, i, j, i)),
+            n: values.density * (edge(yArr, j, i - 1, j, i) + edge(yArr, j, i, j, i - 1)),
+            s: values.density * (edge(yArr, j + 1, i - 1, j + 1, i) + edge(yArr, j + 1, i, j + 1, i - 1)),
             w: values.density * (edge(xArr, j, i - 1, j, i) + edge(xArr, j, i, j, i)),
             e: values.density * (edge(xArr, j, i, j, i) + edge(xArr, j, i + 1, j, i))
           }
@@ -91,8 +91,8 @@ window.addEventListener(
           const f = {
             n: values.density * (edge(yArr, j - 1, i, j, i) + edge(yArr, j, i, j, i)),
             s: values.density * (edge(yArr, j, i, j, i) + edge(yArr, j + 1, i, j, i)),
-            w: values.density * (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j, i)),
-            e: values.density * (edge(xArr, j - 1, i + 1, j, i) + edge(xArr, j, i + 1, j, i))
+            w: values.density * (edge(xArr, j - 1, i, j, i) + edge(xArr, j, i, j - 1, i)),
+            e: values.density * (edge(xArr, j - 1, i + 1, j, i + 1) + edge(xArr, j, i + 1, j - 1, i + 1))
           }
 
           jArr[j][i] = diffuse(f)
@@ -258,7 +258,10 @@ window.addEventListener(
           let pSub2 = (vx.w - vx.e + vy.n - vy.s) / params.size // b_ij
           let pSub3 = 1 / a.n + 1 / a.s + 1 / a.w + 1 / a.e
 
-          kArr[j][i] = (pSub1 + pSub2 / pSub3) * (cell(state, j, i) !== 0)
+          kArr[j][i] = (pSub1 + pSub2) / pSub3 * (cell(state, j, i) !== 0)
+
+          // if (j === 0 && i === 2) console.log('top:', yA[j][i], yA[j + 1][i], xA[j][i], xA[j][i + 1], '\n')
+          // if (j === ROWS - 1 && i === 2) console.log('bot:', yA[j][i], yA[j + 1][i], xA[j][i], xA[j][i + 1], '\n')
 
           // kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
         }
@@ -275,7 +278,7 @@ window.addEventListener(
       // performs velocity calculation in x-axis
       for (let j = 0; j < kArr.length; j++) {
         for (let i = 0; i < kArr[j].length; i++) {
-          kArr[j][i] = pArr[j][i] + qArr[j][i]
+          kArr[j][i] = pArr[j][i] + qArr[j][i] / 10000
         }
       }
 
@@ -465,7 +468,7 @@ window.addEventListener(
         nextX = temp.x
         nextY = temp.y
 
-        draw(nextP, nextX, nextY)
+        draw(prevP, nextX, nextY)
 
         // invokes next animation frame if convergence is above threshold
         if (converge(nextX, nextY, prevX, prevY) > 0.0000000001) {

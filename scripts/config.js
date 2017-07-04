@@ -1,8 +1,8 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 79
-const ROWS = 19
+const COLS = 80
+const ROWS = 20
 
 const params = {
   gamma: 0.2, // interface diffusion
@@ -15,8 +15,8 @@ const params = {
     y: 0
   },
   plant: [
-    { density: 0.8, diameter: 0.3 },
-    { density: 0.5, diameter: 0.001 }
+    { density: 161, diameter: 0.010, area: 1.6 },
+    { density: 171, diameter: 0.019, area: 3.2 }
   ]
 }
 
@@ -32,15 +32,17 @@ for (let n = 0; n < params.plant.length; n++) {
   plants.push({
     density: params.plant[n].density,
     diameter: params.plant[n].diameter,
+    area: params.plant[n].area,
     phi: 0,
-    force: 0,
     a0: 0,
     a1: 0
   })
 
-  plants[n].phi = Math.PI / (4 * plants[n].density * Math.pow(plants[n].diameter, 2))
+  plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
   plants[n].a0 = 7276.43 * plants[n].diameter + 23.55
   plants[n].a1 = 32.7 * plants[n].density + 3.01 * plants[n].phi + 0.42
+
+  console.log(plants[n].phi)
 }
 
 module.exports = {
