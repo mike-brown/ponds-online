@@ -23,3 +23,7 @@ canvas.simulation {
   border: 1px solid black;
   background: black;
 }
+
+canvas.design {
+  cursor: none;
+}

@@ -7,7 +7,14 @@ class AddTool extends Tool {
   activate () {
     super.activate()
 
+    this.editor.pond.selected = true
     this.editor.drawing = true
+  }
+
+  deactivate () {
+    super.deactivate()
+
+    this.editor.pond.selected = false
   }
 
   onMouseDown (ev) {
