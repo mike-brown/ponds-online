@@ -7,38 +7,48 @@ class RemoveTool extends Tool {
   activate () {
     super.activate()
 
-    if (this.editor.drawing) {
-      Editor.removeLastSegment(this.editor.pond)
-      this.editor.fillPond()
-    }
+    this.tempMask = this.editor.mask.clone({ insert: false })
+    this.editor.mask.visible = false
 
-    this.editor.drawing = true
+    this.tempMask.selected = true
+    this.editor.baseLayer.addChild(this.tempMask)
+  }
+
+  deactivate () {
+    super.deactivate()
+
+    this.editor.mask.visible = true
+    Editor.sanitizePond(this.editor.mask)
+
+    const newPond = this.editor.pond.subtract(this.editor.mask)
+    this.editor.pond.replaceWith(newPond)
+    this.editor.pond = newPond
+
+    this.editor.mask.remove()
+    this.tempMask.remove()
+
+    this.tempMask = undefined
+    this.editor.mask = Editor.createMask()
   }
 
   onMouseDown (ev) {
-    if (this.editor.drawing) {
-      this.editor.mask.add(ev.point)
-    }
+    this.editor.mask.add(ev.point)
   }
 
   onMouseMove (ev) {
-    if (this.editor.drawing) {
-      this.editor.mask.removeSegment(this.editor.mask.segments.length - 1)
-      this.editor.mask.add(ev.point)
-    }
+    const moveMask = this.editor.mask.clone({ insert: false })
+
+    moveMask.add(ev.point)
+    moveMask.visible = true
+    moveMask.selected = true
+
+    this.tempMask.replaceWith(moveMask)
+    this.tempMask = moveMask
   }
 
   onKeyDown (ev) {
-    if (ev.key === 'enter' && this.editor.drawing) {
-      this.editor.drawing = false
-
-      Editor.removeLastSegment(this.editor.mask)
-      const newPond = this.editor.pond.subtract(this.editor.mask)
-      this.editor.pond.remove()
-      this.editor.mask.remove()
-      this.editor.pond = newPond
-
-      this.editor.mask = Editor.createMask()
+    if (ev.key === 'enter') {
+      this.editor.deactivateActiveTool()
     }
   }
 }
