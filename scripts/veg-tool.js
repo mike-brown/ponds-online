@@ -29,6 +29,8 @@ class VegTool extends Tool {
 
     this.tempVeg = undefined
     this.editor.vegmask = Editor.createVegMask()
+
+    this.editor.mergeVegetation()
   }
 
   onMouseDown (ev) {

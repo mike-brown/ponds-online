@@ -94,6 +94,22 @@ class Editor {
     this.baseLayer.addChildren([this.pond, this.mask, this.vegmask])
   }
 
+  mergeVegetation () {
+    if (!this.veg.length) return
+
+    const allVeg = this.veg.reduce((allVeg, veg) => {
+      return allVeg.unite(veg, { insert: false })
+    }, Editor.createVegMask())
+
+    this.veg.forEach(veg => {
+      veg.remove()
+    })
+
+    this.veg = []
+    this.veg.push(allVeg)
+    this.baseLayer.addChild(allVeg)
+  }
+
   static validPond (pond) {
     return !pond.intersects(pond)
   }
