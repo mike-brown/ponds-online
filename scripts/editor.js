@@ -6,7 +6,7 @@ class Editor {
   constructor ($canvas) {
     this.scope = paper.setup($canvas)
     this.scope.settings = Object.assign(this.scope.settings, {
-      // insertItems: false,
+      insertItems: false,
       hitTolerance: 5
     })
 
@@ -14,25 +14,24 @@ class Editor {
 
     this.view = this.scope.view
     this.project = this.scope.project
-    this.baseLayer = this.project.activeLayer
 
-    // set up cursor layer
+    this.baseLayer = this.project.activeLayer
     this.cursorLayer = new Layer({
       children: [
         new Line({
           from: [-10, 0],
-          to: [10, 0],
-          strokeColor: Editor.colors.white
+          to: [10, 0]
         }),
         new Line({
           from: [0, -10],
-          to: [0, 10],
-          strokeColor: Editor.colors.white
+          to: [0, 10]
         })
       ],
       strokeColor: Editor.colors.white,
       position: this.view.center
     })
+
+    this.project.addLayer(this.cursorLayer)
 
     this.view.onMouseMove = ev => {
       this.cursorLayer.position = ev.point
@@ -85,8 +84,6 @@ class Editor {
     if (this.outlet) this.outlet.remove()
     if (this.veg) this.veg.forEach(veg => veg.remove())
 
-    this._activeTool = undefined
-    this.drawing = false
     this.pond = Editor.createPond()
     this.mask = Editor.createMask()
     this.vegmask = Editor.createVegMask()
@@ -97,14 +94,26 @@ class Editor {
     this.baseLayer.addChildren([this.pond, this.mask, this.vegmask])
   }
 
-  fillPond () {
-    this.pond.fillColor = this.pond.intersects(this.pond)
-      ? Editor.colors.red
-      : Editor.colors.aqua
+  static validPond (pond) {
+    return !pond.intersects(pond)
   }
 
-  static removeLastSegment (path) {
-    path.removeSegment(path.segments.length - 1)
+  static pondColor (pond) {
+    return Editor.validPond(pond) ? Editor.colors.aqua : Editor.colors.red
+  }
+
+  static fillPond (pond) {
+    pond.fillColor = Editor.pondColor(pond)
+  }
+
+  static sanitizePond (pond) {
+    if (!Editor.validPond(pond)) {
+      console.warn('reverting pond to last valid state')
+    }
+
+    while (!Editor.validPond(pond)) {
+      pond.removeSegment(pond.segments.length - 1)
+    }
   }
 
   static createPond () {

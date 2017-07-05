@@ -7,41 +7,43 @@ class AddTool extends Tool {
   activate () {
     super.activate()
 
-    this.editor.pond.selected = true
-    this.editor.drawing = true
+    this.tempPond = this.editor.pond.clone({ insert: false })
+    this.editor.pond.visible = false
+
+    this.tempPond.selected = true
+    this.editor.baseLayer.addChild(this.tempPond)
   }
 
   deactivate () {
     super.deactivate()
 
-    this.editor.pond.selected = false
+    Editor.sanitizePond(this.editor.pond)
+
+    this.editor.pond.visible = true
+
+    this.tempPond.remove()
+    this.tempPond = undefined
   }
 
   onMouseDown (ev) {
-    if (this.editor.drawing) {
-      this.editor.pond.add(ev.point)
-    }
+    this.editor.pond.add(ev.point)
   }
 
   onMouseMove (ev) {
-    if (this.editor.drawing) {
-      Editor.removeLastSegment(this.editor.pond)
-      this.editor.pond.add(ev.point)
+    const movePond = this.editor.pond.clone({ insert: false })
 
-      this.editor.fillPond()
-    }
+    movePond.add(ev.point)
+    movePond.visible = true
+    movePond.selected = true
+    Editor.fillPond(movePond)
+
+    this.tempPond.replaceWith(movePond)
+    this.tempPond = movePond
   }
 
   onKeyDown (ev) {
-    if (
-      ev.key === 'enter' &&
-      this.editor.drawing &&
-      !this.editor.pond.intersects(this.editor.pond)
-    ) {
-      this.editor.drawing = false
-
-      Editor.removeLastSegment(this.editor.pond)
-      this.editor.fillPond()
+    if (ev.key === 'enter') {
+      this.editor.deactivateActiveTool()
     }
   }
 }
