@@ -7,37 +7,48 @@ class VegTool extends Tool {
   activate () {
     super.activate()
 
-    if (this.editor.drawing) {
-      Editor.removeLastSegment(this.editor.pond)
-      this.editor.fillPond()
-    }
+    this.tempVeg = this.editor.vegmask.clone({ insert: false })
+    this.editor.vegmask.visible = false
 
-    this.editor.drawing = true
+    this.tempVeg.selected = true
+    this.editor.baseLayer.addChild(this.tempVeg)
+  }
+
+  deactivate () {
+    super.deactivate()
+
+    this.editor.vegmask.visible = true
+    Editor.sanitizePond(this.editor.vegmask)
+
+    const vegArea = this.editor.vegmask.intersect(this.editor.pond)
+    this.editor.veg.push(vegArea)
+    this.editor.baseLayer.addChild(vegArea)
+
+    this.editor.vegmask.remove()
+    this.tempVeg.remove()
+
+    this.tempVeg = undefined
+    this.editor.vegmask = Editor.createVegMask()
   }
 
   onMouseDown (ev) {
-    if (this.editor.drawing) {
-      this.editor.vegmask.add(ev.point)
-    }
+    this.editor.vegmask.add(ev.point)
   }
 
   onMouseMove (ev) {
-    if (this.editor.drawing) {
-      this.editor.vegmask.removeSegment(this.editor.vegmask.segments.length - 1)
-      this.editor.vegmask.add(ev.point)
-    }
+    const moveVeg = this.editor.vegmask.clone({ insert: false })
+
+    moveVeg.add(ev.point)
+    moveVeg.visible = true
+    moveVeg.selected = true
+
+    this.tempVeg.replaceWith(moveVeg)
+    this.tempVeg = moveVeg
   }
 
   onKeyDown (ev) {
-    if (ev.key === 'enter' && this.editor.drawing) {
-      this.editor.drawing = false
-
-      Editor.removeLastSegment(this.editor.vegmask)
-      const vegArea = this.editor.vegmask.intersect(this.editor.pond)
-      this.editor.vegmask.remove()
-      this.editor.veg.push(vegArea)
-
-      this.editor.vegmask = Editor.createVegMask()
+    if (ev.key === 'enter') {
+      this.editor.deactivateActiveTool()
     }
   }
 }
