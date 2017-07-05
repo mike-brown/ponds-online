@@ -36,6 +36,7 @@ class InletTool extends Tool {
       segment.strokeColor = Editor.colors.red
       segment.strokeWidth = 5
 
+      this.editor.baseLayer.addChild(segment)
       this.editor._hitTarget = segment
     } else {
       if (this.editor._hitTarget) {
