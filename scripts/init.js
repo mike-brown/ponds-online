@@ -55,9 +55,15 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 10 + (j > 9) * 2 // sets all inner cells to water cells
+        state[j][i] = 10// + (j > 9) * 2 // sets all inner cells to water cells
       }
     }
+
+    // for (let j = 0; j < prevX.length; j++) {
+    //   for (let i = 0; i < prevX[j].length; i++) {
+    //     prevX[j][i] = 0.0005
+    //   }
+    // }
 
     for (let j = 1; j < ROWS - 1; j++) {
       state[j][0] = 1 // sets leftmost column to inlets
@@ -94,8 +100,8 @@ window.addEventListener(
         for (let x = 0; x < pArr[y].length; x++) {
           const val = 120 - pArr[y][x] / maxp * 120
 
-          ctxp.fillStyle = `hsl(${val}, 100%, ${50 *
-            (cell(sArr, y, x) !== 0)}%)`
+          ctxp.fillStyle = `hsl(${val}, 100%, ${25 *
+            (cell(sArr, y, x) !== 0) + 25}%)`
           ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         }
       }
@@ -176,7 +182,7 @@ window.addEventListener(
         draw(state, prevP, nextX, nextY)
 
         // invokes next animation frame if convergence is above threshold
-        if (converge(state, nextX, nextY, prevX, prevY) > 0.000000001) {
+        if (converge(state, nextX, nextY, prevX, prevY) > 0.0000000001) {
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
           prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
@@ -186,7 +192,8 @@ window.addEventListener(
             running.checked = false
           }
 
-          console.log(nextP[9][0])
+          console.log('i:', nextP[9][0])
+          console.log('o:', nextP[9][COLS - 1])
 
           // let test = []
           //

@@ -35,6 +35,7 @@ function cell (arr, j, i) {
 
 function edge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i) !== 0 // returns zero if wall
+  const wdz = (cell(sArr, dj, di) !== 0) // returns zero if wall
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -42,7 +43,7 @@ function edge (sArr, arr, j, i, dj, di) {
   const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
 
   // returns cell on closest edge of array, based on supplied j and i values
-  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
 function slot (arr, n) {
@@ -91,7 +92,14 @@ function coefficients (sArr, xArr, yArr) {
         e: values.density * (edge(sArr, xArr, j, i, j, i) + edge(sArr, xArr, j, i + 1, j, i))
       }
 
-      iArr[j][i] = diffuse(f)
+      const outL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2
+      const outR = cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0
+
+      iArr[j][i] = diffuse(f)// * !(outL || outR) doesn't work: makes NaN
+
+      // TODO: if outlet, duplicate adjacent a value
+
+      if (j === 9 && i === COLS) console.log(f)
     }
   }
 
@@ -103,6 +111,8 @@ function coefficients (sArr, xArr, yArr) {
         w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
         e: values.density * (edge(sArr, xArr, j - 1, i + 1, j, i + 1) + edge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
+
+      // TODO: if outlet, duplicate adjacent a value
 
       jArr[j][i] = diffuse(f)
     }
@@ -186,9 +196,7 @@ function drag (sArr, xArr, yArr) {
     x: iArr,
     y: jArr
   }
-}
-
-function couple (sArr, pArr, xArr, yArr, aX, aY) {
+} function couple (sArr, pArr, xArr, yArr, aX, aY) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
 
@@ -227,7 +235,7 @@ function couple (sArr, pArr, xArr, yArr, aX, aY) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i]/* + iForce[j][i]*/) * wx
+      const uSub3 = (uSub1 + (uSub2 * params.size)/* + iVis[j][i] + iForce[j][i]*/) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
@@ -258,7 +266,7 @@ function couple (sArr, pArr, xArr, yArr, aX, aY) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i]/* + jForce[j][i]*/) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size)/* + jVis[j][i] + jForce[j][i]*/) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }
@@ -320,7 +328,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      kArr[j][i] = pArr[j][i] + qArr[j][i] / 30
+      kArr[j][i] = pArr[j][i] + qArr[j][i]
     }
   }
 

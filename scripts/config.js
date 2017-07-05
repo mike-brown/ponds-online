@@ -1,11 +1,11 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 80
+const COLS = 20
 const ROWS = 20
 
 const params = {
-  gamma: 0.1, // interface diffusion
+  gamma: 0.2, // interface diffusion
   size: 0.01, // 10mm face area
   rho: 998.2, // 998.2kg/m^3 density
   mu: 0.001002, // dynamic viscosity
