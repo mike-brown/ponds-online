@@ -24,6 +24,10 @@ class RemoveTool extends Tool {
     this.editor.pond.replaceWith(newPond)
     this.editor.pond = newPond
 
+    const newVeg = this.editor.veg[0].subtract(this.editor.mask)
+    this.editor.veg[0].replaceWith(newVeg)
+    this.editor.veg[0] = newVeg
+
     this.editor.mask.remove()
     this.tempMask.remove()
 
