@@ -24,9 +24,23 @@ class RemoveTool extends Tool {
     this.editor.pond.replaceWith(newPond)
     this.editor.pond = newPond
 
-    const newVeg = this.editor.veg[0].subtract(this.editor.mask)
-    this.editor.veg[0].replaceWith(newVeg)
-    this.editor.veg[0] = newVeg
+    if (this.editor.veg.length) {
+      this.editor.mergeVegetation()
+
+      const newVeg = this.editor.veg[0].subtract(this.editor.mask)
+      this.editor.veg[0].replaceWith(newVeg)
+      this.editor.veg[0] = newVeg
+    }
+
+    if (this.editor.inlet && this.editor.inlet.intersects(this.editor.mask)) {
+      this.editor.inlet.remove()
+      this.editor.inlet = undefined
+    }
+
+    if (this.editor.outlet && this.editor.outlet.intersects(this.editor.mask)) {
+      this.editor.outlet.remove()
+      this.editor.outlet = undefined
+    }
 
     this.editor.mask.remove()
     this.tempMask.remove()

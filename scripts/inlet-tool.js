@@ -13,6 +13,7 @@ class InletTool extends Tool {
       }
 
       this.editor.inlet = this.editor._hitTarget
+      this.editor.inlet.closed = true
       this.editor._hitTarget = undefined
 
       this.editor.inlet.strokeColor = Editor.colors.blue
