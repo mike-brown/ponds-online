@@ -1,70 +1,28 @@
 /* global GL:false */
 'use strict'
 
+const {
+  AddTool,
+  RemoveTool,
+  VegTool,
+  InletTool,
+  OutletTool
+} = require('./tools')
+const { Editor } = require('./editor')
+
 document.addEventListener('DOMContentLoaded', () => {
+  // canvas
   const $canvases = document.querySelector('.canvases')
   const $designCanvas = $canvases.querySelector('canvas.design')
   const $run = document.querySelector('button.run')
 
-  $designCanvas.height = $designCanvas.clientHeight
-  $designCanvas.width = $designCanvas.clientWidth
-
-  const dctx = $designCanvas.getContext('2d')
-
   let simulating = false
-  let tool = 'water'
-
-  dctx.fillStyle = 'red'
-  dctx.fillRect(100, 100, 200, 200)
 
   const startSim = () => {
     $run.classList.remove('primary')
     $run.classList.add('secondary')
     $run.textContent = 'Stop Simulation'
     document.querySelector('.title').textContent = 'Simulation'
-
-    let angle = 0
-    const gl = GL.create()
-    const mesh = GL.Mesh.cube()
-    const shader = new GL.Shader(`
-        void main() {
-        gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-      }
-    `, `
-      void main() {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-      }
-    `)
-
-    gl.onupdate = seconds => {
-      angle += 45 * seconds
-    }
-
-    gl.ondraw = () => {
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      gl.loadIdentity()
-      gl.translate(0, 0, -5)
-      gl.rotate(30, 1, 0, 0)
-      gl.rotate(angle, 0, 1, 0)
-
-      shader.draw(mesh)
-    }
-
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
-
-    gl.matrixMode(gl.PROJECTION)
-    gl.loadIdentity()
-    gl.perspective(45, gl.canvas.width / gl.canvas.height,
-      0.1, 1000)
-    gl.matrixMode(gl.MODELVIEW)
-
-    gl.animate()
-
-    const $simulationCanvas = gl.canvas
-    $simulationCanvas.height = $designCanvas.height
-    $simulationCanvas.width = $designCanvas.width
-    $simulationCanvas.classList.add('simulation')
-    $canvases.appendChild($simulationCanvas)
 
     $designCanvas.style.display = 'none'
   }
@@ -84,5 +42,90 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     simulating = !simulating
+  })
+
+  const $canvas = document.querySelector('canvas.design')
+
+  // initialise editor
+  const editor = new Editor($canvas)
+
+  const $addTool = document.querySelector('.js-add-tool')
+  const $removeTool = document.querySelector('.js-remove-tool')
+  const $vegTool = document.querySelector('.js-veg-tool')
+  const $inletTool = document.querySelector('.js-inlet-tool')
+  const $outletTool = document.querySelector('.js-outlet-tool')
+
+  const $resetTool = document.querySelector('.js-reset-tool')
+
+  editor.registerTool('add', new AddTool(editor, $addTool))
+  editor.registerTool('remove', new RemoveTool(editor, $removeTool))
+  editor.registerTool('veg', new VegTool(editor, $vegTool))
+  editor.registerTool('inlet', new InletTool(editor, $inletTool))
+  editor.registerTool('outlet', new OutletTool(editor, $outletTool))
+
+  $addTool.addEventListener('click', () => {
+    editor.activateTool('add')
+  })
+
+  $removeTool.addEventListener('click', () => {
+    editor.activateTool('remove')
+  })
+
+  $vegTool.addEventListener('click', () => {
+    editor.activateTool('veg')
+  })
+
+  $inletTool.addEventListener('click', () => {
+    editor.activateTool('inlet')
+  })
+
+  $outletTool.addEventListener('click', () => {
+    editor.activateTool('outlet')
+  })
+
+  $resetTool.addEventListener('click', () => {
+    editor.reset()
+  })
+
+  $run.addEventListener('click', () => {
+    window.location = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  })
+
+  window.addEventListener('keydown', ev => {
+    const keys = {
+      Escape: ev => {
+        editor.deactivateActiveTool()
+        if (editor.isReady()) {
+          $run.disabled = false
+        }
+      },
+
+      KeyA: ev => {
+        editor.activateTool('add')
+      },
+
+      KeyS: ev => {
+        editor.activateTool('remove')
+      },
+
+      KeyV: ev => {
+        editor.activateTool('veg')
+      },
+
+      KeyI: ev => {
+        editor.activateTool('inlet')
+      },
+
+      KeyO: ev => {
+        editor.activateTool('outlet')
+      },
+
+      KeyR: ev => {
+        editor.reset()
+        editor.deactivateActiveTool()
+      }
+    }
+
+    if (ev.code in keys) keys[ev.code](ev)
   })
 })

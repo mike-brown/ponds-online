@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "precommit": "lint-staged",
-    "start": "lite-server"
+    "start": "npm run build && lite-server",
+    "build": "browserify ./scripts/init.js -o ./scripts/bundle.js",
+    "build:w": "watchify ./scripts/init.js -v -o ./scripts/bundle.js"
   },
   "lint-staged": {
     "concurrent": false,
@@ -26,10 +28,15 @@
   },
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
   "devDependencies": {
+    "browserify": "^14.4.0",
     "eclint": "^2.2.0",
     "eslint": "^4.1.1",
     "husky": "^0.14.1",
     "lint-staged": "^4.0.0",
-    "lite-server": "^2.3.0"
+    "lite-server": "^2.3.0",
+    "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "paper": "^0.11.4"
   }
 }

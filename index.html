@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- Scripts -->
-  <script src="http://evanw.github.com/lightgl.js/lightgl.js"></script>
   <script src="https://use.fontawesome.com/f0914e7b27.js" async></script>
-  <script src="/scripts/init.js" charset="utf-8"></script>
+  <script src="http://evanw.github.com/lightgl.js/lightgl.js"></script>
+  <script src="/scripts/bundle.js" charset="utf-8"></script>
 </head>
 <body>
   <header>
@@ -40,18 +40,21 @@
           <canvas class="design"></canvas>
         </div>
 
-        <button class="primary run">Run Simulation</button>
+        <button class="primary run js-run" disabled>Run Simulation</button>
       </div>
 
       <div class="col-sm-12 col-sm-first col-md-3 col-md-last options">
         <div class="tools">
           <h2>Tools</h2>
 
-          <button class="primary">Set Water</button>
-          <button class="tertiary">Set Vegatation</button>
-          <button class="secondary">Set Walls</button>
-          <button class="inverse">Set Inlet(s)</button>
-          <button class="inverse">Set Outlet(s)</button>
+          <button class="primary js-add-tool">(A)dd Boundary</button>
+          <button class="secondary js-remove-tool">(S)ubtract Areas</button>
+          <button class="tertiary js-veg-tool">Set (V)egatation Areas</button>
+          <button class="inverse js-inlet-tool">Set (I)nlet Wall(s)</button>
+          <button class="inverse js-outlet-tool">Set (O)utlet Wall(s)</button>
+          <br>
+          <br>
+          <button class="secondary js-reset-tool">(R)eset Pond</button>
         </div>
 
         <div class="presets">
