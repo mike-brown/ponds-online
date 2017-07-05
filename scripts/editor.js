@@ -110,6 +110,10 @@ class Editor {
     this.baseLayer.addChild(allVeg)
   }
 
+  isReady () {
+    return this.pond.segments.length >= 3 && this.inlet && this.outlet
+  }
+
   static validPond (pond) {
     return !pond.intersects(pond)
   }

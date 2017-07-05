@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $vegTool = document.querySelector('.js-veg-tool')
   const $inletTool = document.querySelector('.js-inlet-tool')
   const $outletTool = document.querySelector('.js-outlet-tool')
+
   const $resetTool = document.querySelector('.js-reset-tool')
 
   editor.registerTool('add', new AddTool(editor, $addTool))
@@ -86,10 +87,17 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.reset()
   })
 
+  $run.addEventListener('click', () => {
+    window.location = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+  })
+
   window.addEventListener('keydown', ev => {
     const keys = {
       Escape: ev => {
         editor.deactivateActiveTool()
+        if (editor.isReady()) {
+          $run.disabled = false
+        }
       },
 
       KeyA: ev => {
