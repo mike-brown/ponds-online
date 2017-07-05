@@ -5,7 +5,7 @@ const COLS = 80
 const ROWS = 20
 
 const params = {
-  gamma: 0.2, // interface diffusion
+  gamma: 0.1, // interface diffusion
   size: 0.01, // 10mm face area
   rho: 998.2, // 998.2kg/m^3 density
   mu: 0.001002, // dynamic viscosity
@@ -15,8 +15,8 @@ const params = {
     y: 0
   },
   plant: [
-    { density: 161, diameter: 0.010, area: 1.6 },
-    { density: 171, diameter: 0.019, area: 3.2 }
+    { density: 161, diameter: 0.010, area: 1.6, phi: 0.013 },
+    { density: 171, diameter: 0.019, area: 3.2, phi: 0.047 }
   ]
 }
 
@@ -33,16 +33,14 @@ for (let n = 0; n < params.plant.length; n++) {
     density: params.plant[n].density,
     diameter: params.plant[n].diameter,
     area: params.plant[n].area,
-    phi: 0,
+    phi: params.plant[n].phi,
     a0: 0,
     a1: 0
   })
 
-  plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
+  // plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
   plants[n].a0 = 7276.43 * plants[n].diameter + 23.55
   plants[n].a1 = 32.7 * plants[n].density + 3.01 * plants[n].phi + 0.42
-
-  console.log(plants[n].phi)
 }
 
 module.exports = {
