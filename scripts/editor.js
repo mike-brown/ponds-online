@@ -17,10 +17,9 @@ class Editor {
 
     this.baseLayer = this.project.activeLayer
 
-    this.nullTool = new PaperTool()
-
     this.tools = {}
     this.activeTool = undefined
+    this.nullTool = new PaperTool()
 
     this.reset()
   }
@@ -70,6 +69,8 @@ class Editor {
     this.veg = []
     this.inlet = undefined
     this.outlet = undefined
+
+    this.deactivateActiveTool()
 
     this.baseLayer.addChildren([this.pond, this.mask, this.vegmask])
   }
