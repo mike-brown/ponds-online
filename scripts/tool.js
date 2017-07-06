@@ -16,12 +16,12 @@ class Tool {
   activate () {
     this.tool.activate()
 
-    this.button.textContent = `> ${this.button.textContent}`
+    this.button.classList.add('active')
     this.button.blur()
   }
 
   deactivate () {
-    this.button.textContent = this.button.textContent.slice(2)
+    this.button.classList.remove('active')
   }
 
   onMouseDown (ev) {}

@@ -27,3 +27,7 @@ canvas.simulation {
 canvas.design {
   cursor: none;
 }
+
+.tools button.active {
+  outline: 5px solid yellow;
+}
