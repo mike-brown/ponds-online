@@ -6,6 +6,10 @@ An interactive online tool for exploring vegetated storm-water pond design
 
 http://vpond.group.shef.ac.uk for more details
 
+### First time setup
+
+Install Node.js and run `npm install`
+
 ### Running
 
-Install Node.js and run `npm start`
+Run `npm start` then visit http://localhost:3000
