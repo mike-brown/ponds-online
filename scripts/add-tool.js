@@ -19,6 +19,16 @@ class AddTool extends Tool {
 
     Editor.sanitizePond(this.editor.pond)
 
+    if (this.editor.veg.length > 0) {
+      this.editor.mergeVegetation()
+
+      const vegArea = this.editor.veg[0].intersect(this.editor.pond)
+      this.editor.veg[0].remove()
+      this.editor.veg = []
+      this.editor.veg.push(vegArea)
+      this.editor.baseLayer.addChild(vegArea)
+    }
+
     this.editor.pond.visible = true
 
     this.tempPond.remove()
