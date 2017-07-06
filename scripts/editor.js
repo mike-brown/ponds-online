@@ -91,7 +91,7 @@ class Editor {
   }
 
   isReady () {
-    return this.pond.segments.length >= 3 && this.inlet && this.outlet
+    return Math.abs(this.pond.area) >= 1 && this.inlet && this.outlet
   }
 
   static validPond (pond) {

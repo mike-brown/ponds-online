@@ -25,7 +25,16 @@ canvas.simulation {
 }
 
 canvas.design {
-  cursor: crosshair;
+  cursor: crosshaira;
+}
+
+.tools button,
+.presets button {
+  --margin: 8px;
+
+  width: calc(100% - 2 * var(--margin));
+  max-width: 15em;
+  margin: var(--margin);
 }
 
 .tools button.active {
