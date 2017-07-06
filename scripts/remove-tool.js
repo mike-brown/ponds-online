@@ -32,14 +32,28 @@ class RemoveTool extends Tool {
       this.editor.veg[0] = newVeg
     }
 
-    if (this.editor.inlet && this.editor.inlet.intersects(this.editor.mask)) {
-      this.editor.inlet.remove()
-      this.editor.inlet = undefined
+    if (this.editor.inlet) {
+      if (this.editor.inlet.intersects(this.editor.mask)) {
+        this.editor.inlet.remove()
+        this.editor.inlet = undefined
+      }
+
+      if (!this.editor.inlet.intersects(this.editor.pond)) {
+        this.editor.inlet.remove()
+        this.editor.inlet = undefined
+      }
     }
 
-    if (this.editor.outlet && this.editor.outlet.intersects(this.editor.mask)) {
-      this.editor.outlet.remove()
-      this.editor.outlet = undefined
+    if (this.editor.outlet) {
+      if (this.editor.outlet.intersects(this.editor.mask)) {
+        this.editor.outlet.remove()
+        this.editor.outlet = undefined
+      }
+
+      if (!this.editor.outlet.intersects(this.editor.pond)) {
+        this.editor.outlet.remove()
+        this.editor.outlet = undefined
+      }
     }
 
     this.editor.mask.remove()
