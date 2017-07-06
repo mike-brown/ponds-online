@@ -25,7 +25,7 @@ canvas.simulation {
 }
 
 canvas.design {
-  cursor: none;
+  cursor: crosshair;
 }
 
 .tools button.active {

@@ -16,26 +16,6 @@ class Editor {
     this.project = this.scope.project
 
     this.baseLayer = this.project.activeLayer
-    this.cursorLayer = new Layer({
-      children: [
-        new Line({
-          from: [-10, 0],
-          to: [10, 0]
-        }),
-        new Line({
-          from: [0, -10],
-          to: [0, 10]
-        })
-      ],
-      strokeColor: Editor.colors.white,
-      position: this.view.center
-    })
-
-    this.project.addLayer(this.cursorLayer)
-
-    this.view.onMouseMove = ev => {
-      this.cursorLayer.position = ev.point
-    }
 
     this.nullTool = new PaperTool()
 
