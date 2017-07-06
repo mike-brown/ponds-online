@@ -4,6 +4,7 @@ const {
   paper,
   Layer,
   Path,
+  Color,
   Point,
   PointText,
   Tool: PaperTool,
@@ -28,6 +29,7 @@ class Editor {
 
     this.baseLayer = this.project.activeLayer
     this.scaleLayer = this.project.addLayer(this.createScaleLayer())
+    this.gridLayer = this.project.addLayer(this.createGridLayer())
 
     this.tools = {}
     this.activeTool = undefined
@@ -139,13 +141,79 @@ class Editor {
           rotation: -90
         }),
         new Path({
-          segments: [[0, -this.GRID_SCALE], [0, 0], [this.GRID_SCALE, 0]],
+          segments: [
+            [-5, -this.GRID_SCALE],
+            [5, -this.GRID_SCALE],
+            [0, -this.GRID_SCALE],
+            [0, 0],
+            [0, 5],
+            [0, 0],
+            [-5, 0],
+            [0, 0],
+            [this.GRID_SCALE, 0],
+            [this.GRID_SCALE, -5],
+            [this.GRID_SCALE, 5]
+          ],
           strokeColor: Editor.colors.white,
           strokeWidth: 2
         })
       ],
       position: [80, this.view.size.height - 80]
     })
+  }
+
+  createGridLayer () {
+    const grid = new Layer()
+
+    // vertical gridlines
+    for (let i = 1; i < 100; i++) {
+      grid.addChild(
+        new Line({
+          from: [i * this.GRID_SCALE, 0],
+          to: [i * this.GRID_SCALE, 10000],
+          strokeWidth: 1,
+          strokeColor: new Color(255, 0.5)
+        })
+      )
+    }
+
+    // horizontal gridlines
+    for (let i = 1; i < 100; i++) {
+      grid.addChild(
+        new Line({
+          from: [0, i * this.GRID_SCALE],
+          to: [10000, i * this.GRID_SCALE],
+          strokeWidth: 1,
+          strokeColor: new Color(255, 0.5)
+        })
+      )
+    }
+
+    // vertical subdivisions
+    for (let i = 1; i < 100 * this.GRID_SUBDIVISIONS; i++) {
+      grid.addChild(
+        new Line({
+          from: [i * this.GRID_SCALE / this.GRID_SUBDIVISIONS, 0],
+          to: [i * this.GRID_SCALE / this.GRID_SUBDIVISIONS, 10000],
+          strokeWidth: 1,
+          strokeColor: new Color(255, 0.25)
+        })
+      )
+    }
+
+    // horizontal subdivisions
+    for (let i = 1; i < 100; i++) {
+      grid.addChild(
+        new Line({
+          from: [0, i * this.GRID_SCALE / this.GRID_SUBDIVISIONS],
+          to: [10000, i * this.GRID_SCALE / this.GRID_SUBDIVISIONS],
+          strokeWidth: 1,
+          strokeColor: new Color(255, 0.25)
+        })
+      )
+    }
+
+    return grid
   }
 
   static validPond (pond) {
