@@ -1,7 +1,27 @@
-'use strict'
+;'use strict'
 
+const { Point } = require('paper')
 const { Tool } = require('./tool')
 const { Editor } = require('./editor')
+
+const roundToNearest = (num, base) => {
+  return Math.round(num / base) * base
+}
+
+const directionalSnap = (from, to, nearest) => {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+
+  const r = Math.sqrt(dx * dx + dy * dy)
+
+  const theta = Math.atan2(dy, dx)
+  const angle = roundToNearest(theta, nearest)
+
+  const x = r * Math.cos(angle)
+  const y = r * Math.sin(angle)
+
+  return new Point(from.x + x, from.y + y)
+}
 
 class AddTool extends Tool {
   activate () {
@@ -42,7 +62,16 @@ class AddTool extends Tool {
   onMouseMove (ev) {
     const movePond = this.editor.pond.clone({ insert: false })
 
-    movePond.add(ev.point)
+    const point =
+      this.editor.pond.segments.length && this.editor.snap
+        ? directionalSnap(
+          movePond.segments[movePond.segments.length - 1].point,
+          ev.point,
+          Math.PI / 6
+        )
+        : ev.point
+
+    movePond.add(point)
     movePond.visible = true
     movePond.selected = true
     Editor.fillPond(movePond)
@@ -54,6 +83,14 @@ class AddTool extends Tool {
   onKeyDown (ev) {
     if (ev.key === 'enter') {
       this.editor.deactivateActiveTool()
+    } else if (ev.key === 'shift') {
+      this.editor.snap = true
+    }
+  }
+
+  onKeyUp (ev) {
+    if (ev.key === 'shift') {
+      this.editor.snap = false
     }
   }
 }

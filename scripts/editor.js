@@ -83,6 +83,7 @@ class Editor {
     this.veg = []
     this.inlet = undefined
     this.outlet = undefined
+    this.snap = false
 
     this.deactivateActiveTool()
 

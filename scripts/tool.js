@@ -11,6 +11,7 @@ class Tool {
     this.tool.onMouseDown = this.onMouseDown.bind(this)
     this.tool.onMouseMove = this.onMouseMove.bind(this)
     this.tool.onKeyDown = this.onKeyDown.bind(this)
+    this.tool.onKeyUp = this.onKeyUp.bind(this)
   }
 
   activate () {
@@ -29,6 +30,8 @@ class Tool {
   onMouseMove (ev) {}
 
   onKeyDown (ev) {}
+
+  onKeyUp (ev) {}
 }
 
 module.exports = {
