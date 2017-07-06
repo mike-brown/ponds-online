@@ -1,7 +1,7 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 20
+const COLS = 80
 const ROWS = 20
 
 const params = {

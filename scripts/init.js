@@ -55,7 +55,13 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 10// + (j > 9) * 2 // sets all inner cells to water cells
+        state[j][i] = 10 // sets all inner cells to water cells
+      }
+    }
+
+    for (let j = 6; j < state.length - 6; j++) {
+      for (let i = 25; i < state[j].length - 25; i++) {
+        state[j][i] = 12
       }
     }
 

@@ -46,6 +46,18 @@ function edge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
+function softedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
+
+  const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
+  const mj = Math.max(Math.min(j, arr.length - 1), 0)
+  const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
+  const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
+
+  // returns cell on closest edge of array, based on supplied j and i values
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
+}
+
 function slot (arr, n) {
   const bn = n >= 0 && n < arr.length
 
@@ -88,18 +100,19 @@ function coefficients (sArr, xArr, yArr) {
       const f = {
         n: values.density * (edge(sArr, yArr, j, i - 1, j, i) + edge(sArr, yArr, j, i, j, i - 1)),
         s: values.density * (edge(sArr, yArr, j + 1, i - 1, j + 1, i) + edge(sArr, yArr, j + 1, i, j + 1, i - 1)),
-        w: values.density * (edge(sArr, xArr, j, i - 1, j, i) + edge(sArr, xArr, j, i, j, i)),
-        e: values.density * (edge(sArr, xArr, j, i, j, i) + edge(sArr, xArr, j, i + 1, j, i))
+        w: values.density * (edge(sArr, xArr, j, i - 1, j, i) + edge(sArr, xArr, j, i, j, i - 1)),
+        e: values.density * (edge(sArr, xArr, j, i, j, i + 1) + edge(sArr, xArr, j, i + 1, j, i))
       }
 
       const outL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2
       const outR = cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0
 
-      iArr[j][i] = diffuse(f)// * !(outL || outR) doesn't work: makes NaN
+      f.w = f.w + outL * f.e
+      f.e = f.e + outR * f.w
+
+      iArr[j][i] = diffuse(f)
 
       // TODO: if outlet, duplicate adjacent a value
-
-      if (j === 9 && i === COLS) console.log(f)
     }
   }
 
@@ -111,6 +124,12 @@ function coefficients (sArr, xArr, yArr) {
         w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
         e: values.density * (edge(sArr, xArr, j - 1, i + 1, j, i + 1) + edge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
+
+      const outU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2
+      const outD = cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0
+
+      f.n = f.n + outU * f.s
+      f.s = f.s + outD * f.n
 
       // TODO: if outlet, duplicate adjacent a value
 
@@ -172,6 +191,8 @@ function drag (sArr, xArr, yArr) {
       const uSub3 = -(1 / 2) * uSub1 * params.rho * uSub2 * plant.density * plant.diameter
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
+      if (j === 9 && i === 27) console.log(uSub3)
+
       iArr[j][i] = uSub4
     }
   }
@@ -214,10 +235,10 @@ function drag (sArr, xArr, yArr) {
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
       const vx = {
-        n: aX[j][i].n * edge(sArr, xArr, j - 1, i, j, i),
-        s: aX[j][i].s * edge(sArr, xArr, j + 1, i, j, i),
-        w: aX[j][i].w * edge(sArr, xArr, j, i - 1, j, i),
-        e: aX[j][i].e * edge(sArr, xArr, j, i + 1, j, i)
+        n: aX[j][i].n * softedge(sArr, xArr, j - 1, i, j, i),
+        s: aX[j][i].s * softedge(sArr, xArr, j + 1, i, j, i),
+        w: aX[j][i].w * softedge(sArr, xArr, j, i - 1, j, i),
+        e: aX[j][i].e * softedge(sArr, xArr, j, i + 1, j, i)
       }
 
       const wx = (cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2) ||
@@ -235,7 +256,7 @@ function drag (sArr, xArr, yArr) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size)/* + iVis[j][i] + iForce[j][i]*/) * wx
+      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
@@ -245,10 +266,10 @@ function drag (sArr, xArr, yArr) {
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
       const vy = {
-        n: aY[j][i].n * edge(sArr, yArr, j - 1, i, j, i),
-        s: aY[j][i].s * edge(sArr, yArr, j + 1, i, j, i),
-        w: aY[j][i].w * edge(sArr, yArr, j, i - 1, j, i),
-        e: aY[j][i].e * edge(sArr, yArr, j, i + 1, j, i)
+        n: aY[j][i].n * softedge(sArr, yArr, j - 1, i, j, i),
+        s: aY[j][i].s * softedge(sArr, yArr, j + 1, i, j, i),
+        w: aY[j][i].w * softedge(sArr, yArr, j, i - 1, j, i),
+        e: aY[j][i].e * softedge(sArr, yArr, j, i + 1, j, i)
       }
 
       const wy = (cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2) ||
@@ -266,7 +287,7 @@ function drag (sArr, xArr, yArr) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size)/* + jVis[j][i] + jForce[j][i]*/) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }
