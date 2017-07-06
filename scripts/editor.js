@@ -1,6 +1,14 @@
 'use strict'
 
-const { paper, Path, Path: { Line }, Layer, Tool: PaperTool } = require('paper')
+const {
+  paper,
+  Layer,
+  Path,
+  Point,
+  PointText,
+  Tool: PaperTool,
+  Path: { Line }
+} = require('paper')
 
 class Editor {
   constructor ($canvas) {
@@ -12,10 +20,14 @@ class Editor {
 
     console.log(this.scope)
 
+    this.GRID_SCALE = 100
+    this.GRID_SUBDIVISIONS = 2
+
     this.view = this.scope.view
     this.project = this.scope.project
 
     this.baseLayer = this.project.activeLayer
+    this.scaleLayer = this.project.addLayer(this.createScaleLayer())
 
     this.tools = {}
     this.activeTool = undefined
@@ -93,6 +105,47 @@ class Editor {
 
   isReady () {
     return Math.abs(this.pond.area) >= 1 && this.inlet && this.outlet
+  }
+
+  createScaleLayer () {
+    return new Layer({
+      children: [
+        new PointText({
+          point: [0, 30],
+          content: '0',
+          fillColor: Editor.colors.white,
+          fontFamily: 'Arial',
+          fontWeight: 100,
+          justification: 'center',
+          fontSize: 25
+        }),
+        new PointText({
+          point: [this.GRID_SCALE, 30],
+          content: '1m',
+          fillColor: Editor.colors.white,
+          fontFamily: 'Arial',
+          fontWeight: 100,
+          justification: 'center',
+          fontSize: 25
+        }),
+        new PointText({
+          point: [-20, -this.GRID_SCALE + 10],
+          content: '1m',
+          fillColor: Editor.colors.white,
+          fontFamily: 'Arial',
+          fontWeight: 100,
+          justification: 'center',
+          fontSize: 25,
+          rotation: -90
+        }),
+        new Path({
+          segments: [[0, -this.GRID_SCALE], [0, 0], [this.GRID_SCALE, 0]],
+          strokeColor: Editor.colors.white,
+          strokeWidth: 2
+        })
+      ],
+      position: [80, this.view.size.height - 80]
+    })
   }
 
   static validPond (pond) {
