@@ -18,8 +18,8 @@ const {
 const {
   CELL_SIZE,
   COLS,
-  ROWS
-  // params,
+  ROWS,
+  params
   // values,
   // plants
 } = require('./config')
@@ -59,17 +59,17 @@ window.addEventListener(
       }
     }
 
-    for (let j = 6; j < state.length - 6; j++) {
-      for (let i = 25; i < state[j].length - 25; i++) {
-        state[j][i] = 12
-      }
-    }
-
-    // for (let j = 0; j < prevX.length; j++) {
-    //   for (let i = 0; i < prevX[j].length; i++) {
-    //     prevX[j][i] = 0.0005
+    // for (let j = 6; j < state.length - 6; j++) {
+    //   for (let i = 25; i < state[j].length - 25; i++) {
+    //     state[j][i] = 12
     //   }
     // }
+
+    for (let j = 1; j < prevX.length - 1; j++) {
+      // for (let i = 0; i < prevX[j].length; i++) {
+      prevX[j][0] = params.input.x
+      // }
+    }
 
     for (let j = 1; j < ROWS - 1; j++) {
       state[j][0] = 1 // sets leftmost column to inlets
@@ -104,7 +104,7 @@ window.addEventListener(
 
       for (let y = 0; y < pArr.length; y++) {
         for (let x = 0; x < pArr[y].length; x++) {
-          const val = 120 - pArr[y][x] / maxp * 120
+          const val = 240 - pArr[y][x] / maxp * 240
 
           ctxp.fillStyle = `hsl(${val}, 100%, ${25 *
             (cell(sArr, y, x) !== 0) + 25}%)`
@@ -140,7 +140,7 @@ window.addEventListener(
       document.querySelector('.yscale .min').textContent = '0'
       document.querySelector('.yscale .max').textContent = maxv.toFixed(5)
 
-      document.querySelector('.pscale .min').textContent = -maxp.toFixed(5)
+      document.querySelector('.pscale .min').textContent = '0'// -maxp.toFixed(5)
       document.querySelector('.pscale .max').textContent = maxp.toFixed(5)
     }
 
@@ -185,10 +185,12 @@ window.addEventListener(
         nextX = temp.x
         nextY = temp.y
 
-        draw(state, prevP, nextX, nextY)
+        draw(state, prevP, tempX, nextY)
 
         // invokes next animation frame if convergence is above threshold
         if (converge(state, nextX, nextY, prevX, prevY) > 0.0000000001) {
+          console.log('x1:', (nextX[9][1] * 1000).toFixed(3), 'x2:', (nextX[9][2] * 1000).toFixed(3))
+
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
           prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
@@ -198,8 +200,8 @@ window.addEventListener(
             running.checked = false
           }
 
-          console.log('i:', nextP[9][0])
-          console.log('o:', nextP[9][COLS - 1])
+          // console.log('i:', nextP[9][0])
+          // console.log('o:', nextP[9][COLS - 1])
 
           // let test = []
           //
@@ -216,12 +218,28 @@ window.addEventListener(
           // for (let i = 0; i < nextX[0].length; i++) {
           //   console.log(test[i])
           // }
+
+          // let test = []
+          //
+          // for (let i = 0; i < prevP[0].length; i++) {
+          //   test[i] = prevP[9][i]
+          // }
+          //
+          // for (let j = 0; j < prevP.length; j++) {
+          //   for (let i = 0; i < prevP[j].length; i++) {
+          //     test[i] += nextX[j][i]
+          //   }
+          // }
+          //
+          // for (let i = 0; i < prevP[0].length; i++) {
+          //   console.log(test[i])
+          // }
         }
       }
 
-      requestAnimationFrame(execute)
+      // requestAnimationFrame(execute)
     }
-    // setInterval(execute, 1000)
+    // setInterval(execute, 2000)
     requestAnimationFrame(execute)
   },
   false

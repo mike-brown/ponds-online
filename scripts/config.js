@@ -1,8 +1,8 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 80
-const ROWS = 20
+const COLS = 79
+const ROWS = 19
 
 const params = {
   gamma: 0.2, // interface diffusion

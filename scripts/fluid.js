@@ -191,7 +191,7 @@ function drag (sArr, xArr, yArr) {
       const uSub3 = -(1 / 2) * uSub1 * params.rho * uSub2 * plant.density * plant.diameter
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
-      if (j === 9 && i === 27) console.log(uSub3)
+      // if (j === 9 && i === 27) console.log(uSub4)
 
       iArr[j][i] = uSub4
     }
@@ -256,7 +256,7 @@ function drag (sArr, xArr, yArr) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
+      const uSub3 = (uSub1 + (uSub2 * params.size)/* + iVis[j][i] + iForce[j][i]*/) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
@@ -287,7 +287,7 @@ function drag (sArr, xArr, yArr) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size)/* + jVis[j][i] + jForce[j][i]*/) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }
@@ -332,7 +332,7 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA) {
       let pSub2 = (vx.w - vx.e + vy.n - vy.s) / params.size // b_ij
       let pSub3 = 1 / a.n + 1 / a.s + 1 / a.w + 1 / a.e
 
-      kArr[j][i] = (pSub1 + pSub2 / pSub3) * (cell(sArr, j, i) !== 0)
+      kArr[j][i] = (pSub1 + pSub2) / pSub3 * (cell(sArr, j, i) !== 0) // this calculation does not apply correct division formula
 
       // kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
     }
