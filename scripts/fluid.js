@@ -34,8 +34,22 @@ function cell (arr, j, i) {
 }
 
 function edge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
   const wdz = (cell(sArr, dj, di) !== 0) // returns zero if wall
+  return softedge(sArr, arr, j, i, dj, di) * wdz
+}
+
+function eastedge (sArr, arr, j, i, dj, di) {
+  const wdz = (cell(sArr, dj, di - 1) !== 0) // returns zero if wall
+  return softeastedge(sArr, arr, j, i, dj, di) * wdz
+}
+
+function downedge (sArr, arr, j, i, dj, di) {
+  const wdz = (cell(sArr, dj - 1, di) !== 0) // returns zero if wall
+  return softdownedge(sArr, arr, j, i, dj, di) * wdz
+}
+
+function softedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -43,11 +57,24 @@ function edge (sArr, arr, j, i, dj, di) {
   const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
 
   // returns cell on closest edge of array, based on supplied j and i values
-  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
-function softedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
+function softeastedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
+  const wdz = (cell(sArr, dj, di - 1) !== 0) // returns zero if wall
+
+  const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
+  const mj = Math.max(Math.min(j, arr.length - 1), 0)
+  const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
+  const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
+
+  // returns cell on closest edge of array, based on supplied j and i values
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
+}
+
+function softdownedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -87,7 +114,7 @@ function diffuse (f) {
     s: a.s,
     w: a.w,
     e: a.e,
-    c: a.n + a.s + a.w + a.e + (f.e - f.w) + (f.s - f.n) // a_c = a_n + a_s + a_w + a_e +
+    c: a.n + a.s + a.w + a.e + (f.e - f.w) + (f.n - f.s) // a_c = a_n + a_s + a_w + a_e + d_F
   }
 }
 
@@ -99,9 +126,9 @@ function coefficients (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const f = {
         n: values.density * (edge(sArr, yArr, j, i - 1, j, i) + edge(sArr, yArr, j, i, j, i - 1)),
-        s: values.density * (edge(sArr, yArr, j + 1, i - 1, j + 1, i) + edge(sArr, yArr, j + 1, i, j + 1, i - 1)),
+        s: values.density * (downedge(sArr, yArr, j + 1, i - 1, j + 1, i) + downedge(sArr, yArr, j + 1, i, j + 1, i - 1)),
         w: values.density * (edge(sArr, xArr, j, i - 1, j, i) + edge(sArr, xArr, j, i, j, i - 1)),
-        e: values.density * (edge(sArr, xArr, j, i, j, i + 1) + edge(sArr, xArr, j, i + 1, j, i))
+        e: values.density * (eastedge(sArr, xArr, j, i, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j, i))
       }
 
       const outL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2
@@ -120,9 +147,9 @@ function coefficients (sArr, xArr, yArr) {
     for (let i = 0; i < jArr[j].length; i++) {
       const f = {
         n: values.density * (edge(sArr, yArr, j - 1, i, j, i) + edge(sArr, yArr, j, i, j, i)),
-        s: values.density * (edge(sArr, yArr, j, i, j, i) + edge(sArr, yArr, j + 1, i, j, i)),
+        s: values.density * (downedge(sArr, yArr, j, i, j, i) + downedge(sArr, yArr, j + 1, i, j, i)),
         w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
-        e: values.density * (edge(sArr, xArr, j - 1, i + 1, j, i + 1) + edge(sArr, xArr, j, i + 1, j - 1, i + 1))
+        e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
 
       const outU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2
@@ -186,12 +213,15 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const plant = slot(plants, cell(sArr, j, i) - 11)
 
+      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i), 2) + Math.pow(cell(yArr, j, i), 2))
+
       const uSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
-      const uSub2 = Math.min(10, 2 * ((plant.a0 * params.nu) / ((xArr[j][i] + (xArr[j][i] === 0)) * plant.diameter) + plant.a1))
-      const uSub3 = -(1 / 2) * uSub1 * params.rho * uSub2 * plant.density * plant.diameter
+      const uSub2 = 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1)
+      const uSub3 = -(1 / 2) * uSub1 * params.rho * Math.min(10, uSub2) * ((4 * plant.phi) / (plant.diameter * Math.PI))
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
-      // if (j === 9 && i === 27) console.log(uSub4)
+      // if (j === 9 && i === 27) console.log('a0:', plant.a0, 'a1', plant.a1)
+      // if (j === 9 && i === 27) console.log('uSub1:', uSub1, '\nuSub2:', uSub2, '\nuSub3:', uSub3, '\nuSub4:', uSub4)
 
       iArr[j][i] = uSub4
     }
@@ -202,9 +232,11 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < jArr[j].length; i++) {
       const plant = slot(plants, cell(sArr, j, i) - 11)
 
+      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i), 2) + Math.pow(cell(yArr, j, i), 2))
+
       const vSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
-      const vSub2 = Math.min(10, 2 * ((plant.a0 * params.nu) / ((yArr[j][i] + (yArr[j][i] === 0)) * plant.diameter) + plant.a1))
-      const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * plant.density * plant.diameter
+      const vSub2 = Math.min(10, 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1))
+      const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * ((4 * plant.phi) / (plant.diameter * Math.PI))
       const vSub4 = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
 
       // if (j === ROWS - 1 && i === 1) console.log('uSub1: ' + vSub1 + '\nuSub2: ' + vSub2 + '\nuSub3: ' + vSub3 + '\nuSub4: ' + vSub4)
@@ -256,9 +288,11 @@ function drag (sArr, xArr, yArr) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size)/* + iVis[j][i] + iForce[j][i]*/) * wx
+      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
+
+      if (j === 9 && (i === 1 || i === COLS - 1)) console.log('ax:', aX[j][i], '\nix:', iArr[j][i], '\nvx:', vx)
     }
   }
 
@@ -287,7 +321,7 @@ function drag (sArr, xArr, yArr) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size)/* + jVis[j][i] + jForce[j][i]*/) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }
@@ -349,7 +383,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      kArr[j][i] = pArr[j][i] + qArr[j][i]
+      kArr[j][i] = pArr[j][i] + qArr[j][i] / 35
     }
   }
 
@@ -406,6 +440,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
 }
 
 function converge (sArr, xArr, yArr, iArr, jArr) {
+  let temp = 0
   let diff = 0
   let step = 0
 
@@ -415,15 +450,11 @@ function converge (sArr, xArr, yArr, iArr, jArr) {
     }
   }
 
-  for (let j = 0; j < xArr.length; j++) {
-    for (let i = 0; i < xArr[j].length; i++) {
-      diff += Math.abs(Math.abs(xArr[j][i]) - Math.abs(iArr[j][i]))
-    }
-  }
-
-  for (let j = 0; j < yArr.length; j++) {
-    for (let i = 0; i < yArr[j].length; i++) {
-      diff += Math.abs(Math.abs(yArr[j][i]) - Math.abs(jArr[j][i]))
+  for (let j = 0; j < ROWS + 1; j++) {
+    for (let i = 0; i < COLS + 1; i++) {
+      temp = Math.pow(cell(xArr, j, i) - cell(iArr, j, i), 2)
+      temp += Math.pow(cell(yArr, j, i) - cell(jArr, j, i), 2)
+      diff += Math.sqrt(temp)
     }
   }
 

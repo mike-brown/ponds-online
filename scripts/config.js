@@ -1,8 +1,8 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 79
-const ROWS = 19
+const COLS = 80
+const ROWS = 18
 
 const params = {
   gamma: 0.2, // interface diffusion
@@ -11,7 +11,7 @@ const params = {
   mu: 0.001002, // dynamic viscosity
   nu: 0.000001004, // kinematic viscosity
   input: {
-    x: 0.0005,
+    x: -0.0005,
     y: 0
   },
   plant: [
@@ -40,7 +40,7 @@ for (let n = 0; n < params.plant.length; n++) {
 
   // plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
   plants[n].a0 = 7276.43 * plants[n].diameter + 23.55
-  plants[n].a1 = 32.7 * plants[n].density + 3.01 * plants[n].phi + 0.42
+  plants[n].a1 = 32.7 * plants[n].diameter + 3.01 * plants[n].phi + 0.42
 }
 
 module.exports = {

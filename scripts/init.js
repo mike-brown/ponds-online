@@ -42,6 +42,8 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 10000
+
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
 
@@ -59,22 +61,31 @@ window.addEventListener(
       }
     }
 
-    // for (let j = 6; j < state.length - 6; j++) {
+    // for (let j = 8; j < state.length - 8; j++) {
     //   for (let i = 25; i < state[j].length - 25; i++) {
-    //     state[j][i] = 12
+    //     state[j][i] = 11
     //   }
     // }
 
-    for (let j = 1; j < prevX.length - 1; j++) {
-      // for (let i = 0; i < prevX[j].length; i++) {
-      prevX[j][0] = params.input.x
-      // }
-    }
+    // for (let j = 0; j < prevX.length - 0; j++) {
+    //   for (let i = 0; i < prevX[j].length - 0; i++) {
+    //     prevX[j][i] = params.input.x
+    //   }
+    // }
 
     for (let j = 1; j < ROWS - 1; j++) {
-      state[j][0] = 1 // sets leftmost column to inlets
-      state[ROWS - 1 - j][COLS - 1] = 2 // sets rightmost column to outlets
+      // state[j][0] = 1 // sets leftmost column to inlets
+      // prevX[j][0] = params.input.x
+
+      state[ROWS - 1 - j][COLS - 1] = 1 // sets rightmost column to outlets
+      prevX[j][COLS] = params.input.x
     }
+
+    // for (let i = 1; i < COLS - 1; i++) {
+    //   state[0][i] = 1 // sets leftmost column to inlets
+    //   prevY[0][i] = params.input.y
+    //   state[ROWS - 1][COLS - 1 - i] = 2 // sets rightmost column to outlets
+    // }
 
     function draw (sArr, pArr, xArr, yArr) {
       ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height)
@@ -185,11 +196,11 @@ window.addEventListener(
         nextX = temp.x
         nextY = temp.y
 
-        draw(state, prevP, tempX, nextY)
+        draw(state, nextP, tempX, nextY)
 
         // invokes next animation frame if convergence is above threshold
-        if (converge(state, nextX, nextY, prevX, prevY) > 0.0000000001) {
-          console.log('x1:', (nextX[9][1] * 1000).toFixed(3), 'x2:', (nextX[9][2] * 1000).toFixed(3))
+        if (converge(state, nextX, nextY, prevX, prevY) > tolerance) {
+          // console.log('x1:', (nextX[9][1] * 1000).toFixed(3), 'x2:', (nextX[9][2] * 1000).toFixed(3))
 
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
@@ -216,7 +227,7 @@ window.addEventListener(
           // }
           //
           // for (let i = 0; i < nextX[0].length; i++) {
-          //   console.log(test[i])
+          //   (test[i])
           // }
 
           // let test = []
@@ -237,9 +248,16 @@ window.addEventListener(
         }
       }
 
+      console.log('xL:' + nextX[9][2] + '\nxL:' + nextX[ROWS - 9][1])
+      console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1])
+
+      console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
+      console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
+
       // requestAnimationFrame(execute)
     }
     // setInterval(execute, 2000)
+    // requestAnimationFrame(execute)
     requestAnimationFrame(execute)
   },
   false
