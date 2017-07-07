@@ -23,6 +23,7 @@ class Editor {
 
     this.GRID_SCALE = 100
     this.GRID_SUBDIVISIONS = 2
+    this.ANGLE_SNAP = Math.PI / 8
 
     this.view = this.scope.view
     this.project = this.scope.project

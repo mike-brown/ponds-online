@@ -56,19 +56,27 @@ class AddTool extends Tool {
   }
 
   onMouseDown (ev) {
-    this.editor.pond.add(ev.point)
+    const lastPoint = this.editor.pond.segments.length
+      ? this.editor.pond.segments[this.editor.pond.segments.length - 1].point
+      : undefined
+
+    const point =
+      this.editor.snap && lastPoint
+        ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
+        : ev.point
+
+    this.editor.pond.add(point)
   }
 
   onMouseMove (ev) {
     const movePond = this.editor.pond.clone({ insert: false })
+    const lastPoint = movePond.segments.length
+      ? movePond.segments[movePond.segments.length - 1].point
+      : undefined
 
     const point =
-      this.editor.pond.segments.length && this.editor.snap
-        ? directionalSnap(
-          movePond.segments[movePond.segments.length - 1].point,
-          ev.point,
-          Math.PI / 6
-        )
+      this.editor.snap && lastPoint
+        ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
 
     movePond.add(point)
