@@ -17,6 +17,14 @@ class InletTool extends Tool {
       this.editor._hitTarget = undefined
 
       this.editor.inlet.strokeColor = Editor.colors.blue
+
+      if (
+        this.editor.outlet &&
+        this.editor.inlet.intersects(this.editor.outlet)
+      ) {
+        this.editor.outlet.remove()
+        this.editor.outlet = undefined
+      }
     }
   }
 

@@ -16,6 +16,14 @@ class OutletTool extends Tool {
       this.editor._hitTarget = undefined
 
       this.editor.outlet.strokeColor = Editor.colors.orange
+
+      if (
+        this.editor.inlet &&
+        this.editor.outlet.intersects(this.editor.inlet)
+      ) {
+        this.editor.inlet.remove()
+        this.editor.inlet = undefined
+      }
     }
   }
 
