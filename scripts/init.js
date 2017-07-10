@@ -42,7 +42,7 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
-    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 10000
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000
 
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
@@ -74,11 +74,10 @@ window.addEventListener(
     // }
 
     for (let j = 1; j < ROWS - 1; j++) {
-      // state[j][0] = 1 // sets leftmost column to inlets
-      // prevX[j][0] = params.input.x
+      state[j][0] = 1 // sets leftmost column to inlets
+      prevX[j][0] = params.input.x
 
-      state[ROWS - 1 - j][COLS - 1] = 1 // sets rightmost column to outlets
-      prevX[j][COLS] = params.input.x
+      state[ROWS - 1 - j][COLS - 1] = 2 // sets rightmost column to outlets
     }
 
     // for (let i = 1; i < COLS - 1; i++) {
@@ -248,13 +247,13 @@ window.addEventListener(
         }
       }
 
-      console.log('xL:' + nextX[9][2] + '\nxL:' + nextX[ROWS - 9][1])
-      console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1])
+      // console.log('xL:' + nextX[9][2] + '\nxL:' + nextX[ROWS - 9][1])
+      // console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1])
+      //
+      // console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
+      // console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
 
-      console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
-      console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
-
-      // requestAnimationFrame(execute)
+      requestAnimationFrame(execute)
     }
     // setInterval(execute, 2000)
     // requestAnimationFrame(execute)

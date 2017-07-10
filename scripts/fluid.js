@@ -220,9 +220,6 @@ function drag (sArr, xArr, yArr) {
       const uSub3 = -(1 / 2) * uSub1 * params.rho * Math.min(10, uSub2) * ((4 * plant.phi) / (plant.diameter * Math.PI))
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
-      // if (j === 9 && i === 27) console.log('a0:', plant.a0, 'a1', plant.a1)
-      // if (j === 9 && i === 27) console.log('uSub1:', uSub1, '\nuSub2:', uSub2, '\nuSub3:', uSub3, '\nuSub4:', uSub4)
-
       iArr[j][i] = uSub4
     }
   }
@@ -238,8 +235,6 @@ function drag (sArr, xArr, yArr) {
       const vSub2 = Math.min(10, 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1))
       const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * ((4 * plant.phi) / (plant.diameter * Math.PI))
       const vSub4 = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
-
-      // if (j === ROWS - 1 && i === 1) console.log('uSub1: ' + vSub1 + '\nuSub2: ' + vSub2 + '\nuSub3: ' + vSub3 + '\nuSub4: ' + vSub4)
 
       jArr[j][i] = vSub4
     }
@@ -268,9 +263,9 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const vx = {
         n: aX[j][i].n * softedge(sArr, xArr, j - 1, i, j, i),
-        s: aX[j][i].s * softedge(sArr, xArr, j + 1, i, j, i),
+        s: aX[j][i].s * softdownedge(sArr, xArr, j + 1, i, j, i),
         w: aX[j][i].w * softedge(sArr, xArr, j, i - 1, j, i),
-        e: aX[j][i].e * softedge(sArr, xArr, j, i + 1, j, i)
+        e: aX[j][i].e * softeastedge(sArr, xArr, j, i + 1, j, i)
       }
 
       const wx = (cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2) ||
@@ -291,8 +286,6 @@ function drag (sArr, xArr, yArr) {
       const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
-
-      if (j === 9 && (i === 1 || i === COLS - 1)) console.log('ax:', aX[j][i], '\nix:', iArr[j][i], '\nvx:', vx)
     }
   }
 
@@ -301,9 +294,9 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < jArr[j].length; i++) {
       const vy = {
         n: aY[j][i].n * softedge(sArr, yArr, j - 1, i, j, i),
-        s: aY[j][i].s * softedge(sArr, yArr, j + 1, i, j, i),
+        s: aY[j][i].s * softdownedge(sArr, yArr, j + 1, i, j, i),
         w: aY[j][i].w * softedge(sArr, yArr, j, i - 1, j, i),
-        e: aY[j][i].e * softedge(sArr, yArr, j, i + 1, j, i)
+        e: aY[j][i].e * softeastedge(sArr, yArr, j, i + 1, j, i)
       }
 
       const wy = (cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2) ||
