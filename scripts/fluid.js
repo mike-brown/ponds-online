@@ -138,8 +138,6 @@ function coefficients (sArr, xArr, yArr) {
       f.e = f.e + outR * f.w
 
       iArr[j][i] = diffuse(f)
-
-      // TODO: if outlet, duplicate adjacent a value
     }
   }
 
@@ -157,8 +155,6 @@ function coefficients (sArr, xArr, yArr) {
 
       f.n = f.n + outU * f.s
       f.s = f.s + outD * f.n
-
-      // TODO: if outlet, duplicate adjacent a value
 
       jArr[j][i] = diffuse(f)
     }
@@ -179,9 +175,9 @@ function viscosity (xArr, yArr) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const uSub1 = cell(xArr, j, i + 1)
-      const uSub2 = 2 * xArr[j][i]
-      const uSub3 = cell(xArr, j, i - 1)
+      const uSub1 = cell(xArr, j, i + 1) // takes cell to the east
+      const uSub2 = 2 * xArr[j][i] // takes center cell
+      const uSub3 = cell(xArr, j, i - 1) // takes cell to the west
 
       iArr[j][i] = (params.mu * (uSub1 - uSub2 + uSub3)) / denom
     }
@@ -190,9 +186,9 @@ function viscosity (xArr, yArr) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const vSub1 = cell(yArr, j + 1, i)
-      const vSub2 = 2 * yArr[j][i]
-      const vSub3 = cell(yArr, j - 1, i)
+      const vSub1 = cell(yArr, j + 1, i) // takes cell to the south
+      const vSub2 = 2 * yArr[j][i] // takes center cell
+      const vSub3 = cell(yArr, j - 1, i) // takes cell to the north
 
       jArr[j][i] = (params.mu * (vSub1 - vSub2 + vSub3)) / denom
     }
@@ -213,7 +209,7 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const plant = slot(plants, cell(sArr, j, i) - 11)
 
-      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i), 2) + Math.pow(cell(yArr, j, i), 2))
+      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i) + cell(xArr, j, i + 1), 2) + Math.pow(cell(yArr, j, i) + cell(yArr, j + 1, i), 2))
 
       const uSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
       const uSub2 = 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1)
@@ -221,6 +217,8 @@ function drag (sArr, xArr, yArr) {
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
       iArr[j][i] = uSub4
+
+      // if ((j === 1 || j === ROWS - 2) && i === 1) console.log('fx:', reynold, '\ncd:', uSub2)
     }
   }
 
@@ -283,9 +281,7 @@ function drag (sArr, xArr, yArr) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i]/* + iForce[j][i]*/) * wx
-
-      if ((j === 1 || j === ROWS - 2) && i === 1) console.log(iVis[j][i])
+      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
@@ -316,7 +312,7 @@ function drag (sArr, xArr, yArr) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i]/* + jForce[j][i]*/) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }

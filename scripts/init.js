@@ -57,7 +57,7 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 10 // sets all inner cells to water cells
+        state[j][i] = 12 // sets all inner cells to water cells
       }
     }
 
@@ -245,17 +245,17 @@ window.addEventListener(
         }
       }
 
-      console.log('xL:' + nextX[1][1] + '\nxL:' + nextX[ROWS - 2][1] + '\naX:', valsX[1][1], valsX[ROWS - 2][1])
-      console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1] + '\naY:', valsY[1][1], valsY[ROWS - 1][1])
+      // console.log('xL:' + nextX[1][1] + '\nxL:' + nextX[ROWS - 2][1] + '\naX:', valsX[1][1], valsX[ROWS - 2][1])
+      // console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1] + '\naY:', valsY[1][1], valsY[ROWS - 1][1])
 
       // console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
       // console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
 
       // requestAnimationFrame(execute)
     }
-    // setInterval(execute, 2000)
-    requestAnimationFrame(execute)
-    requestAnimationFrame(execute)
+    setInterval(execute, 200)
+    // requestAnimationFrame(execute)
+    // requestAnimationFrame(execute)
   },
   false
 )
