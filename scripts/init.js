@@ -1,4 +1,3 @@
-/* global GL:false */
 'use strict'
 
 const {

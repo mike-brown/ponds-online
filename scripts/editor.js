@@ -5,11 +5,12 @@ const {
   Layer,
   Path,
   Color,
-  Point,
   PointText,
   Tool: PaperTool,
   Path: { Line }
 } = require('paper')
+
+const { HandTool } = require('./hand-tool')
 
 class Editor {
   constructor ($canvas) {
@@ -25,6 +26,8 @@ class Editor {
     this.GRID_SUBDIVISIONS = 2
     this.ANGLE_SNAP = Math.PI / 8
 
+    this.viewport = { x: 0, y: 0 }
+
     this.view = this.scope.view
     this.project = this.scope.project
 
@@ -34,7 +37,8 @@ class Editor {
 
     this.tools = {}
     this.activeTool = undefined
-    this.nullTool = new PaperTool()
+    this.registerTool('hand', new HandTool(this))
+    this.activateTool('hand')
 
     this.reset()
   }
@@ -66,7 +70,7 @@ class Editor {
       this.tools[this.activeTool].deactivate()
       this.activeTool = undefined
 
-      this.nullTool.activate()
+      this.activateTool('hand')
     }
   }
 
@@ -168,11 +172,11 @@ class Editor {
     const grid = new Layer()
 
     // vertical gridlines
-    for (let i = 1; i < 100; i++) {
+    for (let i = -100; i < 100; i++) {
       grid.addChild(
         new Line({
-          from: [i * this.GRID_SCALE, 0],
-          to: [i * this.GRID_SCALE, 10000],
+          from: [i * this.GRID_SCALE + this.viewport.x, 0],
+          to: [i * this.GRID_SCALE + this.viewport.x, 10000],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.5)
         })
@@ -180,11 +184,11 @@ class Editor {
     }
 
     // horizontal gridlines
-    for (let i = 1; i < 100; i++) {
+    for (let i = -100; i < 100; i++) {
       grid.addChild(
         new Line({
-          from: [0, i * this.GRID_SCALE],
-          to: [10000, i * this.GRID_SCALE],
+          from: [0, i * this.GRID_SCALE + this.viewport.y],
+          to: [10000, i * this.GRID_SCALE + this.viewport.y],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.5)
         })
@@ -192,11 +196,21 @@ class Editor {
     }
 
     // vertical subdivisions
-    for (let i = 1; i < 100 * this.GRID_SUBDIVISIONS; i++) {
+    for (
+      let i = -100 * this.GRID_SUBDIVISIONS;
+      i < 100 * this.GRID_SUBDIVISIONS;
+      i++
+    ) {
       grid.addChild(
         new Line({
-          from: [i * this.GRID_SCALE / this.GRID_SUBDIVISIONS, 0],
-          to: [i * this.GRID_SCALE / this.GRID_SUBDIVISIONS, 10000],
+          from: [
+            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.x,
+            0
+          ],
+          to: [
+            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.x,
+            10000
+          ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.25)
         })
@@ -204,16 +218,29 @@ class Editor {
     }
 
     // horizontal subdivisions
-    for (let i = 1; i < 100; i++) {
+    for (
+      let i = -100 * this.GRID_SUBDIVISIONS;
+      i < 100 * this.GRID_SUBDIVISIONS;
+      i++
+    ) {
       grid.addChild(
         new Line({
-          from: [0, i * this.GRID_SCALE / this.GRID_SUBDIVISIONS],
-          to: [10000, i * this.GRID_SCALE / this.GRID_SUBDIVISIONS],
+          from: [
+            0,
+            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.y
+          ],
+          to: [
+            10000,
+            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.y
+          ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.25)
         })
       )
     }
+
+    grid.position.x = -this.GRID_SCALE * 50
+    grid.position.y = -this.GRID_SCALE * 50
 
     return grid
   }

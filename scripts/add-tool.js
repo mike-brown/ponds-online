@@ -1,4 +1,4 @@
-;'use strict'
+'use strict'
 
 const { Point } = require('paper')
 const { Tool } = require('./tool')

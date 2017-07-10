@@ -10,6 +10,7 @@ class Tool {
     this.tool = new PaperTool()
     this.tool.onMouseDown = this.onMouseDown.bind(this)
     this.tool.onMouseMove = this.onMouseMove.bind(this)
+    this.tool.onMouseDrag = this.onMouseDrag.bind(this)
     this.tool.onKeyDown = this.onKeyDown.bind(this)
     this.tool.onKeyUp = this.onKeyUp.bind(this)
   }
@@ -17,17 +18,23 @@ class Tool {
   activate () {
     this.tool.activate()
 
-    this.button.classList.add('active')
-    this.button.blur()
+    if (this.button) {
+      this.button.classList.add('active')
+      this.button.blur()
+    }
   }
 
   deactivate () {
-    this.button.classList.remove('active')
+    if (this.button) {
+      this.button.classList.remove('active')
+    }
   }
 
   onMouseDown (ev) {}
 
   onMouseMove (ev) {}
+
+  onMouseDrag (ev) {}
 
   onKeyDown (ev) {}
 
