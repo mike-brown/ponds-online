@@ -11,7 +11,7 @@ const params = {
   mu: 0.001002, // dynamic viscosity
   nu: 0.000001004, // kinematic viscosity
   input: {
-    x: 0.0005,
+    x: 0.005,
     y: 0
   },
   plant: [

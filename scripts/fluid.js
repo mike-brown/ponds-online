@@ -217,8 +217,6 @@ function drag (sArr, xArr, yArr) {
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
       iArr[j][i] = uSub4
-
-      // if ((j === 1 || j === ROWS - 2) && i === 1) console.log('fx:', reynold, '\ncd:', uSub2)
     }
   }
 
@@ -366,7 +364,7 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA) {
   return kArr
 }
 
-function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
+function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
   const iArr = zeros(ROWS, COLS + 1)
   const jArr = zeros(ROWS + 1, COLS)
   const kArr = zeros(ROWS, COLS)
@@ -374,7 +372,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      kArr[j][i] = pArr[j][i] + qArr[j][i] / 35
+      kArr[j][i] = pArr[j][i] + qArr[j][i] * 0.05 // hardcoded under-relaxation factor
     }
   }
 
@@ -396,7 +394,9 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
 
       const outX = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
 
-      iArr[j][i] = wx * outX * !(inL || inR) + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
+      const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i]
+
+      iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
   }
 
@@ -419,7 +419,9 @@ function correct (sArr, pArr, qArr, xArr, yArr, xA, yA) {
 
       const outY = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
 
-      jArr[j][i] = wy * outY * !(inU || inD) + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
+      const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i]
+
+      jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }
   }
 

@@ -42,7 +42,7 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
-    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000000
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 100000
 
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
@@ -57,15 +57,16 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 12 // sets all inner cells to water cells
+        state[j][i] = 10 // sets all inner cells to water cells
       }
     }
 
-    // for (let j = 5; j < state.length - 5; j++) {
-    //   for (let i = 25; i < state[j].length - 25; i++) {
-    //     state[j][i] = 11
-    //   }
-    // }
+    for (let j = 10; j < state.length; j++) {
+      state[j - 10][39] = 0
+      for (let i = 5; i < state[j].length - 5; i++) {
+        state[j][i] = 11
+      }
+    }
 
     // for (let j = 0; j < prevX.length - 0; j++) {
     //   for (let i = 0; i < prevX[j].length - 0; i++) {
@@ -77,7 +78,7 @@ window.addEventListener(
       state[j][0] = 1 // sets leftmost column to inlets
       prevX[j][0] = params.input.x
 
-      state[ROWS - 1 - j][COLS - 1] = 2 // sets rightmost column to outlets
+      state[j][COLS - 1] = 2 // sets rightmost column to outlets
     }
 
     // for (let i = 1; i < COLS - 1; i++) {
@@ -189,7 +190,7 @@ window.addEventListener(
 
         primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY)
 
-        temp = correct(state, prevP, primeP, tempX, tempY, valsX, valsY)
+        temp = correct(state, prevP, primeP, tempX, tempY, prevX, prevY, valsX, valsY)
 
         nextP = temp.p
         nextX = temp.x
@@ -251,11 +252,11 @@ window.addEventListener(
       // console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
       // console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
 
-      // requestAnimationFrame(execute)
+      requestAnimationFrame(execute)
     }
-    setInterval(execute, 200)
+    // setInterval(execute, 400)
     // requestAnimationFrame(execute)
-    // requestAnimationFrame(execute)
+    requestAnimationFrame(execute)
   },
   false
 )
