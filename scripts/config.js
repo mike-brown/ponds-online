@@ -2,7 +2,7 @@
 
 const CELL_SIZE = 10
 const COLS = 80
-const ROWS = 18
+const ROWS = 20
 
 const params = {
   gamma: 0.2, // interface diffusion

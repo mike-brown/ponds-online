@@ -179,9 +179,9 @@ function viscosity (xArr, yArr) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const uSub1 = cell(iArr, j, i + 1)
+      const uSub1 = cell(xArr, j, i + 1)
       const uSub2 = 2 * xArr[j][i]
-      const uSub3 = cell(iArr, j, i - 1)
+      const uSub3 = cell(xArr, j, i - 1)
 
       iArr[j][i] = (params.mu * (uSub1 - uSub2 + uSub3)) / denom
     }
@@ -190,9 +190,9 @@ function viscosity (xArr, yArr) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const vSub1 = cell(jArr, j + 1, i)
+      const vSub1 = cell(yArr, j + 1, i)
       const vSub2 = 2 * yArr[j][i]
-      const vSub3 = cell(jArr, j - 1, i)
+      const vSub3 = cell(yArr, j - 1, i)
 
       jArr[j][i] = (params.mu * (vSub1 - vSub2 + vSub3)) / denom
     }
@@ -283,7 +283,9 @@ function drag (sArr, xArr, yArr) {
 
       const uSub1 = vx.n + vx.s + vx.w + vx.e
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
+      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i]/* + iForce[j][i]*/) * wx
+
+      if ((j === 1 || j === ROWS - 2) && i === 1) console.log(iVis[j][i])
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
     }
@@ -314,7 +316,7 @@ function drag (sArr, xArr, yArr) {
 
       const vSub1 = vy.n + vy.s + vy.w + vy.e
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
+      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i]/* + jForce[j][i]*/) * wy
 
       jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
     }

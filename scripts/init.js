@@ -42,7 +42,7 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
-    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000000
 
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
@@ -61,7 +61,7 @@ window.addEventListener(
       }
     }
 
-    // for (let j = 8; j < state.length - 8; j++) {
+    // for (let j = 5; j < state.length - 5; j++) {
     //   for (let i = 25; i < state[j].length - 25; i++) {
     //     state[j][i] = 11
     //   }
@@ -195,12 +195,10 @@ window.addEventListener(
         nextX = temp.x
         nextY = temp.y
 
-        draw(state, nextP, tempX, nextY)
+        draw(state, nextP, nextX, nextY)
 
         // invokes next animation frame if convergence is above threshold
         if (converge(state, nextX, nextY, prevX, prevY) > tolerance) {
-          // console.log('x1:', (nextX[9][1] * 1000).toFixed(3), 'x2:', (nextX[9][2] * 1000).toFixed(3))
-
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
           prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
@@ -247,16 +245,16 @@ window.addEventListener(
         }
       }
 
-      // console.log('xL:' + nextX[9][2] + '\nxL:' + nextX[ROWS - 9][1])
-      // console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1])
-      //
+      console.log('xL:' + nextX[1][1] + '\nxL:' + nextX[ROWS - 2][1] + '\naX:', valsX[1][1], valsX[ROWS - 2][1])
+      console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1] + '\naY:', valsY[1][1], valsY[ROWS - 1][1])
+
       // console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
       // console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
 
-      requestAnimationFrame(execute)
+      // requestAnimationFrame(execute)
     }
     // setInterval(execute, 2000)
-    // requestAnimationFrame(execute)
+    requestAnimationFrame(execute)
     requestAnimationFrame(execute)
   },
   false
