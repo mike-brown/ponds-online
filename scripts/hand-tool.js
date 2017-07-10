@@ -26,6 +26,14 @@ class HandTool extends Tool {
     this.editor.baseLayer.position.x += ev.delta.x
     this.editor.baseLayer.position.y += ev.delta.y
   }
+
+  onKeyDown (ev) {
+    if (ev.key === '=') {
+      this.editor.zoom('in')
+    } else if (ev.key === '-') {
+      this.editor.zoom('out')
+    }
+  }
 }
 
 module.exports = {

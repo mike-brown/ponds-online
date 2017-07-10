@@ -6,7 +6,6 @@ const {
   Path,
   Color,
   PointText,
-  Tool: PaperTool,
   Path: { Line }
 } = require('paper')
 
@@ -27,6 +26,7 @@ class Editor {
     this.ANGLE_SNAP = Math.PI / 8
 
     this.viewport = { x: 0, y: 0 }
+    this.zoomLevel = 1
 
     this.view = this.scope.view
     this.project = this.scope.project
@@ -113,6 +113,23 @@ class Editor {
 
   isReady () {
     return Math.abs(this.pond.area) >= 1 && this.inlet && this.outlet
+  }
+
+  zoom (level) {
+    const IN_SCALE = 1.25
+    const OUT_SCALE = 1 / IN_SCALE
+
+    if (level === 'in') {
+      this.zoomLevel *= IN_SCALE
+      this.gridLayer.scale(IN_SCALE, this.view.center)
+      this.baseLayer.scale(IN_SCALE, this.view.center)
+      this.scaleLayer.scale(IN_SCALE, this.view.bounds.bottomLeft)
+    } else if (level === 'out') {
+      this.zoomLevel = OUT_SCALE
+      this.gridLayer.scale(OUT_SCALE, this.view.center)
+      this.baseLayer.scale(OUT_SCALE, this.view.center)
+      this.scaleLayer.scale(OUT_SCALE, this.view.bounds.bottomLeft)
+    }
   }
 
   createScaleLayer () {
