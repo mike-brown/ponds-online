@@ -2,8 +2,8 @@
 
 window.addEventListener('DOMContentLoaded', function () {
   const CELL_SIZE = 10
-  const COLS = 79
-  const ROWS = 19
+  const COLS = 80
+  const ROWS = 20
 
   // TODO: velocity profile at end of simulation
 
@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', function () {
     size: 0.01, // 10mm face area
     rho: 998.2, // 998.2kg/m^3 density
     mu: 0.00089, //  viscosity
-    G: (0.0005 * ((ROWS - 1) / 100)) * 12 * 0.00089 / Math.pow((ROWS - 1) / 100, 3)
+    G: (0.005 * ((ROWS - 1) / 100)) * 12 * 0.00089 / Math.pow((ROWS - 1) / 100, 3)
   }
 
   const constants = {
@@ -159,7 +159,7 @@ window.addEventListener('DOMContentLoaded', function () {
       for (let j = 1; j < ROWS - 1; j++) {
         state[j][0] = -2
         state[ROWS - 1 - j][COLS - 1] = 2
-        prevX[j][0] = 0.0005
+        prevX[j][0] = 0.005
       }
 
       const h = (ROWS - 1) / 100

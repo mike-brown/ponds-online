@@ -34,18 +34,42 @@ function cell (arr, j, i) {
 }
 
 function edge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
   const wdz = (cell(sArr, dj, di) !== 0) // returns zero if wall
-  return softedge(sArr, arr, j, i, dj, di) * wdz
+
+  const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
+  const mj = Math.max(Math.min(j, arr.length - 1), 0)
+  const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
+  const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
+
+  // returns cell on closest edge of array, based on supplied j and i values
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
 function eastedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
   const wdz = (cell(sArr, dj, di - 1) !== 0) // returns zero if wall
-  return softeastedge(sArr, arr, j, i, dj, di) * wdz
+
+  const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
+  const mj = Math.max(Math.min(j, arr.length - 1), 0)
+  const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
+  const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
+
+  // returns cell on closest edge of array, based on supplied j and i values
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
 function downedge (sArr, arr, j, i, dj, di) {
+  const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
   const wdz = (cell(sArr, dj - 1, di) !== 0) // returns zero if wall
-  return softdownedge(sArr, arr, j, i, dj, di) * wdz
+
+  const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
+  const mj = Math.max(Math.min(j, arr.length - 1), 0)
+  const mdi = Math.max(Math.min(di, arr[0].length - 1), 0)
+  const mdj = Math.max(Math.min(dj, arr.length - 1), 0)
+
+  // returns cell on closest edge of array, based on supplied j and i values
+  return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
 function softedge (sArr, arr, j, i, dj, di) {
@@ -62,7 +86,6 @@ function softedge (sArr, arr, j, i, dj, di) {
 
 function softeastedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
-  const wdz = (cell(sArr, dj, di - 1) !== 0) // returns zero if wall
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -131,12 +154,6 @@ function coefficients (sArr, xArr, yArr) {
         e: values.density * (eastedge(sArr, xArr, j, i, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j, i))
       }
 
-      const outL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2
-      const outR = cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0
-
-      f.w = f.w + outL * f.e
-      f.e = f.e + outR * f.w
-
       iArr[j][i] = diffuse(f)
     }
   }
@@ -149,12 +166,6 @@ function coefficients (sArr, xArr, yArr) {
         w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
         e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
-
-      const outU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2
-      const outD = cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0
-
-      f.n = f.n + outU * f.s
-      f.s = f.s + outD * f.n
 
       jArr[j][i] = diffuse(f)
     }
@@ -328,13 +339,13 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA) {
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
       let vx = {
-        w: cell(xArr, j, i),
-        e: cell(xArr, j, i + 1)
+        w: xArr[j][i],
+        e: xArr[j][i + 1]
       }
 
       let vy = {
-        n: cell(yArr, j, i),
-        s: cell(yArr, j + 1, i)
+        n: yArr[j][i],
+        s: yArr[j + 1][i]
       }
 
       const p = {
@@ -392,7 +403,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
       const inR = cell(sArr, j, i - 1) === 1 && cell(sArr, j, i) === 0
 
-      const outX = cell(xArr, j, i) + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
+      const outX = xArr[j][i] + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
 
       const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i]
 
@@ -417,7 +428,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
       const inD = cell(sArr, j - 1, i) === 1 && cell(sArr, j, i) === 0
 
-      const outY = cell(yArr, j, i) + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
+      const outY = yArr[j][i] + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
 
       const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i]
 

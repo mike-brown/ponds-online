@@ -42,7 +42,7 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
-    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 100000
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000
 
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
@@ -61,12 +61,12 @@ window.addEventListener(
       }
     }
 
-    for (let j = 10; j < state.length; j++) {
-      state[j - 10][39] = 0
-      for (let i = 5; i < state[j].length - 5; i++) {
-        state[j][i] = 11
-      }
-    }
+    // for (let j = 10; j < state.length; j++) {
+    //   state[j - 10][39] = 0
+    //   for (let i = 5; i < state[j].length - 5; i++) {
+    //     state[j][i] = 11
+    //   }
+    // }
 
     // for (let j = 0; j < prevX.length - 0; j++) {
     //   for (let i = 0; i < prevX[j].length - 0; i++) {
@@ -75,10 +75,15 @@ window.addEventListener(
     // }
 
     for (let j = 1; j < ROWS - 1; j++) {
-      state[j][0] = 1 // sets leftmost column to inlets
-      prevX[j][0] = params.input.x
+      state[j][j] = 1 // sets leftmost column to inlets
+      state[j][j - 1] = 0 // sets leftmost column to inlets
+      prevX[j][j] = params.input.x
 
-      state[j][COLS - 1] = 2 // sets rightmost column to outlets
+      // state[j][COLS - 2] = 2 // sets rightmost column to outlets
+      // state[j][COLS - 1] = 0 // sets rightmost column to outlets
+
+      state[1][COLS - 1 - j] = 2 // sets rightmost column to outlets
+      state[0][COLS - 1 - j] = 0 // sets rightmost column to outlets
     }
 
     // for (let i = 1; i < COLS - 1; i++) {
@@ -209,8 +214,8 @@ window.addEventListener(
             running.checked = false
           }
 
-          // console.log('i:', nextP[9][0])
-          // console.log('o:', nextP[9][COLS - 1])
+          console.log('i:', nextP[9][0])
+          console.log('o:', nextP[9][COLS - 1])
 
           // let test = []
           //
@@ -225,9 +230,9 @@ window.addEventListener(
           // }
           //
           // for (let i = 0; i < nextX[0].length; i++) {
-          //   (test[i])
+          //   console.log(test[i])
           // }
-
+          //
           // let test = []
           //
           // for (let i = 0; i < prevP[0].length; i++) {
