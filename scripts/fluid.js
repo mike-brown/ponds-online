@@ -161,8 +161,8 @@ function coefficients (sArr, xArr, yArr) {
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
       const f = {
-        n: values.density * (edge(sArr, yArr, j - 1, i, j, i) + edge(sArr, yArr, j, i, j, i)),
-        s: values.density * (downedge(sArr, yArr, j, i, j, i) + downedge(sArr, yArr, j + 1, i, j, i)),
+        n: values.density * (edge(sArr, yArr, j - 1, i, j, i) + edge(sArr, yArr, j, i, j - 1, i)),
+        s: values.density * (downedge(sArr, yArr, j, i, j + 1, i) + downedge(sArr, yArr, j + 1, i, j, i)),
         w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
         e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
@@ -270,7 +270,7 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const vx = {
         n: aX[j][i].n * softedge(sArr, xArr, j - 1, i, j, i),
-        s: aX[j][i].s * softdownedge(sArr, xArr, j + 1, i, j, i),
+        s: aX[j][i].s * softedge(sArr, xArr, j + 1, i, j, i),
         w: aX[j][i].w * softedge(sArr, xArr, j, i - 1, j, i),
         e: aX[j][i].e * softeastedge(sArr, xArr, j, i + 1, j, i)
       }
@@ -279,10 +279,10 @@ function drag (sArr, xArr, yArr) {
                  (cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0) ||
                  (cell(sArr, j, i) !== 0 &&
                   cell(sArr, j, i - 1) !== 0 &&
-                  cell(sArr, j - 1, i) !== 0 &&
-                  cell(sArr, j + 1, i) !== 0 &&
-                  cell(sArr, j - 1, i - 1) !== 0 &&
-                  cell(sArr, j + 1, i - 1) !== 0)
+                  (cell(sArr, j + 1, i) !== 0 ||
+                  cell(sArr, j + 1, i - 1) !== 0) &&
+                  (cell(sArr, j - 1, i) !== 0 ||
+                  cell(sArr, j - 1, i - 1) !== 0))
 
       // returns true if inlet cell adjacent to wall in x-axis
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
@@ -303,17 +303,17 @@ function drag (sArr, xArr, yArr) {
         n: aY[j][i].n * softedge(sArr, yArr, j - 1, i, j, i),
         s: aY[j][i].s * softdownedge(sArr, yArr, j + 1, i, j, i),
         w: aY[j][i].w * softedge(sArr, yArr, j, i - 1, j, i),
-        e: aY[j][i].e * softeastedge(sArr, yArr, j, i + 1, j, i)
+        e: aY[j][i].e * softedge(sArr, yArr, j, i + 1, j, i)
       }
 
       const wy = (cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2) ||
                  (cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0) ||
                  (cell(sArr, j, i) !== 0 &&
                   cell(sArr, j - 1, i) !== 0 &&
-                  cell(sArr, j, i - 1) !== 0 &&
-                  cell(sArr, j, i + 1) !== 0 &&
-                  cell(sArr, j - 1, i - 1) !== 0 &&
-                  cell(sArr, j - 1, i + 1) !== 0)
+                 (cell(sArr, j, i - 1) !== 0 ||
+                  cell(sArr, j - 1, i - 1) !== 0) &&
+                 (cell(sArr, j, i + 1) !== 0 ||
+                  cell(sArr, j - 1, i + 1) !== 0))
 
       // returns true if inlet cell adjacent to wall in y-axis
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
@@ -393,11 +393,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
       const wx = (cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2) ||
                  (cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0) ||
                  (cell(sArr, j, i) !== 0 &&
-                  cell(sArr, j - 1, i) !== 0 &&
-                  cell(sArr, j + 1, i) !== 0 &&
                   cell(sArr, j, i - 1) !== 0 &&
-                  cell(sArr, j - 1, i - 1) !== 0 &&
-                  cell(sArr, j + 1, i - 1) !== 0)
+                 (cell(sArr, j + 1, i) !== 0 ||
+                  cell(sArr, j + 1, i - 1) !== 0) &&
+                 (cell(sArr, j - 1, i) !== 0 ||
+                  cell(sArr, j - 1, i - 1) !== 0))
 
       // returns true if inlet cell adjacent to wall in x-axis
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
@@ -414,17 +414,16 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
   // performs velocity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      // returns true if inlet cell adjacent to wall in y-axis
-
       const wy = (cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2) ||
                  (cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0) ||
                  (cell(sArr, j, i) !== 0 &&
                   cell(sArr, j - 1, i) !== 0 &&
-                  cell(sArr, j, i - 1) !== 0 &&
-                  cell(sArr, j, i + 1) !== 0 &&
-                  cell(sArr, j - 1, i - 1) !== 0 &&
-                  cell(sArr, j - 1, i + 1) !== 0)
+                 (cell(sArr, j, i - 1) !== 0 ||
+                  cell(sArr, j - 1, i - 1) !== 0) &&
+                 (cell(sArr, j, i + 1) !== 0 ||
+                  cell(sArr, j - 1, i + 1) !== 0))
 
+      // returns true if inlet cell adjacent to wall in y-axis
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
       const inD = cell(sArr, j - 1, i) === 1 && cell(sArr, j, i) === 0
 

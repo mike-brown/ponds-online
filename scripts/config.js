@@ -12,7 +12,7 @@ const params = {
   nu: 0.000001004, // kinematic viscosity
   input: {
     x: 0.005,
-    y: -0.005
+    y: 0.0
   },
   plant: [
     { density: 161, diameter: 0.010, area: 1.6, phi: 0.013 },

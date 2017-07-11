@@ -61,12 +61,12 @@ window.addEventListener(
       }
     }
 
-    // for (let j = 10; j < state.length; j++) {
-    //   state[j - 10][39] = 0
-    //   for (let i = 5; i < state[j].length - 5; i++) {
-    //     state[j][i] = 11
-    //   }
-    // }
+    for (let j = 10; j < state.length; j++) {
+      state[j - 10][39 + j] = 0
+      for (let i = 5; i < state[j].length - 5; i++) {
+        state[j][i] = 11
+      }
+    }
 
     // for (let j = 0; j < prevX.length - 0; j++) {
     //   for (let i = 0; i < prevX[j].length - 0; i++) {
@@ -75,21 +75,27 @@ window.addEventListener(
     // }
 
     for (let j = 1; j < ROWS - 1; j++) {
-      state[j][j] = 1 // sets leftmost column to inlets
-      state[j][j - 1] = 0 // sets leftmost column to inlets
-      prevX[j][j] = params.input.x
+      state[j][0] = 1 // sets leftmost column to inlets
+      prevX[j][0] = params.input.x
+      prevY[j][0] = params.input.y
 
-      // state[j][COLS - 2] = 2 // sets rightmost column to outlets
-      // state[j][COLS - 1] = 0 // sets rightmost column to outlets
-
-      state[1][COLS - 1 - j] = 2 // sets rightmost column to outlets
-      state[0][COLS - 1 - j] = 0 // sets rightmost column to outlets
+      state[j][COLS - 2] = 2 // sets rightmost column to outlets
+      state[j][COLS - 1] = 0 // sets rightmost column to outlets
     }
+
+    state[1][COLS - 2] = 10 // sets rightmost column to outlets
+    state[1][COLS - 1] = 10 // sets rightmost column to outlets
+
+    state[ROWS - 2][COLS - 2] = 10 // sets rightmost column to outlets
+    state[ROWS - 2][COLS - 1] = 10 // sets rightmost column to outlets
 
     // for (let i = 1; i < COLS - 1; i++) {
     //   state[0][i] = 1 // sets leftmost column to inlets
+    //   prevX[0][i] = params.input.x
     //   prevY[0][i] = params.input.y
-    //   state[ROWS - 1][COLS - 1 - i] = 2 // sets rightmost column to outlets
+    //
+    //   state[ROWS - 2][i] = 2 // sets lowest row to outlets
+    //   state[ROWS - 1][i] = 0 // sets lowest row to outlets
     // }
 
     function draw (sArr, pArr, xArr, yArr) {
