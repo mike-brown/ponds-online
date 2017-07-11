@@ -21,6 +21,10 @@ function zeros (ROWS, COLS) {
   return grid
 }
 
+function pyth (a, b) {
+  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
+}
+
 function cell (arr, j, i) {
   const bx = i >= 0 && i < arr[0].length
   const by = j >= 0 && j < arr.length
@@ -148,10 +152,14 @@ function coefficients (sArr, xArr, yArr) {
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
       const f = {
-        n: values.density * (edge(sArr, yArr, j, i - 1, j, i) + edge(sArr, yArr, j, i, j, i - 1)),
-        s: values.density * (downedge(sArr, yArr, j + 1, i - 1, j + 1, i) + downedge(sArr, yArr, j + 1, i, j + 1, i - 1)),
-        w: values.density * (edge(sArr, xArr, j, i - 1, j, i) + edge(sArr, xArr, j, i, j, i - 1)),
-        e: values.density * (eastedge(sArr, xArr, j, i, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j, i))
+        n: values.density * (edge(sArr, yArr, j, i - 1, j, i) +
+                             edge(sArr, yArr, j, i, j, i - 1)),
+        s: values.density * (downedge(sArr, yArr, j + 1, i - 1, j + 1, i) +
+                             downedge(sArr, yArr, j + 1, i, j + 1, i - 1)),
+        w: values.density * (edge(sArr, xArr, j, i - 1, j, i) +
+                             edge(sArr, xArr, j, i, j, i - 1)),
+        e: values.density * (eastedge(sArr, xArr, j, i, j, i + 1) +
+                             eastedge(sArr, xArr, j, i + 1, j, i))
       }
 
       iArr[j][i] = diffuse(f)
@@ -161,10 +169,14 @@ function coefficients (sArr, xArr, yArr) {
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
       const f = {
-        n: values.density * (edge(sArr, yArr, j - 1, i, j, i) + edge(sArr, yArr, j, i, j - 1, i)),
-        s: values.density * (downedge(sArr, yArr, j, i, j + 1, i) + downedge(sArr, yArr, j + 1, i, j, i)),
-        w: values.density * (edge(sArr, xArr, j - 1, i, j, i) + edge(sArr, xArr, j, i, j - 1, i)),
-        e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) + eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
+        n: values.density * (edge(sArr, yArr, j - 1, i, j, i) +
+                             edge(sArr, yArr, j, i, j - 1, i)),
+        s: values.density * (downedge(sArr, yArr, j, i, j + 1, i) +
+                             downedge(sArr, yArr, j + 1, i, j, i)),
+        w: values.density * (edge(sArr, xArr, j - 1, i, j, i) +
+                             edge(sArr, xArr, j, i, j - 1, i)),
+        e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) +
+                             eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
       }
 
       jArr[j][i] = diffuse(f)
@@ -218,13 +230,16 @@ function drag (sArr, xArr, yArr) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const plant = slot(plants, cell(sArr, j, i) - 11)
+      const p = slot(plants, cell(sArr, j, i) - 11)
 
-      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i) + cell(xArr, j, i + 1), 2) + Math.pow(cell(yArr, j, i) + cell(yArr, j + 1, i), 2))
+      const reynold = pyth(
+        cell(xArr, j, i) + cell(xArr, j, i + 1),
+        cell(yArr, j, i) + cell(yArr, j + 1, i)
+      )
 
-      const uSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
-      const uSub2 = 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1)
-      const uSub3 = -(1 / 2) * uSub1 * params.rho * Math.min(10, uSub2) * ((4 * plant.phi) / (plant.diameter * Math.PI))
+      const uSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
+      const uSub2 = 2 * ((p.a0 * params.nu) / ((reynold + (reynold === 0)) * p.diameter) + p.a1)
+      const uSub3 = -(1 / 2) * uSub1 * params.rho * Math.min(10, uSub2) * ((4 * p.phi) / (p.diameter * Math.PI))
       const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
 
       iArr[j][i] = uSub4
@@ -234,13 +249,16 @@ function drag (sArr, xArr, yArr) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const plant = slot(plants, cell(sArr, j, i) - 11)
+      const p = slot(plants, cell(sArr, j, i) - 11)
 
-      const reynold = Math.sqrt(Math.pow(cell(xArr, j, i), 2) + Math.pow(cell(yArr, j, i), 2))
+      const reynold = pyth(
+        cell(xArr, j, i) + cell(xArr, j, i + 1),
+        cell(yArr, j, i) + cell(yArr, j + 1, i)
+      )
 
-      const vSub1 = 1 / (1 - plant.phi) // hardcoded to set 11 as first plant state index
-      const vSub2 = Math.min(10, 2 * ((plant.a0 * params.nu) / ((reynold + (reynold === 0)) * plant.diameter) + plant.a1))
-      const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * ((4 * plant.phi) / (plant.diameter * Math.PI))
+      const vSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
+      const vSub2 = Math.min(10, 2 * ((p.a0 * params.nu) / ((reynold + (reynold === 0)) * p.diameter) + p.a1))
+      const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * ((4 * p.phi) / (p.diameter * Math.PI))
       const vSub4 = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
 
       jArr[j][i] = vSub4

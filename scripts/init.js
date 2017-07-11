@@ -42,7 +42,7 @@ window.addEventListener(
     ctxy.canvas.width = COLS * CELL_SIZE + 1
     ctxy.canvas.height = (ROWS + 1) * CELL_SIZE + 1
 
-    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 1000000
+    const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 10000
 
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
@@ -64,7 +64,7 @@ window.addEventListener(
     for (let j = 10; j < state.length; j++) {
       state[j - 10][39 + j] = 0
       for (let i = 5; i < state[j].length - 5; i++) {
-        state[j][i] = 11
+        state[j][i] = 12
       }
     }
 
