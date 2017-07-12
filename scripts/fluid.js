@@ -1,7 +1,6 @@
 'use strict'
 
 const {
-  // CELL_SIZE,
   COLS,
   ROWS,
   params,
@@ -265,12 +264,12 @@ function drag (sArr, xArr, yArr) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
 
-  let {
+  const {
     x: iVis,
     y: jVis
   } = viscosity(xArr, yArr)
 
-  let {
+  const {
     x: iForce,
     y: jForce
   } = drag(sArr, xArr, yArr)
