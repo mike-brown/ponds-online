@@ -1,8 +1,8 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 80
-const ROWS = 20
+const COLS = 81
+const ROWS = 81
 
 const params = {
   gamma: 0.2, // interface diffusion
@@ -11,7 +11,7 @@ const params = {
   mu: 0.001002, // dynamic viscosity
   nu: 0.000001004, // kinematic viscosity
   input: {
-    x: 0.005,
+    x: 0.0005,
     y: 0.0
   },
   plant: [

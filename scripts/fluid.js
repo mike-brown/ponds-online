@@ -232,17 +232,21 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < iArr[j].length; i++) {
       const p = slot(plants, cell(sArr, j, i) - 11)
 
+      const c = {
+        a: (p.a0 * params.nu),
+        b: (4 * p.phi) / (p.diameter * Math.PI)
+      }
+
       const reynold = pyth(
         cell(xArr, j, i) + cell(xArr, j, i + 1),
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
       const uSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
-      const uSub2 = 2 * ((p.a0 * params.nu) / ((reynold + (reynold === 0)) * p.diameter) + p.a1)
-      const uSub3 = -(1 / 2) * uSub1 * params.rho * Math.min(10, uSub2) * ((4 * p.phi) / (p.diameter * Math.PI))
-      const uSub4 = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
+      const uSub2 = c.a / ((reynold + (reynold === 0)) * p.diameter) + p.a1
+      const uSub3 = -(uSub1 * params.rho * Math.min(10, 2 * uSub2) * c.b) / 2
 
-      iArr[j][i] = uSub4
+      iArr[j][i] = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
     }
   }
 
@@ -251,17 +255,21 @@ function drag (sArr, xArr, yArr) {
     for (let i = 0; i < jArr[j].length; i++) {
       const p = slot(plants, cell(sArr, j, i) - 11)
 
+      const c = {
+        a: (p.a0 * params.nu),
+        b: (4 * p.phi) / (p.diameter * Math.PI)
+      }
+
       const reynold = pyth(
         cell(xArr, j, i) + cell(xArr, j, i + 1),
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
       const vSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
-      const vSub2 = Math.min(10, 2 * ((p.a0 * params.nu) / ((reynold + (reynold === 0)) * p.diameter) + p.a1))
-      const vSub3 = -(1 / 2) * vSub1 * params.rho * vSub2 * ((4 * p.phi) / (p.diameter * Math.PI))
-      const vSub4 = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
+      const vSub2 = c.a / ((reynold + (reynold === 0)) * p.diameter) + p.a1
+      const vSub3 = -(vSub1 * params.rho * Math.min(10, 2 * vSub2) * c.b) / 2
 
-      jArr[j][i] = vSub4
+      jArr[j][i] = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
     }
   }
 
@@ -401,7 +409,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      kArr[j][i] = pArr[j][i] + qArr[j][i] * 0.05 // hardcoded under-relaxation factor
+      kArr[j][i] = pArr[j][i] + qArr[j][i] * 0.01 // hardcoded under-relaxation factor
     }
   }
 
@@ -484,13 +492,8 @@ function converge (sArr, xArr, yArr, iArr, jArr) {
 
 module.exports = {
   zeros,
-  cell,
-  edge,
-  slot,
-  diffuse,
+  pyth,
   coefficients,
-  viscosity,
-  drag,
   couple,
   jacobi,
   correct,

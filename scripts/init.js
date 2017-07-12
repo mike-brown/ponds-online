@@ -2,13 +2,8 @@
 
 const {
   zeros,
-  cell,
-  // edge,
-  // slot,
-  // diffuse,
+  pyth,
   coefficients,
-  // viscosity,
-  // drag,
   couple,
   jacobi,
   correct,
@@ -44,6 +39,8 @@ window.addEventListener(
 
     const tolerance = Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) / 10000
 
+    let count = 0
+
     // defines states of current cells: 0 = wall, 1 = inlet, 2 = outlet, 10+ = vegetation types
     let state = zeros(ROWS, COLS)
 
@@ -57,14 +54,12 @@ window.addEventListener(
 
     for (let j = 0; j < state.length - 0; j++) {
       for (let i = 0; i < state[j].length - 0; i++) {
-        state[j][i] = 10 // sets all inner cells to water cells
-      }
-    }
+        const my = (state.length - 1) / 2
+        const mx = (state[0].length - 1) / 2
 
-    for (let j = 10; j < state.length; j++) {
-      state[j - 10][39 + j] = 0
-      for (let i = 5; i < state[j].length - 5; i++) {
-        state[j][i] = 12
+        if (pyth(my - j, mx - i) > 15 && pyth(my - j, mx - i) < my) {
+          state[j][i] = 10
+        } // sets all inner cells to water cells
       }
     }
 
@@ -74,25 +69,15 @@ window.addEventListener(
     //   }
     // }
 
-    for (let j = 1; j < ROWS - 1; j++) {
-      state[j][0] = 1 // sets leftmost column to inlets
-      prevX[j][0] = params.input.x
-      prevY[j][0] = params.input.y
+    for (let j = 32; j < ROWS - 32; j++) {
+      state[j][1] = 1 // sets leftmost column to inlets
 
-      state[j][COLS - 2] = 2 // sets rightmost column to outlets
-      state[j][COLS - 1] = 0 // sets rightmost column to outlets
+      state[ROWS - 2][j] = 2 // sets rightmost column to outlets
+      state[ROWS - 1][j] = 0 // sets rightmost column to wall
     }
-
-    state[1][COLS - 2] = 10 // sets rightmost column to outlets
-    state[1][COLS - 1] = 10 // sets rightmost column to outlets
-
-    state[ROWS - 2][COLS - 2] = 10 // sets rightmost column to outlets
-    state[ROWS - 2][COLS - 1] = 10 // sets rightmost column to outlets
 
     // for (let i = 1; i < COLS - 1; i++) {
     //   state[0][i] = 1 // sets leftmost column to inlets
-    //   prevX[0][i] = params.input.x
-    //   prevY[0][i] = params.input.y
     //
     //   state[ROWS - 2][i] = 2 // sets lowest row to outlets
     //   state[ROWS - 1][i] = 0 // sets lowest row to outlets
@@ -129,7 +114,7 @@ window.addEventListener(
           const val = 240 - pArr[y][x] / maxp * 240
 
           ctxp.fillStyle = `hsl(${val}, 100%, ${25 *
-            (cell(sArr, y, x) !== 0) + 25}%)`
+            (sArr[y][x] !== 0) + 25}%)`
           ctxp.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         }
       }
@@ -207,17 +192,22 @@ window.addEventListener(
         nextX = temp.x
         nextY = temp.y
 
-        draw(state, nextP, nextX, nextY)
+        if (count === 0) {
+          draw(state, nextP, nextX, nextY)
+          count = 100
+        }
 
         // invokes next animation frame if convergence is above threshold
         if (converge(state, nextX, nextY, prevX, prevY) > tolerance) {
+          count--
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
           prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
         } else {
+          running.checked = false
+
           for (let j = 0; j < nextX.length; j++) {
             console.log(nextX[j][COLS - 1])
-            running.checked = false
           }
 
           console.log('i:', nextP[9][0])
@@ -254,6 +244,8 @@ window.addEventListener(
           // for (let i = 0; i < prevP[0].length; i++) {
           //   console.log(test[i])
           // }
+
+          draw(state, nextP, nextX, nextY)
         }
       }
 
