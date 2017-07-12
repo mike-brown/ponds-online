@@ -23,6 +23,13 @@ const directionalSnap = (from, to, nearest) => {
   return new Point(from.x + x, from.y + y)
 }
 
+const snapToGrid = (point, gridSize = 1) => {
+  return new Point({
+    x: roundToNearest(point.x, gridSize),
+    y: roundToNearest(point.y, gridSize)
+  })
+}
+
 class AddTool extends Tool {
   activate () {
     super.activate()
@@ -61,7 +68,9 @@ class AddTool extends Tool {
       : undefined
 
     const point =
-      this.editor.snap && lastPoint
+    this.editor.gridSnap
+      ? snapToGrid(ev.point, this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS)
+      : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
 
@@ -75,7 +84,9 @@ class AddTool extends Tool {
       : undefined
 
     const point =
-      this.editor.snap && lastPoint
+    this.editor.gridSnap
+      ? snapToGrid(ev.point, this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS)
+      : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
 
@@ -92,13 +103,13 @@ class AddTool extends Tool {
     if (ev.key === 'enter') {
       this.editor.deactivateActiveTool()
     } else if (ev.key === 'shift') {
-      this.editor.snap = true
+      this.editor.angleSnap = true
     }
   }
 
   onKeyUp (ev) {
     if (ev.key === 'shift') {
-      this.editor.snap = false
+      this.editor.angleSnap = false
     }
   }
 }

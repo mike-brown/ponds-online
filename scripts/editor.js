@@ -14,7 +14,7 @@ const { HandTool } = require('./hand-tool')
 class Editor {
   constructor ($canvas) {
     this.scope = paper.setup($canvas)
-    this.scope.settings = Object.assign(this.scope.settings, {
+    this.scope.settings = Object.assign({}, this.scope.settings, {
       insertItems: false,
       hitTolerance: 5
     })
@@ -88,7 +88,8 @@ class Editor {
     this.veg = []
     this.inlet = undefined
     this.outlet = undefined
-    this.snap = false
+    this.angleSnap = false
+    this.gridSnap = true
 
     this.deactivateActiveTool()
 
