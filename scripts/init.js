@@ -52,14 +52,9 @@ window.addEventListener(
 
     let tempX, tempY, valsX, valsY, nextP, nextX, nextY
 
-    for (let j = 0; j < state.length - 0; j++) {
-      for (let i = 0; i < state[j].length - 0; i++) {
-        const my = (state.length - 1) / 2
-        const mx = (state[0].length - 1) / 2
-
-        if (pyth(my - j, mx - i) > 15 && pyth(my - j, mx - i) < my) {
-          state[j][i] = 10
-        } // sets all inner cells to water cells
+    for (let j = 0; j < state.length; j++) {
+      for (let i = 0; i < state[j].length; i++) {
+        state[j][i] = 10 + (j > 9) * 2 // sets all inner cells to water cells
       }
     }
 
@@ -69,12 +64,18 @@ window.addEventListener(
     //   }
     // }
 
-    for (let j = 32; j < ROWS - 32; j++) {
-      state[j][1] = 1 // sets leftmost column to inlets
+    for (let j = 1; j < ROWS - 1; j++) {
+      state[j][0] = 1 // sets leftmost column to inlets
 
-      state[ROWS - 2][j] = 2 // sets rightmost column to outlets
-      state[ROWS - 1][j] = 0 // sets rightmost column to wall
+      state[j][COLS - 2] = 2 // sets rightmost column to outlets
+      state[j][COLS - 1] = 0 // sets rightmost column to wall
     }
+
+    state[0][COLS - 2] = 2 // sets rightmost column to outlets
+    state[0][COLS - 1] = 0 // sets rightmost column to wall
+
+    state[ROWS - 1][COLS - 2] = 2 // sets rightmost column to outlets
+    state[ROWS - 1][COLS - 1] = 0 // sets rightmost column to wall
 
     // for (let i = 1; i < COLS - 1; i++) {
     //   state[0][i] = 1 // sets leftmost column to inlets

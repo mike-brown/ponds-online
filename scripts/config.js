@@ -1,8 +1,8 @@
 'use strict'
 
 const CELL_SIZE = 10
-const COLS = 81
-const ROWS = 81
+const COLS = 80
+const ROWS = 20
 
 const params = {
   gamma: 0.2, // interface diffusion
@@ -15,8 +15,8 @@ const params = {
     y: 0.0
   },
   plant: [
-    { density: 161, diameter: 0.010, area: 1.6, phi: 0.013 },
-    { density: 171, diameter: 0.019, area: 3.2, phi: 0.047 }
+    { diameter: 0.010, phi: 0.013 },
+    { diameter: 0.019, phi: 0.047 }
   ]
 }
 
@@ -30,9 +30,7 @@ const plants = []
 // initialises plant constants
 for (let n = 0; n < params.plant.length; n++) {
   plants.push({
-    density: params.plant[n].density,
     diameter: params.plant[n].diameter,
-    area: params.plant[n].area,
     phi: params.plant[n].phi,
     a0: 0,
     a1: 0
