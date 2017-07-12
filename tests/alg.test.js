@@ -2,10 +2,9 @@
 
 const test = require('ava')
 
-const { zeros, cell, edge, slot } = require('../scripts/fluid')
+const { zeros, cell, edge } = require('../scripts/fluid')
 
 const arr3x3 = zeros(3, 3)
-
 const state3x3 = zeros(3, 3)
 
 arr3x3[0][0] = 1
@@ -74,19 +73,4 @@ test('obtain non-boundary cell within array', t => {
   t.is(edge(state, arr, 9, 9, 0, 1), 0, 'zero cell supplies non-zero value')
   t.is(edge(state, arr, 9, 9, 1, 1), 0, 'valid cell not accepted')
   t.is(edge(state, arr, 9, 9, 2, 1), 0, 'wall cell supplies non-zero value')
-})
-
-test('obtain non-boundary slot within array', t => {
-  const arr = [
-    { density: 0.2 },
-    { density: 0.4 },
-    { density: 0.6 }
-  ]
-
-  t.is(slot(arr, 0).density, 0.2, 'incorrect element found')
-  t.is(slot(arr, 1).density, 0.4, 'incorrect element found')
-  t.is(slot(arr, 2).density, 0.6, 'incorrect element found')
-
-  t.is(slot(arr, -1).density, 0, 'incorrect boundary condition')
-  t.is(slot(arr, 10).density, 0, 'incorrect boundary condition')
 })

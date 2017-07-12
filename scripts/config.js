@@ -30,17 +30,17 @@ const plants = []
 
 // initialises plant constants
 for (let n = 0; n < params.plant.length; n++) {
-  plants.push({
-    diameter: params.plant[n].diameter,
-    phi: params.plant[n].phi,
-    state: params.plant[n].state,
-    a0: 0,
-    a1: 0
-  })
+  plants.push([
+    params.plant[n].diameter, // diameter
+    params.plant[n].phi, // phi
+    params.plant[n].state, // state
+    0, // a0
+    0 // a1
+  ])
 
   // plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
-  plants[n].a0 = 7276.43 * plants[n].diameter + 23.55
-  plants[n].a1 = 32.7 * plants[n].diameter + 3.01 * plants[n].phi + 0.42
+  plants[n][3] = 7276.43 * plants[n][0] + 23.55
+  plants[n][4] = 32.7 * plants[n][0] + 3.01 * plants[n][1] + 0.42
 }
 
 module.exports = {

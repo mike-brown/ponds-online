@@ -2,7 +2,8 @@
 
 const {
   zeros,
-  coefficients,
+  xCoefficients,
+  yCoefficients,
   couple,
   jacobi,
   correct,
@@ -13,7 +14,8 @@ const {
   CELL_SIZE,
   COLS,
   ROWS,
-  params
+  params,
+  values
 } = require('./config') // imports simulation properties from config.js file
 
 window.addEventListener(
@@ -37,7 +39,7 @@ window.addEventListener(
     const tolerance = Math.sqrt(
       Math.pow(params.input.x, 2) +
       Math.pow(params.input.y, 2)
-    ) / 10000 // defines convergence threshold for simulation
+    ) / 100000 // defines convergence threshold for simulation
 
     let count = 0
 
@@ -52,7 +54,7 @@ window.addEventListener(
 
     for (let j = 0; j < state.length; j++) {
       for (let i = 0; i < state[j].length; i++) {
-        state[j][i] = 10 + (j > 9) * 2 // sets all inner cells to water cells
+        state[j][i] = 10// + (j > 9) * 2 // sets all inner cells to water cells
       }
     }
 
@@ -168,23 +170,44 @@ window.addEventListener(
 
     function execute () {
       if (running.checked) {
-        const {
-          x: valsX,
-          y: valsY
-        } = coefficients(state, prevX, prevY) // calculates a-values for each velocity axis
+        const valsX = xCoefficients(
+          state, prevX, prevY,
+          values.density,
+          values.diffuse
+        ) // calculates a-values for the x-velocity axis
 
-        const {
-          x: tempX,
-          y: tempY
-        } = couple(state, prevP, prevX, prevY, valsX, valsY) // calcualtes pressure-velocity coupling terms
+        const valsY = yCoefficients(
+          state, prevX, prevY,
+          values.density,
+          values.diffuse
+        ) // calculates a-values for the y-velocity axis
 
-        primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY) // calculates pressure estimate
+        const [
+          tempX,
+          tempY
+        ] = couple(
+            state, prevP, prevX, prevY, valsX, valsY,
+            params.size,
+            params.mu,
+            params.nu,
+            params.rho,
+            params.input.x,
+            params.input.y
+          ) // calcualtes pressure-velocity coupling terms
 
-        const {
-          p: nextP,
-          x: nextX,
-          y: nextY
-        } = correct(state, prevP, primeP, tempX, tempY, prevX, prevY, valsX, valsY) // calculates corrected values
+        primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY,
+          params.size
+        ) // calculates pressure estimate
+
+        const [
+          nextX,
+          nextY,
+          nextP
+        ] = correct(state, prevP, primeP, tempX, tempY, prevX, prevY, valsX, valsY,
+            params.size,
+            params.input.x,
+            params.input.y
+          ) // calculates corrected values
 
         if (count === 0) {
           draw(state, nextP, nextX, nextY)

@@ -3,8 +3,6 @@
 const {
   COLS,
   ROWS,
-  params,
-  values,
   plants
 } = require('./config')
 
@@ -111,72 +109,74 @@ function softdownedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
-function diffuse (f) {
-  const a = {
-    n: values.diffuse + Math.max(f.n, 0), // a_n = D_n + max(F_n, 0)
-    s: values.diffuse + Math.max(-f.s, 0), // a_s = D_s + max(-F_s, 0)
-    w: values.diffuse + Math.max(f.w, 0), // a_w = D_w + max(F_w, 0)
-    e: values.diffuse + Math.max(-f.e, 0) // a_e = D_e + max(-F_e, 0)
-  }
+function diffuse (f, diff) {
+  const a = [
+    diff + Math.max(f[0], 0), // a_n = D_n + max(F_n, 0)
+    diff + Math.max(-f[1], 0), // a_s = D_s + max(-F_s, 0)
+    diff + Math.max(f[2], 0), // a_w = D_w + max(F_w, 0)
+    diff + Math.max(-f[3], 0) // a_e = D_e + max(-F_e, 0)
+  ]
 
-  return {
-    n: a.n,
-    s: a.s,
-    w: a.w,
-    e: a.e,
-    c: a.n + a.s + a.w + a.e + (f.e - f.w) + (f.n - f.s) // a_c = a_n + a_s + a_w + a_e + d_F
-  }
+  return [
+    a[0], // north
+    a[1], // south
+    a[2], // west
+    a[3], // east
+    a[0] + a[1] + a[2] + a[3] + (f[3] - f[2]) + (f[1] - f[0]) // a_c = a_n + a_s + a_w + a_e + d_F
+  ]
 }
 
-function coefficients (sArr, xArr, yArr) {
+function xCoefficients (sArr, xArr, yArr, dens, diff) {
   let iArr = zeros(ROWS, COLS + 1)
-  let jArr = zeros(ROWS + 1, COLS)
 
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const f = {
-        n: values.density * (edge(sArr, yArr, j, i - 1, j, i) +
-                             edge(sArr, yArr, j, i, j, i - 1)),
-        s: values.density * (downedge(sArr, yArr, j + 1, i - 1, j + 1, i) +
-                             downedge(sArr, yArr, j + 1, i, j + 1, i - 1)),
-        w: values.density * (edge(sArr, xArr, j, i - 1, j, i) +
-                             edge(sArr, xArr, j, i, j, i - 1)),
-        e: values.density * (eastedge(sArr, xArr, j, i, j, i + 1) +
-                             eastedge(sArr, xArr, j, i + 1, j, i))
-      }
+      const f = [
+        dens * (edge(sArr, yArr, j, i - 1, j, i) +
+                edge(sArr, yArr, j, i, j, i - 1)),
+        dens * (downedge(sArr, yArr, j + 1, i - 1, j + 1, i) +
+                downedge(sArr, yArr, j + 1, i, j + 1, i - 1)),
+        dens * (edge(sArr, xArr, j, i - 1, j, i) +
+                edge(sArr, xArr, j, i, j, i - 1)),
+        dens * (eastedge(sArr, xArr, j, i, j, i + 1) +
+                eastedge(sArr, xArr, j, i + 1, j, i))
+      ]
 
-      iArr[j][i] = diffuse(f)
+      iArr[j][i] = diffuse(f, diff)
     }
   }
+
+  return iArr
+}
+
+function yCoefficients (sArr, xArr, yArr, dens, diff) {
+  let jArr = zeros(ROWS + 1, COLS)
 
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const f = {
-        n: values.density * (edge(sArr, yArr, j - 1, i, j, i) +
-                             edge(sArr, yArr, j, i, j - 1, i)),
-        s: values.density * (downedge(sArr, yArr, j, i, j + 1, i) +
-                             downedge(sArr, yArr, j + 1, i, j, i)),
-        w: values.density * (edge(sArr, xArr, j - 1, i, j, i) +
-                             edge(sArr, xArr, j, i, j - 1, i)),
-        e: values.density * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) +
-                             eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
-      }
+      const f = [
+        dens * (edge(sArr, yArr, j - 1, i, j, i) +
+                edge(sArr, yArr, j, i, j - 1, i)),
+        dens * (downedge(sArr, yArr, j, i, j + 1, i) +
+                downedge(sArr, yArr, j + 1, i, j, i)),
+        dens * (edge(sArr, xArr, j - 1, i, j, i) +
+                edge(sArr, xArr, j, i, j - 1, i)),
+        dens * (eastedge(sArr, xArr, j - 1, i + 1, j, i + 1) +
+                eastedge(sArr, xArr, j, i + 1, j - 1, i + 1))
+      ]
 
-      jArr[j][i] = diffuse(f)
+      jArr[j][i] = diffuse(f, diff)
     }
   }
 
-  return {
-    x: iArr,
-    y: jArr
-  }
+  return jArr
 }
 
-function viscosity (xArr, yArr) {
+function viscosity (xArr, yArr, size, mu) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
 
-  const denom = 2 * params.size
+  const denom = 2 * size
 
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
@@ -185,7 +185,7 @@ function viscosity (xArr, yArr) {
       const uSub2 = 2 * xArr[j][i] // takes center cell
       const uSub3 = cell(xArr, j, i - 1) // takes cell to the west
 
-      iArr[j][i] = (params.mu * (uSub1 - uSub2 + uSub3)) / denom
+      iArr[j][i] = (mu * (uSub1 - uSub2 + uSub3)) / denom
     }
   }
 
@@ -196,38 +196,38 @@ function viscosity (xArr, yArr) {
       const vSub2 = 2 * yArr[j][i] // takes center cell
       const vSub3 = cell(yArr, j - 1, i) // takes cell to the north
 
-      jArr[j][i] = (params.mu * (vSub1 - vSub2 + vSub3)) / denom
+      jArr[j][i] = (mu * (vSub1 - vSub2 + vSub3)) / denom
     }
   }
 
-  return {
-    x: iArr,
-    y: jArr
-  }
+  return [
+    iArr,
+    jArr
+  ]
 }
 
-function drag (sArr, xArr, yArr) {
+function drag (sArr, xArr, yArr, nu, rho) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
 
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const p = plants.find(pt => pt.state === cell(sArr, j, i)) || plants[0]
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
 
-      const c = {
-        a: (p.a0 * params.nu),
-        b: (4 * p.phi) / (p.diameter * Math.PI)
-      }
+      const c = [
+        p[3] * nu,
+        (4 * p[1]) / (p[0] * Math.PI)
+      ]
 
       const reynold = pyth(
         cell(xArr, j, i) + cell(xArr, j, i + 1),
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
-      const uSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
-      const uSub2 = c.a / ((reynold + (reynold === 0)) * p.diameter) + p.a1
-      const uSub3 = -(uSub1 * params.rho * Math.min(10, 2 * uSub2) * c.b) / 2
+      const uSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
+      const uSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
+      const uSub3 = -(uSub1 * rho * Math.min(10, 2 * uSub2) * c[1]) / 2
 
       iArr[j][i] = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
     }
@@ -236,53 +236,55 @@ function drag (sArr, xArr, yArr) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const p = plants.find(pt => pt.state === cell(sArr, j, i)) || plants[0]
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
 
-      const c = {
-        a: (p.a0 * params.nu),
-        b: (4 * p.phi) / (p.diameter * Math.PI)
-      }
+      const c = [
+        p[3] * nu,
+        (4 * p[1]) / (p[0] * Math.PI)
+      ]
 
       const reynold = pyth(
         cell(xArr, j, i) + cell(xArr, j, i + 1),
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
-      const vSub1 = 1 / (1 - p.phi) // hardcoded to set 11 as first plant state index
-      const vSub2 = c.a / ((reynold + (reynold === 0)) * p.diameter) + p.a1
-      const vSub3 = -(vSub1 * params.rho * Math.min(10, 2 * vSub2) * c.b) / 2
+      const vSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
+      const vSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
+      const vSub3 = -(vSub1 * rho * Math.min(10, 2 * vSub2) * c[1]) / 2
 
       jArr[j][i] = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
     }
   }
 
-  return {
-    x: iArr,
-    y: jArr
-  }
-} function couple (sArr, pArr, xArr, yArr, aX, aY) {
+  return [
+    iArr,
+    jArr
+  ]
+}
+
+function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
 
-  const {
-    x: iVis,
-    y: jVis
-  } = viscosity(xArr, yArr)
+  const [
+    iVis,
+    jVis
+  ] = viscosity(xArr, yArr, size, mu)
 
-  const {
-    x: iForce,
-    y: jForce
-  } = drag(sArr, xArr, yArr)
+  const [
+    iForce,
+    jForce
+  ] = drag(sArr, xArr, yArr, nu, rho)
 
   // performs velocity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const vx = {
-        n: aX[j][i].n * softedge(sArr, xArr, j - 1, i, j, i),
-        s: aX[j][i].s * softedge(sArr, xArr, j + 1, i, j, i),
-        w: aX[j][i].w * softedge(sArr, xArr, j, i - 1, j, i),
-        e: aX[j][i].e * softeastedge(sArr, xArr, j, i + 1, j, i)
-      }
+      const vx = [
+        xA[j][i][0] * softedge(sArr, xArr, j - 1, i, j, i), // north
+        xA[j][i][1] * softedge(sArr, xArr, j + 1, i, j, i), // south
+        xA[j][i][2] * softedge(sArr, xArr, j, i - 1, j, i), // west
+        xA[j][i][3] * softeastedge(sArr, xArr, j, i + 1, j, i) // east
+      ]
 
       const wx = (cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2) ||
                  (cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0) ||
@@ -297,23 +299,23 @@ function drag (sArr, xArr, yArr) {
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
       const inR = cell(sArr, j, i) === 0 && cell(sArr, j, i - 1) === 1
 
-      const uSub1 = vx.n + vx.s + vx.w + vx.e
+      const uSub1 = vx[0] + vx[1] + vx[2] + vx[3]
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
-      const uSub3 = (uSub1 + (uSub2 * params.size) + iVis[j][i] + iForce[j][i]) * wx
+      const uSub3 = (uSub1 + (uSub2 * size) + iVis[j][i] + iForce[j][i]) * wx
 
-      iArr[j][i] = (uSub3 * !(inL || inR)) / aX[j][i].c + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
+      iArr[j][i] = (uSub3 * !(inL || inR)) / xA[j][i][4] + (inL ^ inR) * xI // either returns calculated value or inlet value
     }
   }
 
   // performs velocity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const vy = {
-        n: aY[j][i].n * softedge(sArr, yArr, j - 1, i, j, i),
-        s: aY[j][i].s * softdownedge(sArr, yArr, j + 1, i, j, i),
-        w: aY[j][i].w * softedge(sArr, yArr, j, i - 1, j, i),
-        e: aY[j][i].e * softedge(sArr, yArr, j, i + 1, j, i)
-      }
+      const vy = [
+        yA[j][i][0] * softedge(sArr, yArr, j - 1, i, j, i),
+        yA[j][i][1] * softdownedge(sArr, yArr, j + 1, i, j, i),
+        yA[j][i][2] * softedge(sArr, yArr, j, i - 1, j, i),
+        yA[j][i][3] * softedge(sArr, yArr, j, i + 1, j, i)
+      ]
 
       const wy = (cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2) ||
                  (cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0) ||
@@ -328,52 +330,52 @@ function drag (sArr, xArr, yArr) {
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
       const inD = cell(sArr, j, i) === 0 && cell(sArr, j - 1, i) === 1
 
-      const vSub1 = vy.n + vy.s + vy.w + vy.e
+      const vSub1 = vy[0] + vy[1] + vy[2] + vy[3]
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
-      const vSub3 = (vSub1 + (vSub2 * params.size) + jVis[j][i] + jForce[j][i]) * wy
+      const vSub3 = (vSub1 + (vSub2 * size) + jVis[j][i] + jForce[j][i]) * wy
 
-      jArr[j][i] = (vSub3 * !(inU || inD)) / aY[j][i].c + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
+      jArr[j][i] = (vSub3 * !(inU || inD)) / yA[j][i][4] + (inU ^ inD) * yI // either returns calculated value or inlet value
     }
   }
 
-  return {
-    x: iArr,
-    y: jArr
-  }
+  return [
+    iArr,
+    jArr
+  ]
 }
 
-function jacobi (sArr, pArr, xArr, yArr, xA, yA) {
+function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
   const kArr = zeros(ROWS, COLS)
 
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      let vx = {
-        w: xArr[j][i],
-        e: xArr[j][i + 1]
-      }
+      let vx = [
+        xArr[j][i], // west
+        xArr[j][i + 1] // east
+      ]
 
-      let vy = {
-        n: yArr[j][i],
-        s: yArr[j + 1][i]
-      }
+      let vy = [
+        yArr[j][i], // north
+        yArr[j + 1][i] // south
+      ]
 
-      const p = {
-        n: cell(pArr, j - 1, i),
-        s: cell(pArr, j + 1, i),
-        w: cell(pArr, j, i - 1),
-        e: cell(pArr, j, i + 1)
-      }
+      const p = [
+        cell(pArr, j - 1, i), // north
+        cell(pArr, j + 1, i), // south
+        cell(pArr, j, i - 1), // west
+        cell(pArr, j, i + 1) // east
+      ]
 
-      const a = {
-        n: yA[j][i].c,
-        s: yA[j + 1][i].c,
-        w: xA[j][i].c,
-        e: xA[j][i + 1].c
-      }
+      const a = [
+        yA[j][i][4],
+        yA[j + 1][i][4],
+        xA[j][i][4],
+        xA[j][i + 1][4]
+      ]
 
-      let pSub1 = p.n / a.n + p.s / a.s + p.w / a.w + p.e / a.e // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
-      let pSub2 = (vx.w - vx.e + vy.n - vy.s) / params.size // b_ij
-      let pSub3 = 1 / a.n + 1 / a.s + 1 / a.w + 1 / a.e
+      let pSub1 = p[0] / a[0] + p[1] / a[1] + p[2] / a[2] + p[3] / a[3] // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
+      let pSub2 = (vx[0] - vx[1] + vy[0] - vy[1]) / size // b_ij
+      let pSub3 = 1 / a[0] + 1 / a[1] + 1 / a[2] + 1 / a[3]
 
       kArr[j][i] = (pSub1 + pSub2) / pSub3 * (cell(sArr, j, i) !== 0) // this calculation does not apply correct division formula
 
@@ -384,7 +386,7 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA) {
   return kArr
 }
 
-function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
+function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI) {
   const iArr = zeros(ROWS, COLS + 1)
   const jArr = zeros(ROWS + 1, COLS)
   const kArr = zeros(ROWS, COLS)
@@ -412,11 +414,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
       const inR = cell(sArr, j, i - 1) === 1 && cell(sArr, j, i) === 0
 
-      const outX = xArr[j][i] + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (params.size / xA[j][i].c)
+      const outX = xArr[j][i] + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (size / xA[j][i][4])
 
       const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i]
 
-      iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * params.input.x // either returns calculated value or inlet value
+      iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * xI // either returns calculated value or inlet value
     }
   }
 
@@ -436,19 +438,19 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA) {
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
       const inD = cell(sArr, j - 1, i) === 1 && cell(sArr, j, i) === 0
 
-      const outY = yArr[j][i] + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (params.size / yA[j][i].c)
+      const outY = yArr[j][i] + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (size / yA[j][i][4])
 
       const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i]
 
-      jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * params.input.y // either returns calculated value or inlet value
+      jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * yI // either returns calculated value or inlet value
     }
   }
 
-  return {
-    x: iArr,
-    y: jArr,
-    p: kArr
-  }
+  return [
+    iArr,
+    jArr,
+    kArr
+  ]
 }
 
 function converge (sArr, xArr, yArr, iArr, jArr) {
@@ -476,7 +478,8 @@ function converge (sArr, xArr, yArr, iArr, jArr) {
 module.exports = {
   zeros,
   pyth,
-  coefficients,
+  xCoefficients,
+  yCoefficients,
   couple,
   jacobi,
   correct,
