@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $outletTool = document.querySelector('.js-outlet-tool')
 
   const $resetTool = document.querySelector('.js-reset-tool')
+  const $gridSnapTool = document.querySelector('.js-grid-snap')
 
   editor.registerTool('add', new AddTool(editor, $addTool))
   editor.registerTool('remove', new RemoveTool(editor, $removeTool))
@@ -84,6 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $resetTool.addEventListener('click', () => {
     editor.reset()
+  })
+
+  $gridSnapTool.addEventListener('click', () => {
+    editor.gridSnap = !!$gridSnapTool.checked
   })
 
   $run.addEventListener('click', () => {

@@ -27,6 +27,8 @@ class Editor {
 
     this.viewport = { x: 0, y: 0 }
     this.zoomLevel = 1
+    this.angleSnap = false
+    this.gridSnap = false
 
     this.view = this.scope.view
     this.project = this.scope.project
@@ -88,8 +90,6 @@ class Editor {
     this.veg = []
     this.inlet = undefined
     this.outlet = undefined
-    this.angleSnap = false
-    this.gridSnap = true
 
     this.deactivateActiveTool()
 
