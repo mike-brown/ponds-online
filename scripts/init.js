@@ -91,6 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.gridSnap = !!$gridSnapTool.checked
   })
 
+  $canvas.addEventListener('mousewheel', ev => {
+    ev.preventDefault()
+    editor.zoom(1 + -ev.wheelDeltaY / 100)
+  })
+
   $run.addEventListener('click', () => {
     window.location = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
   })

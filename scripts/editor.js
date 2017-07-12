@@ -126,10 +126,15 @@ class Editor {
       this.baseLayer.scale(IN_SCALE, this.view.center)
       this.scaleLayer.scale(IN_SCALE, this.view.bounds.bottomLeft)
     } else if (level === 'out') {
-      this.zoomLevel = OUT_SCALE
+      this.zoomLevel /= OUT_SCALE
       this.gridLayer.scale(OUT_SCALE, this.view.center)
       this.baseLayer.scale(OUT_SCALE, this.view.center)
       this.scaleLayer.scale(OUT_SCALE, this.view.bounds.bottomLeft)
+    } else {
+      this.zoomLevel *= level
+      this.gridLayer.scale(level, this.view.center)
+      this.baseLayer.scale(level, this.view.center)
+      this.scaleLayer.scale(level, this.view.bounds.bottomLeft)
     }
   }
 
