@@ -24,6 +24,8 @@ class Editor {
     this.GRID_SCALE = 100
     this.GRID_SUBDIVISIONS = 2
     this.ANGLE_SNAP = Math.PI / 8
+    this.MAX_ZOOM = 8
+    this.MIN_ZOOM = 0.2
 
     this.viewport = { x: 0, y: 0 }
     this.zoomLevel = 1
@@ -116,26 +118,22 @@ class Editor {
     return Math.abs(this.pond.area) >= 1 && this.inlet && this.outlet
   }
 
-  zoom (level) {
+  zoom (factor) {
     const IN_SCALE = 1.25
     const OUT_SCALE = 1 / IN_SCALE
 
-    if (level === 'in') {
-      this.zoomLevel *= IN_SCALE
-      this.gridLayer.scale(IN_SCALE, this.view.center)
-      this.baseLayer.scale(IN_SCALE, this.view.center)
-      this.scaleLayer.scale(IN_SCALE, this.view.bounds.bottomLeft)
-    } else if (level === 'out') {
-      this.zoomLevel /= OUT_SCALE
-      this.gridLayer.scale(OUT_SCALE, this.view.center)
-      this.baseLayer.scale(OUT_SCALE, this.view.center)
-      this.scaleLayer.scale(OUT_SCALE, this.view.bounds.bottomLeft)
-    } else {
-      this.zoomLevel *= level
-      this.gridLayer.scale(level, this.view.center)
-      this.baseLayer.scale(level, this.view.center)
-      this.scaleLayer.scale(level, this.view.bounds.bottomLeft)
+    const level = factor === 'in' ? IN_SCALE : factor === 'out' ? OUT_SCALE : factor || 1
+
+    console.log(level, this.zoomLevel)
+
+    if (this.zoomLevel * level < this.MIN_ZOOM || this.zoomLevel * level > this.MAX_ZOOM) {
+      return
     }
+
+    this.zoomLevel *= level
+    this.gridLayer.scale(level, this.view.center)
+    this.baseLayer.scale(level, this.view.center)
+    this.scaleLayer.scale(level, this.view.bounds.bottomLeft)
   }
 
   createScaleLayer () {
