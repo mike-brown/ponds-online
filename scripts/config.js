@@ -15,8 +15,9 @@ const params = {
     y: 0.0
   },
   plant: [
-    { diameter: 0.010, phi: 0.013 },
-    { diameter: 0.019, phi: 0.047 }
+    { diameter: 1.000, phi: 0.000, state: 10 },
+    { diameter: 0.010, phi: 0.013, state: 11 },
+    { diameter: 0.019, phi: 0.047, state: 12 }
   ]
 }
 
@@ -32,6 +33,7 @@ for (let n = 0; n < params.plant.length; n++) {
   plants.push({
     diameter: params.plant[n].diameter,
     phi: params.plant[n].phi,
+    state: params.plant[n].state,
     a0: 0,
     a1: 0
   })

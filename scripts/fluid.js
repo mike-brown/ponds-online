@@ -112,22 +112,6 @@ function softdownedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
-function slot (arr, n) {
-  const bn = n >= 0 && n < arr.length
-
-  const mn = Math.max(Math.min(n, arr.length - 1), 0)
-
-  // returns zero if cell does not fall within the supplied array range
-  return {
-    density: arr[mn].density * bn,
-    diameter: arr[mn].diameter,
-    phi: arr[mn].phi * bn,
-    force: arr[mn].force * bn,
-    a0: arr[mn].a0 * bn,
-    a1: arr[mn].a1 * bn
-  }
-}
-
 function diffuse (f) {
   const a = {
     n: values.diffuse + Math.max(f.n, 0), // a_n = D_n + max(F_n, 0)
@@ -230,7 +214,7 @@ function drag (sArr, xArr, yArr) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const p = slot(plants, cell(sArr, j, i) - 11)
+      const p = plants.find(pt => pt.state === cell(sArr, j, i)) || plants[0]
 
       const c = {
         a: (p.a0 * params.nu),
@@ -253,7 +237,7 @@ function drag (sArr, xArr, yArr) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const p = slot(plants, cell(sArr, j, i) - 11)
+      const p = plants.find(pt => pt.state === cell(sArr, j, i)) || plants[0]
 
       const c = {
         a: (p.a0 * params.nu),
