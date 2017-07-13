@@ -39,7 +39,7 @@ window.addEventListener(
     const tolerance = Math.sqrt(
       Math.pow(params.input.x, 2) +
       Math.pow(params.input.y, 2)
-    ) / 100000 // defines convergence threshold for simulation
+    ) / 1000000 // defines convergence threshold for simulation
 
     let count = 0
 
@@ -54,7 +54,8 @@ window.addEventListener(
 
     for (let j = 0; j < state.length; j++) {
       for (let i = 0; i < state[j].length; i++) {
-        state[j][i] = 10// + (j > 9) * 2 // sets all inner cells to water cells
+        state[j][i] = 10// + (j > 9 && i > 9) * 2 // sets all inner cells to water cells
+        // state[parseInt(j / 2)][40] = 0
       }
     }
 
@@ -67,15 +68,15 @@ window.addEventListener(
     for (let j = 1; j < ROWS - 1; j++) {
       state[j][0] = 1 // sets leftmost column to inlets
 
-      state[j][COLS - 2] = 2 // sets rightmost column to outlets
-      state[j][COLS - 1] = 0 // sets rightmost column to wall
+      state[j][COLS - 1] = 2 // sets rightmost column to outlets
+      // state[j][COLS - 1] = 0 // sets rightmost column to wall
     }
 
-    state[0][COLS - 2] = 2 // sets northern-rightmost column to outlets
-    state[0][COLS - 1] = 0 // sets northern-rightmost column to wall
-
-    state[ROWS - 1][COLS - 2] = 2 // sets southern-rightmost column to outlets
-    state[ROWS - 1][COLS - 1] = 0 // sets southern-rightmost column to wall
+    state[0][COLS - 1] = 2 // sets northern-rightmost column to outlets
+    // state[0][COLS - 1] = 0 // sets northern-rightmost column to wall
+    //
+    state[ROWS - 1][COLS - 1] = 2 // sets southern-rightmost column to outlets
+    // state[ROWS - 1][COLS - 1] = 0 // sets southern-rightmost column to wall
 
     // for (let i = 1; i < COLS - 1; i++) {
     //   state[0][i] = 1 // sets leftmost column to inlets

@@ -172,11 +172,9 @@ function yCoefficients (sArr, xArr, yArr, dens, diff) {
   return jArr
 }
 
-function viscosity (xArr, yArr, size, mu) {
+function viscosity (xArr, yArr, mu) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
-
-  const denom = 2 * size
 
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
@@ -185,7 +183,7 @@ function viscosity (xArr, yArr, size, mu) {
       const uSub2 = 2 * xArr[j][i] // takes center cell
       const uSub3 = cell(xArr, j, i - 1) // takes cell to the west
 
-      iArr[j][i] = (mu * (uSub1 - uSub2 + uSub3)) / denom
+      iArr[j][i] = mu * (uSub1 - uSub2 + uSub3) // calculates x-velocity viscosity coefficient
     }
   }
 
@@ -196,7 +194,7 @@ function viscosity (xArr, yArr, size, mu) {
       const vSub2 = 2 * yArr[j][i] // takes center cell
       const vSub3 = cell(yArr, j - 1, i) // takes cell to the north
 
-      jArr[j][i] = (mu * (vSub1 - vSub2 + vSub3)) / denom
+      jArr[j][i] = mu * (vSub1 - vSub2 + vSub3) // calculates y-velocity viscosity coefficient
     }
   }
 
@@ -269,7 +267,7 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
   const [
     iVis,
     jVis
-  ] = viscosity(xArr, yArr, size, mu)
+  ] = viscosity(xArr, yArr, mu)
 
   const [
     iForce,
@@ -290,9 +288,9 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
                  (cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0) ||
                  (cell(sArr, j, i) !== 0 &&
                   cell(sArr, j, i - 1) !== 0 &&
-                  (cell(sArr, j + 1, i) !== 0 ||
+                 (cell(sArr, j + 1, i) !== 0 ||
                   cell(sArr, j + 1, i - 1) !== 0) &&
-                  (cell(sArr, j - 1, i) !== 0 ||
+                 (cell(sArr, j - 1, i) !== 0 ||
                   cell(sArr, j - 1, i - 1) !== 0))
 
       // returns true if inlet cell adjacent to wall in x-axis
@@ -302,6 +300,8 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
       const uSub1 = vx[0] + vx[1] + vx[2] + vx[3]
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
       const uSub3 = (uSub1 + (uSub2 * size) + iVis[j][i] + iForce[j][i]) * wx
+
+      if (j === 10 && i === 5) console.log(iForce[j][i])
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / xA[j][i][4] + (inL ^ inR) * xI // either returns calculated value or inlet value
     }

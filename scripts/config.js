@@ -6,7 +6,7 @@ const ROWS = 20
 
 const params = {
   gamma: 0.2, // interface diffusion
-  size: 0.01, // 10mm face area
+  size: 0.05, // 10mm face area
   rho: 998.2, // 998.2kg/m^3 density
   mu: 0.001002, // dynamic viscosity
   nu: 0.000001004, // kinematic viscosity
@@ -38,7 +38,6 @@ for (let n = 0; n < params.plant.length; n++) {
     0 // a1
   ])
 
-  // plants[n].phi = Math.PI / (4 * plants[n].density * plants[n].diameter * plants[n].area)
   plants[n][3] = 7276.43 * plants[n][0] + 23.55
   plants[n][4] = 32.7 * plants[n][0] + 3.01 * plants[n][1] + 0.42
 }
