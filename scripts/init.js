@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('keydown', ev => {
     const keys = {
       Escape: ev => {
-        editor.deactivateActiveTool()
+        editor.activateTool('hand')
         if (editor.isReady()) {
           $run.disabled = false
         }
@@ -131,7 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       KeyR: ev => {
         editor.reset()
-        editor.deactivateActiveTool()
+        editor.activateTool('hand')
+      },
+
+      Minus: ev => {
+        editor.zoom('out')
+      },
+
+      Equal: ev => {
+        editor.zoom('in')
       }
     }
 
