@@ -126,7 +126,7 @@ function diffuse (f, diff) {
   ]
 }
 
-function xCoefficients (sArr, xArr, yArr, dens, diff) {
+function ax (sArr, xArr, yArr, dens, diff) {
   let iArr = zeros(ROWS, COLS + 1)
 
   for (let j = 0; j < iArr.length; j++) {
@@ -149,7 +149,7 @@ function xCoefficients (sArr, xArr, yArr, dens, diff) {
   return iArr
 }
 
-function yCoefficients (sArr, xArr, yArr, dens, diff) {
+function ay (sArr, xArr, yArr, dens, diff) {
   let jArr = zeros(ROWS + 1, COLS)
 
   for (let j = 0; j < jArr.length; j++) {
@@ -166,6 +166,8 @@ function yCoefficients (sArr, xArr, yArr, dens, diff) {
       ]
 
       jArr[j][i] = diffuse(f, diff)
+
+      if (j === 9 && i === 5) console.log(jArr[j][i])
     }
   }
 
@@ -478,8 +480,10 @@ function converge (sArr, xArr, yArr, iArr, jArr) {
 module.exports = {
   zeros,
   pyth,
-  xCoefficients,
-  yCoefficients,
+  cell,
+  diffuse,
+  ax,
+  ay,
   couple,
   jacobi,
   correct,

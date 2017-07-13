@@ -2,8 +2,8 @@
 
 const {
   zeros,
-  xCoefficients,
-  yCoefficients,
+  ax,
+  ay,
   couple,
   jacobi,
   correct,
@@ -171,13 +171,13 @@ window.addEventListener(
 
     function execute () {
       if (running.checked) {
-        const valsX = xCoefficients(
+        const valsX = ax(
           state, prevX, prevY,
           values.density,
           values.diffuse
         ) // calculates a-values for the x-velocity axis
 
-        const valsY = yCoefficients(
+        const valsY = ay(
           state, prevX, prevY,
           values.density,
           values.diffuse
