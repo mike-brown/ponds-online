@@ -23,10 +23,13 @@ const directionalSnap = (from, to, nearest) => {
   return new Point(from.x + x, from.y + y)
 }
 
-const snapToGrid = (point, gridSize = 1) => {
+const snapToGrid = (point, gridSize = 1, offset = { x: 0, y: 0 }) => {
+  point.x -= offset.x
+  point.y -= offset.y
+
   return new Point({
-    x: roundToNearest(point.x, gridSize),
-    y: roundToNearest(point.y, gridSize)
+    x: roundToNearest(point.x, gridSize) + offset.x,
+    y: roundToNearest(point.y, gridSize) + offset.y
   })
 }
 
@@ -58,8 +61,10 @@ class AddTool extends Tool {
 
     this.editor.pond.visible = true
 
-    this.tempPond.remove()
-    this.tempPond = undefined
+    if (this.tempPond) {
+      this.tempPond.remove()
+      this.tempPond = undefined
+    }
   }
 
   onMouseDown (ev) {
@@ -67,9 +72,12 @@ class AddTool extends Tool {
       ? this.editor.pond.segments[this.editor.pond.segments.length - 1].point
       : undefined
 
-    const point =
-    this.editor.gridSnap
-      ? snapToGrid(ev.point, this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS)
+    const point = this.editor.gridSnap
+      ? snapToGrid(
+        ev.point,
+        this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
+        this.editor.viewport
+      )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
@@ -78,17 +86,27 @@ class AddTool extends Tool {
   }
 
   onMouseMove (ev) {
+    console.log('mouse position', ev.point)
+
+    ev.point.x -= this.editor.viewport.x
+    ev.point.y -= this.editor.viewport.y
+
     const movePond = this.editor.pond.clone({ insert: false })
     const lastPoint = movePond.segments.length
       ? movePond.segments[movePond.segments.length - 1].point
       : undefined
 
-    const point =
-    this.editor.gridSnap
-      ? snapToGrid(ev.point, this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS)
+    const point = this.editor.gridSnap
+      ? snapToGrid(
+        ev.point,
+        this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
+        this.editor.viewport
+      )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
+
+    console.log('point to add', point)
 
     movePond.add(point)
     movePond.visible = true
