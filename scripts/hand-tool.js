@@ -17,22 +17,19 @@ class HandTool extends Tool {
   }
 
   onMouseDrag (ev) {
-    this.editor.viewport.x += ev.delta.x
-    this.editor.viewport.y += ev.delta.y
+    const layers = [
+      this.editor.viewport,
+      this.editor.gridLayer.position,
+      this.editor.subGridLayer.position,
+      this.editor.baseLayer.position
+    ]
 
-    this.editor.gridLayer.position.x += ev.delta.x
-    this.editor.gridLayer.position.y += ev.delta.y
+    layers.forEach(point => {
+      point.x += ev.delta.x
+      point.y += ev.delta.y
+    })
 
-    this.editor.baseLayer.position.x += ev.delta.x
-    this.editor.baseLayer.position.y += ev.delta.y
-  }
-
-  onKeyDown (ev) {
-    if (ev.key === '=') {
-      this.editor.zoom('in')
-    } else if (ev.key === '-') {
-      this.editor.zoom('out')
-    }
+    console.log('viewport offset', this.editor.viewport)
   }
 }
 

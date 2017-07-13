@@ -3,6 +3,7 @@
 const {
   paper,
   Layer,
+  Point,
   Path,
   Color,
   PointText,
@@ -27,7 +28,7 @@ class Editor {
     this.MAX_ZOOM = 8
     this.MIN_ZOOM = 0.2
 
-    this.viewport = { x: 0, y: 0 }
+    this.viewport = new Point({ x: 0, y: 0 })
     this.zoomLevel = 1
     this.angleSnap = false
     this.gridSnap = false
@@ -38,6 +39,7 @@ class Editor {
     this.baseLayer = this.project.activeLayer
     this.scaleLayer = this.project.addLayer(this.createScaleLayer())
     this.gridLayer = this.project.addLayer(this.createGridLayer())
+    this.subGridLayer = this.project.addLayer(this.createSubGridLayer())
 
     this.tools = {}
     this.activeTool = undefined
@@ -61,21 +63,12 @@ class Editor {
       return
     }
 
-    this.deactivateActiveTool()
+    if (this.activeTool) this.tools[this.activeTool].deactivate()
 
     console.info(`activating ${name} tool`)
 
     this.tools[name].activate()
     this.activeTool = name
-  }
-
-  deactivateActiveTool () {
-    if (this.activeTool) {
-      this.tools[this.activeTool].deactivate()
-      this.activeTool = undefined
-
-      this.activateTool('hand')
-    }
   }
 
   reset () {
@@ -93,7 +86,7 @@ class Editor {
     this.inlet = undefined
     this.outlet = undefined
 
-    this.deactivateActiveTool()
+    this.activateTool('hand')
 
     this.baseLayer.addChildren([this.pond, this.mask, this.vegmask])
   }
@@ -122,18 +115,23 @@ class Editor {
     const IN_SCALE = 1.25
     const OUT_SCALE = 1 / IN_SCALE
 
-    const level = factor === 'in' ? IN_SCALE : factor === 'out' ? OUT_SCALE : factor || 1
+    const level =
+      factor === 'in' ? IN_SCALE : factor === 'out' ? OUT_SCALE : factor || 1
 
-    console.log(level, this.zoomLevel)
-
-    if (this.zoomLevel * level < this.MIN_ZOOM || this.zoomLevel * level > this.MAX_ZOOM) {
+    if (
+      this.zoomLevel * level < this.MIN_ZOOM ||
+      this.zoomLevel * level > this.MAX_ZOOM
+    ) {
       return
     }
 
     this.zoomLevel *= level
+    this.subGridLayer.scale(level, this.view.center)
     this.gridLayer.scale(level, this.view.center)
     this.baseLayer.scale(level, this.view.center)
     this.scaleLayer.scale(level, this.view.bounds.bottomLeft)
+
+    this.subGridLayer.visible = this.zoomLevel > 0.7
   }
 
   createScaleLayer () {
@@ -215,6 +213,15 @@ class Editor {
         })
       )
     }
+
+    grid.position.x = -this.GRID_SCALE * 50
+    grid.position.y = -this.GRID_SCALE * 50
+
+    return grid
+  }
+
+  createSubGridLayer () {
+    const grid = new Layer()
 
     // vertical subdivisions
     for (
