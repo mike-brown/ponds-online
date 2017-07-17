@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const $resetTool = document.querySelector('.js-reset-tool')
   const $gridSnapTool = document.querySelector('.js-grid-snap')
+  const $subdivisionsTool = document.querySelector('.js-grid-subdivisions')
 
   editor.registerTool('add', new AddTool(editor, $addTool))
   editor.registerTool('remove', new RemoveTool(editor, $removeTool))
@@ -91,6 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $gridSnapTool.addEventListener('click', () => {
     editor.gridSnap = !!$gridSnapTool.checked
+  })
+
+  $subdivisionsTool.addEventListener('change', () => {
+    editor.GRID_SUBDIVISIONS = $subdivisionsTool.value
+
+    editor.subGridLayer.remove()
+    editor.subGridLayer = editor.project.addLayer(editor.createSubGridLayer())
+    editor.subGridLayer.scale(editor.zoomLevel, editor.view.center)
+
+    editor.subGridLayer.position = editor.gridLayer.position.clone()
+
+    $subdivisionsTool.parentNode.querySelector('.js-grid-subdivisions-val').textContent = $subdivisionsTool.value
   })
 
   $canvas.addEventListener('mousewheel', ev => {
