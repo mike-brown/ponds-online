@@ -55,7 +55,14 @@ figcaption {
 
 nav {
   position: relative;
-  background-color: #303038;
+
+  background: rgb(64, 64, 70);
+  background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:      -o-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:         linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+
+  background-size: cover;
 
   width: 100%;
   height: 128px;
@@ -106,6 +113,6 @@ nav ul li a:hover {
 
 /* TEXTS /////////////////////////////////////////////////////////////////////*/
 
-p {
+h1, h2, h3, h4, h5, h6, p {
   padding: 8px;
 }
