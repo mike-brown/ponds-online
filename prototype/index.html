@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <script src="./scripts/bundle.js"></script>
+</head>
+
+<body>
+  <div class="running">
+    Running:
+    <input type="checkbox" class="js-running" checked>
+  </div>
+
+  <br><br> Pressure: <br>
+  <canvas class="canvasp"></canvas>
+  <div class="pscale" style="display: inline-block;">
+    <canvas class="canvaspscale" height="50"></canvas>
+    <div>
+      <span class="min"></span>
+      <span class="max" style="float: right;"></span>
+    </div>
+  </div>
+
+  <br> Yellow/Red is positive pressure <br> Green is neutral <br> Cyan/Blue is negative pressure <br>
+
+
+  <br><br> X Velocity: <br>
+  <canvas class="canvasx"></canvas>
+  <div class="xscale" style="display: inline-block;">
+    <canvas class="canvasxscale" height="50"></canvas>
+    <div>
+      <span class="min"></span>
+      <span class="max" style="float: right;"></span>
+    </div>
+  </div>
+
+  <br><br> Y Velocity: <br>
+  <canvas class="canvasy"></canvas>
+  <div class="yscale" style="display: inline-block;">
+    <canvas class="canvasyscale" height="50"></canvas>
+    <div>
+      <span class="min"></span>
+      <span class="max" style="float: right;"></span>
+    </div>
+  </div>
+</body>
+
+</html>

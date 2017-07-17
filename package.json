@@ -4,11 +4,12 @@
   "description": "A SURE2017 project (University of Sheffield)",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "precommit": "lint-staged",
     "start": "npm run build && lite-server",
+    "test": "ava \"./tests/**/*.test.js\"",
+    "test:w": "npm test -- --watch",
     "build": "browserify ./scripts/init.js -o ./scripts/bundle.js",
-    "build:w": "watchify ./scripts/init.js -v -o ./scripts/bundle.js"
+    "build:w": "watchify ./scripts/init.js -o ./scripts/bundle.js",
+    "precommit": "lint-staged"
   },
   "lint-staged": {
     "concurrent": false,
@@ -34,17 +35,18 @@
     "url": "https://github.com/mike-brown/ponds-online/issues"
   },
   "homepage": "https://github.com/mike-brown/ponds-online#readme",
-  "devDependencies": {
-    "browserify": "^14.4.0",
-    "eclint": "^2.2.0",
-    "eslint": "^4.1.1",
-    "husky": "^0.14.1",
-    "lint-staged": "^4.0.0",
-    "lite-server": "^2.3.0",
-    "watchify": "^3.9.0"
-  },
   "dependencies": {
     "mousetrap": "^1.6.1",
     "paper": "^0.11.4"
+  },
+  "devDependencies": {
+    "ava": "^0.20.0",
+    "browserify": "^14.4.0",
+    "eclint": "^2.2.0",
+    "eslint": "^4.1.1",
+    "husky": "^0.13.4",
+    "lint-staged": "^4.0.0",
+    "lite-server": "^2.3.0",
+    "watchify": "^3.9.0"
   }
 }
