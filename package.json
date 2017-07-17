@@ -9,6 +9,8 @@
     "test:w": "npm test -- --watch",
     "build": "browserify ./scripts/init.js -o ./scripts/bundle.js",
     "build:w": "watchify ./scripts/init.js -o ./scripts/bundle.js",
+    "build:p": "browserify ./prototype/init.js -o ./prototype/bundle.js",
+    "build:p:w": "watchify ./prototype/init.js -o ./prototype/bundle.js",
     "precommit": "lint-staged"
   },
   "lint-staged": {
