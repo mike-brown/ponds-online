@@ -24,11 +24,11 @@ section {
   margin: 8px;
   background-color: #E8E8E0;
 
-  -webkit-box-shadow: 4px 4px 1px #666688;
-     -moz-box-shadow: 4px 4px 1px #666688;
-      -ms-box-shadow: 4px 4px 1px #666688;
-       -o-box-shadow: 4px 4px 1px #666688;
-          box-shadow: 4px 4px 1px #666688;
+  -webkit-box-shadow: 4px 4px 1px #A8A8B0;
+     -moz-box-shadow: 4px 4px 1px #A8A8B0;
+      -ms-box-shadow: 4px 4px 1px #A8A8B0;
+       -o-box-shadow: 4px 4px 1px #A8A8B0;
+          box-shadow: 4px 4px 1px #A8A8B0;
 }
 
 figure {
