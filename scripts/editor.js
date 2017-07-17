@@ -48,8 +48,6 @@ class Editor {
     this.registerTool('hand', new HandTool(this))
 
     this.reset()
-
-    this.zoom(1.25)
   }
 
   registerTool (name, tool) {
@@ -153,16 +151,13 @@ class Editor {
     let text
     let length
 
-    if (ratio > 5) {
-      text = '0.2m'
-      length = 0.2
-    } else if (ratio > 4) {
+    if (ratio > 4) {
       text = '0.25m'
       length = 0.25
     } else if (ratio > 2) {
       text = '0.5m'
       length = 0.5
-    } else if (ratio > 1) {
+    } else if (ratio > 0.8) {
       text = '1m'
       length = 1
     } else if (ratio > 0.5) {
