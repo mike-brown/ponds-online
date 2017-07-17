@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $canvas.addEventListener('mousewheel', ev => {
     ev.preventDefault()
-    editor.zoom(1 + -ev.wheelDeltaY / 1000)
+    editor.zoom(1 + ev.wheelDeltaY / 1000)
   })
 
   $run.addEventListener('click', () => {
