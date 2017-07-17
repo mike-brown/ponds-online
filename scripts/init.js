@@ -1,5 +1,7 @@
 'use strict'
 
+const Mousetrap = require('mousetrap')
+
 const {
   AddTool,
   RemoveTool,
@@ -100,49 +102,45 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
   })
 
-  window.addEventListener('keydown', ev => {
-    const keys = {
-      Escape: ev => {
-        editor.activateTool('hand')
-        if (editor.isReady()) {
-          $run.disabled = false
-        }
-      },
-
-      KeyA: ev => {
-        editor.activateTool('add')
-      },
-
-      KeyS: ev => {
-        editor.activateTool('remove')
-      },
-
-      KeyV: ev => {
-        editor.activateTool('veg')
-      },
-
-      KeyI: ev => {
-        editor.activateTool('inlet')
-      },
-
-      KeyO: ev => {
-        editor.activateTool('outlet')
-      },
-
-      KeyR: ev => {
-        editor.reset()
-        editor.activateTool('hand')
-      },
-
-      Minus: ev => {
-        editor.zoom('out')
-      },
-
-      Equal: ev => {
-        editor.zoom('in')
-      }
+  Mousetrap.bind('esc', ev => {
+    editor.activateTool('hand')
+    if (editor.isReady()) {
+      $run.disabled = false
     }
+  })
 
-    if (ev.code in keys) keys[ev.code](ev)
+  Mousetrap.bind('a', ev => {
+    editor.activateTool('add')
+  })
+
+  Mousetrap.bind('s', ev => {
+    editor.activateTool('remove')
+  })
+
+  Mousetrap.bind('v', ev => {
+    editor.activateTool('veg')
+  })
+
+  Mousetrap.bind('i', ev => {
+    editor.activateTool('inlet')
+  })
+
+  Mousetrap.bind('o', ev => {
+    editor.activateTool('outlet')
+  })
+
+  Mousetrap.bind('r', ev => {
+    editor.reset()
+    editor.activateTool('hand')
+  })
+
+  Mousetrap.bind('-', ev => {
+    ev.preventDefault()
+    editor.zoom('out')
+  })
+
+  Mousetrap.bind('=', ev => {
+    ev.preventDefault()
+    editor.zoom('in')
   })
 })
