@@ -74,6 +74,12 @@ class Editor {
   }
 
   reset () {
+    if (this.resetinit && !confirm('Reset?')) {
+      return
+    } else {
+      this.resetinit = true
+    }
+
     if (this.pond) this.pond.remove()
     if (this.mask) this.mask.remove()
     if (this.vegmask) this.vegmask.remove()
