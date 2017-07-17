@@ -166,8 +166,6 @@ function ay (sArr, xArr, yArr, dens, diff) {
       ]
 
       jArr[j][i] = diffuse(f, diff)
-
-      if (j === 9 && i === 5) console.log(jArr[j][i])
     }
   }
 
@@ -302,8 +300,6 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
       const uSub1 = vx[0] + vx[1] + vx[2] + vx[3]
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
       const uSub3 = (uSub1 + (uSub2 * size) + iVis[j][i] + iForce[j][i]) * wx
-
-      if (j === 10 && i === 5) console.log(iForce[j][i])
 
       iArr[j][i] = (uSub3 * !(inL || inR)) / xA[j][i][4] + (inL ^ inR) * xI // either returns calculated value or inlet value
     }

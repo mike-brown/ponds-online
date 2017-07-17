@@ -11,6 +11,13 @@ const {
 } = require('./fluid') // imports simulation functions from fluid.js file
 
 const {
+  dye,
+  concentrations,
+  corrections,
+  record
+} = require('./flow') // imports simulation functions from flow.js file
+
+const {
   CELL_SIZE,
   COLS,
   ROWS,
@@ -39,7 +46,9 @@ window.addEventListener(
     const tolerance = Math.sqrt(
       Math.pow(params.input.x, 2) +
       Math.pow(params.input.y, 2)
-    ) / 1000000 // defines convergence threshold for simulation
+    ) / 100000 // defines convergence threshold for simulation
+
+    let converged = false
 
     let count = 0
 
@@ -51,6 +60,8 @@ window.addEventListener(
     let prevY = zeros(ROWS + 1, COLS) // (21R, 80C)
 
     let primeP = zeros(ROWS, COLS) //    (20R, 80C)
+    let aX = zeros(ROWS, COLS + 1)
+    let aY = zeros(ROWS + 1, COLS)
 
     for (let j = 0; j < state.length; j++) {
       for (let i = 0; i < state[j].length; i++) {
@@ -72,18 +83,14 @@ window.addEventListener(
       // state[j][COLS - 1] = 0 // sets rightmost column to wall
     }
 
-    state[0][COLS - 1] = 2 // sets northern-rightmost column to outlets
-    // state[0][COLS - 1] = 0 // sets northern-rightmost column to wall
-    //
-    state[ROWS - 1][COLS - 1] = 2 // sets southern-rightmost column to outlets
-    // state[ROWS - 1][COLS - 1] = 0 // sets southern-rightmost column to wall
-
     // for (let i = 1; i < COLS - 1; i++) {
     //   state[0][i] = 1 // sets leftmost column to inlets
     //
     //   state[ROWS - 2][i] = 2 // sets lowest row to outlets
     //   state[ROWS - 1][i] = 0 // sets lowest row to outlets
     // }
+
+    let prevC = dye(state)
 
     function draw (sArr, pArr, xArr, yArr) {
       ctxp.clearRect(0, 0, ctxp.canvas.width, ctxp.canvas.height) // clears the pressure canvas
@@ -169,7 +176,7 @@ window.addEventListener(
       ctxyscale.fillRect(i, 0, 10, 50)
     }
 
-    function execute () {
+    function initiate () {
       if (running.checked) {
         const valsX = ax(
           state, prevX, prevY,
@@ -187,14 +194,14 @@ window.addEventListener(
           tempX,
           tempY
         ] = couple(
-            state, prevP, prevX, prevY, valsX, valsY,
-            params.size,
-            params.mu,
-            params.nu,
-            params.rho,
-            params.input.x,
-            params.input.y
-          ) // calcualtes pressure-velocity coupling terms
+          state, prevP, prevX, prevY, valsX, valsY,
+          params.size,
+          params.mu,
+          params.nu,
+          params.rho,
+          params.input.x,
+          params.input.y
+        ) // calcualtes pressure-velocity coupling terms
 
         primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY,
           params.size
@@ -205,10 +212,10 @@ window.addEventListener(
           nextY,
           nextP
         ] = correct(state, prevP, primeP, tempX, tempY, prevX, prevY, valsX, valsY,
-            params.size,
-            params.input.x,
-            params.input.y
-          ) // calculates corrected values
+          params.size,
+          params.input.x,
+          params.input.y
+        ) // calculates corrected values
 
         if (count === 0) {
           draw(state, nextP, nextX, nextY)
@@ -222,14 +229,19 @@ window.addEventListener(
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
           prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
         } else {
-          running.checked = false // disables simulation loop
+          // running.checked = false // disables simulation loop
+          converged = true
+          prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
+          prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
+          prevP = nextP.map(arr => [...arr]) // puts array into cell and expands out
+          aX = valsX.map(arr => [...arr]) // puts array into cell and expands out
+          aY = valsY.map(arr => [...arr]) // puts array into cell and expands out
 
-          for (let j = 0; j < nextX.length; j++) {
-            console.log(nextX[j][COLS - 1])
-          }
+          console.log('converged!')
 
-          console.log('i:', nextP[9][0])
-          console.log('o:', nextP[9][COLS - 1])
+          // for (let j = 0; j < nextX.length; j++) {
+          //   console.log(nextX[j][COLS - 1])
+          // }
 
           // let test = []
           //
@@ -267,17 +279,35 @@ window.addEventListener(
         }
       }
 
-      // console.log('xL:' + nextX[1][1] + '\nxL:' + nextX[ROWS - 2][1] + '\naX:', valsX[1][1], valsX[ROWS - 2][1])
-      // console.log('yL:' + nextY[1][1] + '\nyL:' + nextY[ROWS - 1][1] + '\naY:', valsY[1][1], valsY[ROWS - 1][1])
-
-      // console.log('xR:' + nextX[1][COLS - 2] + '\nxR:' + nextX[ROWS - 2][COLS - 1])
-      // console.log('yR:' + nextY[1][COLS - 2] + '\nyR:' + nextY[ROWS - 1][COLS - 2])
-
-      requestAnimationFrame(execute)
+      if (!converged) {
+        requestAnimationFrame(initiate)
+      } else {
+        setInterval(simulate, 1000)
+        // requestAnimationFrame(simulate)
+      }
     }
-    // setInterval(execute, 400)
-    // requestAnimationFrame(execute)
-    requestAnimationFrame(execute)
+
+    function simulate () {
+      if (running.checked) {
+        let tempC = concentrations(state, prevC, 0.0001)
+
+        // let tempC = jacobi(state, prevC, prevX, prevY, aX, aY,
+        //   params.size
+        // ) // calculates pressure estimate
+
+        let tempD = corrections(state, prevX, prevY, tempC)
+        draw(state, tempD, prevX, prevY)
+
+        // console.log(tempC, tempD)
+        if (true) {
+          prevC = tempD.map(arr => [...arr]) // puts array into cell and expands out
+        }
+      }
+
+      // requestAnimationFrame(simulate)
+    }
+    // setInterval(initiate, 400)
+    requestAnimationFrame(initiate)
   },
   false
 )
