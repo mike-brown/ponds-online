@@ -15,33 +15,34 @@ html {
 }
 
 body {
-  background-color: #DCDCCC;
+  /* credit to www.subtlepatterns.com */
+  background: url("../images/topography.png");
 }
 
 section {
   padding: 8px;
   margin: 8px;
-  background-color: #E8E8D8;
+  background-color: #E8E8E0;
 
-  -webkit-box-shadow: 4px 4px 0px #666688;
-     -moz-box-shadow: 4px 4px 0px #666688;
-      -ms-box-shadow: 4px 4px 0px #666688;
-       -o-box-shadow: 4px 4px 0px #666688;
-          box-shadow: 4px 4px 0px #666688;
+  -webkit-box-shadow: 4px 4px 1px #666688;
+     -moz-box-shadow: 4px 4px 1px #666688;
+      -ms-box-shadow: 4px 4px 1px #666688;
+       -o-box-shadow: 4px 4px 1px #666688;
+          box-shadow: 4px 4px 1px #666688;
 }
 
 figure {
   display: table;
   margin: 8px;
 
-  background-color: #D8D8E8;
+  background-color: #E0E0E8;
 }
 
 figcaption {
   display: table-caption;
   caption-side: bottom;
 
-  background-color: #D8D8E8;
+  background-color: #E0E0E8;
 
   padding: 0px 4px 4px 4px;
 
@@ -94,7 +95,7 @@ nav ul li {
 }
 
 nav ul li a, nav ul li a:hover, nav ul li a:visited {
-  color: #DCDCCC;
+  color: #DCDCD4;
 
 	width: 100%;
 	height: 100%;
@@ -106,7 +107,7 @@ nav ul li a, nav ul li a:hover, nav ul li a:visited {
 
 nav ul li a:hover {
   color: #000008;
-  background-color: #E8E8D8;
+  background-color: #E8E8E0;
 }
 
 /* TABLES ////////////////////////////////////////////////////////////////////*/
