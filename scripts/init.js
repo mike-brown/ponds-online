@@ -15,17 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // canvas
   const $canvases = document.querySelector('.canvases')
   const $designCanvas = $canvases.querySelector('canvas.design')
-  const $run = document.querySelector('button.run')
+  const $run = document.querySelector('.js-run')
 
   let simulating = false
 
   const startSim = () => {
-    $run.classList.remove('primary')
-    $run.classList.add('secondary')
-    $run.textContent = 'Stop Simulation'
-    document.querySelector('.title').textContent = 'Simulation'
+    if (editor.isReady()) {
+      $run.classList.remove('primary')
+      $run.classList.add('secondary')
+      $run.textContent = 'Stop Simulation'
+      document.querySelector('.title').textContent = 'Simulation'
 
-    $designCanvas.style.display = 'none'
+      $designCanvas.style.display = 'none'
+    }
   }
 
   const stopSim = () => {
@@ -37,7 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $run.addEventListener('click', () => {
     if (!simulating) {
-      startSim()
+      // startSim()
+
+      const bounds = editor.pond.bounds
+      console.log(bounds)
     } else {
       stopSim()
     }
@@ -115,10 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.zoom(1 + ev.wheelDeltaY / 1000)
   })
 
-  $run.addEventListener('click', () => {
-    window.location = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
-  })
-
   Mousetrap.bind('esc', ev => {
     editor.activateTool('hand')
     if (editor.isReady()) {
@@ -151,20 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.activateTool('hand')
   })
 
-  Mousetrap.bind('g', ev => {
-    editor.gridSnap = true
-    $gridSnapTool.checked = true
-  })
-
-  Mousetrap.bind(
-    'g',
-    ev => {
-      editor.gridSnap = false
-      $gridSnapTool.checked = false
-    },
-    'keyup'
-  )
-
   Mousetrap.bind('-', ev => {
     ev.preventDefault()
     editor.zoom('out')
@@ -186,4 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
     },
     'keyup'
   )
+
+  Mousetrap.bind('g', ev => {
+    $gridSnapTool.checked = editor.gridSnap = !editor.gridSnap
+  })
+
+  if (editor.isReady()) {
+    $run.disabled = false
+  }
 })

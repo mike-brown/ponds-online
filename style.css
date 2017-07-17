@@ -16,7 +16,7 @@ canvas.simulation {
   --margin: 0.5rem;
   flex: 1 1 auto;
   max-width: calc(100% - 2 * var(--margin));
-  min-height: 80vh;
+  min-height: 70vh;
   display: block;
   margin: 0 var(--margin) var(--margin);
 

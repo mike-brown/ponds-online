@@ -7,7 +7,7 @@ const {
   Path,
   Color,
   PointText,
-  Path: { Line }
+  Path: { Line, Rectangle }
 } = require('paper')
 
 const { HandTool } = require('./hand-tool')
@@ -48,6 +48,35 @@ class Editor {
     this.registerTool('hand', new HandTool(this))
 
     this.reset()
+
+    //
+    // HACK: PRESET REMOVE
+    //
+
+    this.pond = new Rectangle({
+      topLeft: [100, 100],
+      bottomRight: [400, 200],
+      fillColor: Editor.colors.aqua
+    })
+    this.baseLayer.addChild(this.pond)
+
+    this.inlet = new Line({
+      from: [100, 100],
+      to: [100, 200],
+      strokeColor: Editor.colors.blue,
+      strokeCap: 'round',
+      strokeWidth: 5
+    })
+    this.baseLayer.addChild(this.inlet)
+
+    this.outlet = new Line({
+      from: [400, 100],
+      to: [400, 200],
+      strokeColor: Editor.colors.orange,
+      strokeCap: 'round',
+      strokeWidth: 5
+    })
+    this.baseLayer.addChild(this.outlet)
   }
 
   registerTool (name, tool) {
