@@ -28,8 +28,6 @@ class HandTool extends Tool {
       point.x += ev.delta.x
       point.y += ev.delta.y
     })
-
-    console.log('viewport offset', this.editor.viewport)
   }
 }
 

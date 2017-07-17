@@ -75,8 +75,12 @@ class AddTool extends Tool {
     const point = this.editor.gridSnap
       ? snapToGrid(
         ev.point,
-        this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
-        this.editor.viewport
+        this.editor.zoomLevel *
+            this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
+        {
+          x: this.editor.viewport.x + this.editor.view.center.x,
+          y: this.editor.viewport.y + this.editor.view.center.y
+        }
       )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
@@ -86,8 +90,6 @@ class AddTool extends Tool {
   }
 
   onMouseMove (ev) {
-    console.log('mouse position', ev.point)
-
     ev.point.x -= this.editor.viewport.x
     ev.point.y -= this.editor.viewport.y
 
@@ -99,14 +101,16 @@ class AddTool extends Tool {
     const point = this.editor.gridSnap
       ? snapToGrid(
         ev.point,
-        this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
-        this.editor.viewport
+        this.editor.zoomLevel *
+            (this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS),
+        {
+          x: this.editor.viewport.x + this.editor.view.center.x,
+          y: this.editor.viewport.y + this.editor.view.center.y
+        }
       )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
         : ev.point
-
-    console.log('point to add', point)
 
     movePond.add(point)
     movePond.visible = true

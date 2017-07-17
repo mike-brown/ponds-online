@@ -44,9 +44,11 @@ class Editor {
     this.tools = {}
     this.activeTool = undefined
     this.registerTool('hand', new HandTool(this))
-    this.activateTool('hand')
 
     this.reset()
+
+    this.zoom(2)
+    this.zoom(0.5)
   }
 
   registerTool (name, tool) {
@@ -126,6 +128,9 @@ class Editor {
     }
 
     this.zoomLevel *= level
+    this.viewport.x *= level
+    this.viewport.y *= level
+
     this.subGridLayer.scale(level, this.view.center)
     this.gridLayer.scale(level, this.view.center)
     this.baseLayer.scale(level, this.view.center)
@@ -191,11 +196,14 @@ class Editor {
     const grid = new Layer()
 
     // vertical gridlines
-    for (let i = -100; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       grid.addChild(
         new Line({
-          from: [i * this.GRID_SCALE + this.viewport.x, 0],
-          to: [i * this.GRID_SCALE + this.viewport.x, 10000],
+          from: [this.view.center.x + i * this.GRID_SCALE, this.view.center.y],
+          to: [
+            this.view.center.x + i * this.GRID_SCALE,
+            this.view.center.y + 10000
+          ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.5)
         })
@@ -203,19 +211,22 @@ class Editor {
     }
 
     // horizontal gridlines
-    for (let i = -100; i < 100; i++) {
+    for (let i = 0; i < 100; i++) {
       grid.addChild(
         new Line({
-          from: [0, i * this.GRID_SCALE + this.viewport.y],
-          to: [10000, i * this.GRID_SCALE + this.viewport.y],
+          from: [this.view.center.x, this.view.center.y + i * this.GRID_SCALE],
+          to: [
+            this.view.center.x + 10000,
+            this.view.center.y + i * this.GRID_SCALE
+          ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.5)
         })
       )
     }
 
-    grid.position.x = -this.GRID_SCALE * 50
-    grid.position.y = -this.GRID_SCALE * 50
+    grid.position.x = this.view.center.x
+    grid.position.y = this.view.center.y
 
     return grid
   }
@@ -224,19 +235,15 @@ class Editor {
     const grid = new Layer()
 
     // vertical subdivisions
-    for (
-      let i = -100 * this.GRID_SUBDIVISIONS;
-      i < 100 * this.GRID_SUBDIVISIONS;
-      i++
-    ) {
+    for (let i = 0; i < 100 * this.GRID_SUBDIVISIONS; i++) {
       grid.addChild(
         new Line({
           from: [
-            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.x,
+            this.view.center.x + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS,
             0
           ],
           to: [
-            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.x,
+            this.view.center.y + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS,
             10000
           ],
           strokeWidth: 1,
@@ -246,20 +253,16 @@ class Editor {
     }
 
     // horizontal subdivisions
-    for (
-      let i = -100 * this.GRID_SUBDIVISIONS;
-      i < 100 * this.GRID_SUBDIVISIONS;
-      i++
-    ) {
+    for (let i = 0; i < 100 * this.GRID_SUBDIVISIONS; i++) {
       grid.addChild(
         new Line({
           from: [
             0,
-            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.y
+            this.view.center.x + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS
           ],
           to: [
             10000,
-            i * this.GRID_SCALE / this.GRID_SUBDIVISIONS + this.viewport.y
+            this.view.center.y + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS
           ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.25)
