@@ -25,7 +25,7 @@ class Editor {
     this.GRID_SCALE = 100
     this.GRID_SUBDIVISIONS = 2
     this.ANGLE_SNAP = Math.PI / 8
-    this.MAX_ZOOM = 8
+    this.MAX_ZOOM = 6
     this.MIN_ZOOM = 0.2
 
     this.viewport = new Point({ x: 0, y: 0 })
@@ -37,9 +37,11 @@ class Editor {
     this.project = this.scope.project
 
     this.baseLayer = this.project.activeLayer
-    this.scaleLayer = this.project.addLayer(this.createScaleLayer())
     this.gridLayer = this.project.addLayer(this.createGridLayer())
     this.subGridLayer = this.project.addLayer(this.createSubGridLayer())
+    this.scaleLayer = this.project.addLayer(
+      this.createScaleLayer(this.zoomLevel)
+    )
 
     this.tools = {}
     this.activeTool = undefined
@@ -47,8 +49,7 @@ class Editor {
 
     this.reset()
 
-    this.zoom(2)
-    this.zoom(0.5)
+    this.zoom(1.25)
   }
 
   registerTool (name, tool) {
@@ -139,12 +140,42 @@ class Editor {
     this.subGridLayer.scale(level, this.view.center)
     this.gridLayer.scale(level, this.view.center)
     this.baseLayer.scale(level, this.view.center)
-    this.scaleLayer.scale(level, this.view.bounds.bottomLeft)
+
+    this.scaleLayer.remove()
+    this.scaleLayer = this.project.addLayer(
+      this.createScaleLayer(this.zoomLevel)
+    )
 
     this.subGridLayer.visible = this.zoomLevel > 0.7
   }
 
-  createScaleLayer () {
+  createScaleLayer (ratio) {
+    let text
+    let length
+
+    if (ratio > 5) {
+      text = '0.2m'
+      length = 0.2
+    } else if (ratio > 4) {
+      text = '0.25m'
+      length = 0.25
+    } else if (ratio > 2) {
+      text = '0.5m'
+      length = 0.5
+    } else if (ratio > 1) {
+      text = '1m'
+      length = 1
+    } else if (ratio > 0.5) {
+      text = '2m'
+      length = 2
+    } else if (ratio > 0.2) {
+      text = '4m'
+      length = 4
+    } else {
+      text = '1m'
+      length = 1
+    }
+
     return new Layer({
       children: [
         new PointText({
@@ -157,8 +188,8 @@ class Editor {
           fontSize: 25
         }),
         new PointText({
-          point: [this.GRID_SCALE, 30],
-          content: '1m',
+          point: [this.GRID_SCALE * ratio * length, 30],
+          content: text,
           fillColor: Editor.colors.white,
           fontFamily: 'Arial',
           fontWeight: 100,
@@ -166,8 +197,8 @@ class Editor {
           fontSize: 25
         }),
         new PointText({
-          point: [-20, -this.GRID_SCALE + 10],
-          content: '1m',
+          point: [-20, -this.GRID_SCALE * ratio * length + 10],
+          content: text,
           fillColor: Editor.colors.white,
           fontFamily: 'Arial',
           fontWeight: 100,
@@ -177,23 +208,26 @@ class Editor {
         }),
         new Path({
           segments: [
-            [-5, -this.GRID_SCALE],
-            [5, -this.GRID_SCALE],
-            [0, -this.GRID_SCALE],
+            [-5, -this.GRID_SCALE * ratio * length],
+            [5, -this.GRID_SCALE * ratio * length],
+            [0, -this.GRID_SCALE * ratio * length],
             [0, 0],
             [0, 5],
             [0, 0],
             [-5, 0],
             [0, 0],
-            [this.GRID_SCALE, 0],
-            [this.GRID_SCALE, -5],
-            [this.GRID_SCALE, 5]
+            [this.GRID_SCALE * ratio * length, 0],
+            [this.GRID_SCALE * ratio * length, -5],
+            [this.GRID_SCALE * ratio * length, 5]
           ],
           strokeColor: Editor.colors.white,
           strokeWidth: 2
         })
       ],
-      position: [80, this.view.size.height - 80]
+      position: [
+        this.view.bounds.bottomLeft.x + 50 * ratio * length + 30,
+        this.view.bounds.bottomLeft.y - 50 * ratio * length - 30
+      ]
     })
   }
 
