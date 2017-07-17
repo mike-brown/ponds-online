@@ -337,6 +337,12 @@ class Editor {
     }
   }
 
+  static lastPointOf (path) {
+    return path.segments.length
+      ? path.segments[path.segments.length - 1].point
+      : undefined
+  }
+
   static createPond () {
     const pond = new Path()
     pond.strokeColor = Editor.colors.white

@@ -34,13 +34,18 @@ class VegTool extends Tool {
   }
 
   onMouseDown (ev) {
-    this.editor.vegmask.add(ev.point)
+    const lastPoint = Editor.lastPointOf(this.editor.vegMask)
+    const point = this.lineSnap(ev.point, lastPoint)
+
+    this.editor.vegmask.add(point)
   }
 
   onMouseMove (ev) {
     const moveVeg = this.editor.vegmask.clone({ insert: false })
+    const lastPoint = Editor.lastPointOf(moveVeg)
+    const point = this.lineSnap(ev.point, lastPoint)
 
-    moveVeg.add(ev.point)
+    moveVeg.add(point)
     moveVeg.visible = true
     moveVeg.selected = true
 

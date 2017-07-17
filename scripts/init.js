@@ -143,4 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
     ev.preventDefault()
     editor.zoom('in')
   })
+
+  Mousetrap.bind('shift', ev => {
+    editor.angleSnap = true
+  })
+
+  Mousetrap.bind('shift', ev => {
+    editor.angleSnap = false
+  }, 'keyup')
 })

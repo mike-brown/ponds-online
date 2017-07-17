@@ -2,6 +2,10 @@
 
 const { Tool } = require('./tool')
 const { Editor } = require('./editor')
+const {
+  directionalSnap,
+  snapToGrid
+} = require('./snap')
 
 class RemoveTool extends Tool {
   activate () {
@@ -64,13 +68,19 @@ class RemoveTool extends Tool {
   }
 
   onMouseDown (ev) {
-    this.editor.mask.add(ev.point)
+    const lastPoint = Editor.lastPointOf(this.editor.mask)
+    const point = this.lineSnap(ev.point, lastPoint)
+
+    this.editor.mask.add(point)
   }
 
   onMouseMove (ev) {
     const moveMask = this.editor.mask.clone({ insert: false })
 
-    moveMask.add(ev.point)
+    const lastPoint = Editor.lastPointOf(moveMask)
+    const point = this.lineSnap(ev.point, lastPoint)
+
+    moveMask.add(point)
     moveMask.visible = true
     moveMask.selected = true
 
