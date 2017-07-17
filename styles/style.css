@@ -15,8 +15,10 @@ html {
 }
 
 body {
+  position: absolute;
   /* credit to www.subtlepatterns.com */
   background: url("../images/topography.png");
+  min-height: 100vh;
 }
 
 section {
@@ -29,6 +31,28 @@ section {
       -ms-box-shadow: 4px 4px 1px #A8A8B0;
        -o-box-shadow: 4px 4px 1px #A8A8B0;
           box-shadow: 4px 4px 1px #A8A8B0;
+}
+
+section:last-of-type {
+  margin: 8px 8px 32px 8px;
+}
+
+footer {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+
+  font-size: 16px;
+
+  color: #D8D8D0;
+  height: 24px;
+
+  line-height: 24px;
+
+  text-align: center;
+
+  background-color: #202028;
 }
 
 figure {
@@ -57,11 +81,11 @@ figcaption {
 nav {
   position: relative;
 
-  background: rgb(64, 64, 70);
-  background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:      -o-linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:         linear-gradient(45deg, rgba(48, 48, 56, 1) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background: rgb(48, 48, 56);
+  background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:      -o-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background:         linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
 
   background-size: cover;
 
