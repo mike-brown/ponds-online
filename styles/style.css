@@ -1,0 +1,111 @@
+/* RESETS ////////////////////////////////////////////////////////////////////*/
+
+* {
+  padding: 0px;
+  margin: 0px;
+}
+
+/* FONTS /////////////////////////////////////////////////////////////////////*/
+
+/* CONTAINERS ////////////////////////////////////////////////////////////////*/
+
+html {
+  font-family: 'Signika', sans-serif;
+  overflow-y: scroll;
+}
+
+body {
+  background-color: #DCDCCC;
+}
+
+section {
+  padding: 8px;
+  margin: 8px;
+  background-color: #E8E8D8;
+
+  -webkit-box-shadow: 4px 4px 0px #666688;
+     -moz-box-shadow: 4px 4px 0px #666688;
+      -ms-box-shadow: 4px 4px 0px #666688;
+       -o-box-shadow: 4px 4px 0px #666688;
+          box-shadow: 4px 4px 0px #666688;
+}
+
+figure {
+  display: table;
+  margin: 8px;
+
+  background-color: #D8D8E8;
+}
+
+figcaption {
+  display: table-caption;
+  caption-side: bottom;
+
+  background-color: #D8D8E8;
+
+  padding: 0px 4px 4px 4px;
+
+  font-size: 14px;
+  text-align: center;
+}
+
+/* FORMS /////////////////////////////////////////////////////////////////////*/
+
+/* NAVBARS ///////////////////////////////////////////////////////////////////*/
+
+nav {
+  position: relative;
+  background-color: #303038;
+
+  width: 100%;
+  height: 128px;
+}
+
+nav ul {
+  position: absolute;
+  bottom: 0px;
+
+  width: 100%;
+
+	background-color: #202028;
+
+	list-style: none;
+
+	font-size: 0px;
+}
+
+nav ul li {
+	width: 96px;
+	height: 32px;
+
+	display: inline-block;
+
+	line-height: 32px;
+	text-align: center;
+
+	font-size: 20px;
+}
+
+nav ul li a, nav ul li a:hover, nav ul li a:visited {
+  color: #DCDCCC;
+
+	width: 100%;
+	height: 100%;
+
+	display: inline-block;
+
+	text-decoration: none;
+}
+
+nav ul li a:hover {
+  color: #000008;
+  background-color: #E8E8D8;
+}
+
+/* TABLES ////////////////////////////////////////////////////////////////////*/
+
+/* TEXTS /////////////////////////////////////////////////////////////////////*/
+
+p {
+  padding: 8px;
+}
