@@ -245,11 +245,11 @@ class Editor {
         new Line({
           from: [
             this.view.center.x + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS,
-            0
+            this.view.center.y
           ],
           to: [
-            this.view.center.y + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS,
-            10000
+            this.view.center.x + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS,
+            this.view.center.y + 10000
           ],
           strokeWidth: 1,
           strokeColor: new Color(255, 0.25)
@@ -262,11 +262,11 @@ class Editor {
       grid.addChild(
         new Line({
           from: [
-            0,
-            this.view.center.x + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS
+            this.view.center.x,
+            this.view.center.y + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS
           ],
           to: [
-            10000,
+            this.view.center.x + 10000,
             this.view.center.y + i * this.GRID_SCALE / this.GRID_SUBDIVISIONS
           ],
           strokeWidth: 1,
@@ -275,8 +275,8 @@ class Editor {
       )
     }
 
-    grid.position.x = -this.GRID_SCALE * 50
-    grid.position.y = -this.GRID_SCALE * 50
+    grid.position.x = this.view.center.x
+    grid.position.y = this.view.center.y
 
     return grid
   }
