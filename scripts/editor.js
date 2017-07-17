@@ -134,8 +134,7 @@ class Editor {
     }
 
     this.zoomLevel *= level
-    this.viewport.x *= level
-    this.viewport.y *= level
+    this.viewport = this.viewport.multiply(level)
 
     this.subGridLayer.scale(level, this.view.center)
     this.gridLayer.scale(level, this.view.center)

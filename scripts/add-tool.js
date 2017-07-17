@@ -9,8 +9,7 @@ const roundToNearest = (num, base) => {
 }
 
 const directionalSnap = (from, to, nearest) => {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
+  const { x: dx, y: dy } = to.subtract(from)
 
   const r = Math.sqrt(dx * dx + dy * dy)
 
@@ -23,9 +22,12 @@ const directionalSnap = (from, to, nearest) => {
   return new Point(from.x + x, from.y + y)
 }
 
-const snapToGrid = (point, gridSize = 1, offset = { x: 0, y: 0 }) => {
-  point.x -= offset.x
-  point.y -= offset.y
+const snapToGrid = (
+  point,
+  gridSize = 1,
+  offset = new Point({ x: 0, y: 0 })
+) => {
+  point = point.subtract(offset)
 
   return new Point({
     x: roundToNearest(point.x, gridSize) + offset.x,
@@ -76,11 +78,9 @@ class AddTool extends Tool {
       ? snapToGrid(
         ev.point,
         this.editor.zoomLevel *
-            this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS,
-        {
-          x: this.editor.viewport.x + this.editor.view.center.x,
-          y: this.editor.viewport.y + this.editor.view.center.y
-        }
+            this.editor.GRID_SCALE /
+            this.editor.GRID_SUBDIVISIONS,
+        this.editor.viewport.add(this.editor.view.center)
       )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
@@ -90,9 +90,6 @@ class AddTool extends Tool {
   }
 
   onMouseMove (ev) {
-    ev.point.x -= this.editor.viewport.x
-    ev.point.y -= this.editor.viewport.y
-
     const movePond = this.editor.pond.clone({ insert: false })
     const lastPoint = movePond.segments.length
       ? movePond.segments[movePond.segments.length - 1].point
@@ -103,10 +100,7 @@ class AddTool extends Tool {
         ev.point,
         this.editor.zoomLevel *
             (this.editor.GRID_SCALE / this.editor.GRID_SUBDIVISIONS),
-        {
-          x: this.editor.viewport.x + this.editor.view.center.x,
-          y: this.editor.viewport.y + this.editor.view.center.y
-        }
+        this.editor.viewport.add(this.editor.view.center)
       )
       : this.editor.angleSnap && lastPoint
         ? directionalSnap(lastPoint, ev.point, this.editor.ANGLE_SNAP)
