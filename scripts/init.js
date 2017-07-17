@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   $gridSnapTool.addEventListener('click', () => {
-    editor.gridSnap = !!$gridSnapTool.checked
+    editor.gridSnap = !!editor.gridSnap
+    $gridSnapTool.checked = editor.gridSnap
   })
 
   $subdivisionsTool.addEventListener('change', () => {
@@ -103,7 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editor.subGridLayer.position = editor.gridLayer.position.clone()
 
-    $subdivisionsTool.parentNode.querySelector('.js-grid-subdivisions-val').textContent = $subdivisionsTool.value
+    $subdivisionsTool.parentNode.querySelector(
+      '.js-grid-subdivisions-val'
+    ).textContent =
+      $subdivisionsTool.value
   })
 
   $canvas.addEventListener('mousewheel', ev => {
@@ -147,6 +151,20 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.activateTool('hand')
   })
 
+  Mousetrap.bind('g', ev => {
+    editor.gridSnap = true
+    $gridSnapTool.checked = true
+  })
+
+  Mousetrap.bind(
+    'g',
+    ev => {
+      editor.gridSnap = false
+      $gridSnapTool.checked = false
+    },
+    'keyup'
+  )
+
   Mousetrap.bind('-', ev => {
     ev.preventDefault()
     editor.zoom('out')
@@ -161,7 +179,11 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.angleSnap = true
   })
 
-  Mousetrap.bind('shift', ev => {
-    editor.angleSnap = false
-  }, 'keyup')
+  Mousetrap.bind(
+    'shift',
+    ev => {
+      editor.angleSnap = false
+    },
+    'keyup'
+  )
 })
