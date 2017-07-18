@@ -18,6 +18,8 @@ body {
   position: absolute;
   /* credit to www.subtlepatterns.com */
   background: url("../images/topography.png");
+
+  min-width: 100%;
   min-height: 100vh;
 }
 
