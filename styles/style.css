@@ -75,6 +75,17 @@ figcaption {
   text-align: center;
 }
 
+ul {
+  margin: 8px 8px 8px 24px;
+  padding: 0px 8px 8px 8px;
+
+  line-height: 1.4em;
+}
+
+ul li {
+  padding: 8px;
+}
+
 /* FORMS /////////////////////////////////////////////////////////////////////*/
 
 /* NAVBARS ///////////////////////////////////////////////////////////////////*/
@@ -139,6 +150,10 @@ nav ul li a:hover {
 
 /* TEXTS /////////////////////////////////////////////////////////////////////*/
 
+span.bold {
+  font-weight: bold;
+}
+
 a {
   text-decoration: none;
   color: inherit;
@@ -150,5 +165,5 @@ a:hover {
 
 h1, h2, h3, h4, h5, h6, p {
   padding: 8px;
-  line-height: 1.5em;
+  line-height: 1.4em;
 }
