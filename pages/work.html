@@ -90,14 +90,32 @@
     \documentclass{article}
     \begin{document}
     \begin{equation*}
-    \rho \frac{\partial u}{\partial t} = -\frac{\partial p}{\partial x} + \bigtriangledown \circ \mu \bigtriangledown u + S
+    \rho \frac{D u}{D t} = -\frac{\partial p}{\partial x} + \bigtriangledown \circ \mu \bigtriangledown u + S
 
-    \rho \frac{\partial v}{\partial t} = -\frac{\partial p}{\partial y} + \bigtriangledown \circ \mu \bigtriangledown v + S
+    \rho \frac{D v}{D t} = -\frac{\partial p}{\partial y} + \bigtriangledown \circ \mu \bigtriangledown v + S
     \end{equation*}
     \end{document}
 
 
+    <p>Here the use of D in the place of the normal or partial deltas signifiies total change of the variable over time and so can be expanded into this.</p>
+
+    \documentclass{article}
+    \begin{document}
+    \begin{equation*}
+    \rho \frac{D u}{D t} = \frac{\partial u}{\partial t} + \bigtriangledown \circ \rho u \mathbf{u}
+    \end{equation*}
+    \end{document}
+
     <p>Using the assumption of steady state the derivative with respect to time can be set to 0 and then using the following identity the Navier-Stokes equations can be simplified.</p>
+
+    \documentclass{article}
+    \begin{document}
+    \begin{equation*}
+    \bigtriangledown \circ \rho u \mathbf{u} = \mathbf{u} \circ \bigtriangledown \rho u + \rho u \bigtriangledown \circ \mathbf{u}
+    \end{equation*}
+    \end{document}
+
+    <p> This gives the following result for the now simplified steady state Navier-Stokes equatons for an incompressible fluid. </p>
     <figure style="float:right">
       <img src="../images/utah_teapot.png" width="320px" height="auto" alt="Image of the Utah Teapot" />
       <figcaption>3D graphical representation of the Utah Teapot, made by Martin Newell</figcaption>
