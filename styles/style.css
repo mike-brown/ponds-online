@@ -42,15 +42,14 @@ footer {
   bottom: 0px;
   left: 0px;
   right: 0px;
-
-  font-size: 16px;
+  padding: 0px 4px;
 
   color: #D8D8D0;
+  font-size: 20px;
+  text-align: right;
+
   height: 24px;
-
   line-height: 24px;
-
-  text-align: center;
 
   background-color: #202028;
 }
@@ -137,6 +136,15 @@ nav ul li a:hover {
 /* TABLES ////////////////////////////////////////////////////////////////////*/
 
 /* TEXTS /////////////////////////////////////////////////////////////////////*/
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  color: #FFFFFF;
+}
 
 h1, h2, h3, h4, h5, h6, p {
   padding: 8px;
