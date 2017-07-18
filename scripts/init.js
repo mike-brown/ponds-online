@@ -41,8 +41,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!simulating) {
       // startSim()
 
-      const bounds = editor.pond.bounds
-      console.log(bounds)
+      editor.scaleLayer.visible = false
+      editor.gridLayer.visible = false
+      editor.subGridLayer.visible = false
+
+      editor.baseLayer.fitBounds(editor.view.bounds)
+      editor.baseLayer.scale(0.98, editor.view.center)
+      editor.pond.fillColor = '#0affff'
+
+      editor.inlet.strokeWidth = 1
+      editor.outlet.strokeWidth = 1
+      editor.inlet.strokeColor = '#01ffff'
+      editor.outlet.strokeColor = '#02ffff'
+
+      const raster = editor.pond.rasterize()
+      const { data, width, height } = raster.getImageData(editor.view.bounds)
+
+      const reds = Float32Array.from(data.filter((val, index) => {
+        return index % 4 === 0
+      }))
+
+      const input = Array.from(Array(height)).map((val, i) => {
+        return reds.slice(i * width, i * width + width)
+      })
+
+      console.log(input)
     } else {
       stopSim()
     }
