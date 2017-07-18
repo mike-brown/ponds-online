@@ -29,8 +29,52 @@
   </nav>
 
   <section>
-    <h2>Lorem Ipsum!</h2>
-    <p>Lorem ipsum dolor sit amet, ad infinitum...</p>
+    <h2>How the model works</h2>
+    <p>CFD or computational fluid dynamics is the use of computational mathematical modelling to simulate the flow of fluids in a given geometry. There are two methods for this, direct numerical simulation (DNS) and modelling using a given approach or scheme. DNS is theoretically the simpler approach, each element of the fluid being small enough for the ''brute force'' method to give accurate results. This is however extremely costly in regards to computing time and power and rarely used for large models.</p>
+
+    <p>Instead a finite volume method was used to solve the Navier-Stokes equations in order to properly simulate the flow field in a given pond geometry. In this approach there are several assumptions;
+
+    <p>_Conservation of mass_; The mass of the fluid is *always* conserved. If a loss or gain of mass occurs there must be an appropriate process to explain it, mass cannot simply 'fall' out of the simulation.
+
+    <p>_Newton's second law_; This states that any change in momentum must equal the sum of the forces acting upon it.
+
+    <p>_Conservation of energy_; The change in energy of any particle must be equal to any work done or change in temperature, we cannot create energy or loose it spontaneously. This is in essence the first law of thermodynamics.
+
+    <p>_Continuum_; The fluid being modelled is considered to be a Continuum. This is a formal way of saying that the scale at which the model is operating is large enough for any effects from the molecular structure and motion are irrelevant. Looking from one point to the next we should see no difference in characteristics. This means that a point of fluid is the smallest volume of the fluid where it can still be considered a continuum and the macroscopic properties still provide an adequate description.</p>
+
+    <p>_Macroscopic description_; The variables used t fully describe the motion of the fluid are pressure, velocity, density, temperature and so forth are all macroscopic. This means that they are averages over the microscopic variables which each molecule has. We assume that this is a complete description which continues on from our assumption of it being a continuum.</p>
+
+    <p>_Two dimensional_; In this example the model has only been applied in two dimensions. In essence it has been treated as a one meter slice of an infinity deep body of water. In reality this means additional contributions from vertical effects have been neglected but in pond structures these tend t be small due to the shallow depth.</p>
+
+    <p>_Completely isolated_; The fluid is also assumed to be completely isolated from its surroundings and so no change in temperature or work due to external forces (such as wind or wildlife) are included. Again this will decrease the accuracy of the results compared to real world data as temperature and external conditions can have very significant effects.</p>
+
+    <p>_Vegetative drag_; In this model the effect due to vegetation is accounted by the inclusion of an additional drag force to oppose the motion of the fluid. This drag force depends upon several experimentally found results and so may not be perfectly representative. Other schemes for vegetation do exist.</p>
+
+    <p>_Steady state_; This model is a steady state solution which assumes no changes with respect to time occur to the flow field and that it has stabilized to some result after sufficient time has elapsed since flow began.</p>
+
+    <p>_Incompressible fluid_; In this simulation the fluid, namely liquid water, is assumed to be incompressible and so has a constant density at all points.</p>
+
+    <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the center of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
+
+    <p>In order to prevent the ''checker boarding'' of values a staggered grid has been used. This means that the grid of pressures, x velocities and y velocities are not the same size. For each pressure cell or point there is a velocity on each wall, two x velocities and two y velocities. This means that the x velocity grid has one more column than the pressure grid and the y velocity grid has one more row. This means that for a pressure cell with index (i,j) the x velocity (i,j) is the velocity on the wall to the west of it and (i+1,j) is the velocity on the wall to the east of the pressure. The same holds for y velocities with (i,j) in the y velocity grid to be the wall above or north of the pressure point and (i,j+1) to be the velocity of the wall below or south of the pressure cell. This arrangement may seem odd at first look but makes sense when it is remembered that computer graphics begin counting in the top left corner. By seeming to count backwards in the y direction we ensure the resulting graphics isn't up-down.</p>
+
+    <p>The first step begins with two of the base assumptions, incompressibility and the conservation of mass. The conservation of mass can be written as the rate of change of mass for an element being equal to the net rate of flow of mass for that element. mathematically this can be written like this;</p>
+
+    <p>**Insert equation for conservation of mass**</p>
+
+    <p>The left hand side can be simplified using the assumption of the incompressibility of the fluid, this gives us this;</p>
+
+    <p>**show simplification**</p>
+
+    <p>Substituting this back into the conservation of mass the following result is found;</p>
+
+    <p>**show equation of the simplified cons of mass**</p>
+
+    <p>This result will be very useful in this next derivation using the Navier-Stokes equations. The Navier-Stokes equations relate the change in velocity to a change in pressure plus effects from viscus stress and any other source or sink terms, they can be written like this;</p>
+
+    <p>**show Navier-Stokes here**</p>
+
+    <p>Using the assumption of steady state the derivative with respect to time can be set to 0 and then using the following identity the Navier-Stokes equations can be simplified.</p>
     <figure style="float:right">
       <img src="../images/utah_teapot.png" width="320px" height="auto" alt="Image of the Utah Teapot" />
       <figcaption>3D graphical representation of the Utah Teapot, made by Martin Newell</figcaption>
