@@ -29,7 +29,8 @@
   </nav>
 
   <section>
-    <h2>How the model works</h2>
+    <h2>Applying the Maths!</h2>
+    <h3>How does the model work?</h3>
     <p>CFD or computational fluid dynamics is the use of computational mathematical modelling to simulate the flow of fluids in a given geometry. There are two methods for this, direct numerical simulation (DNS) and modelling using a given approach or scheme. DNS is theoretically the simpler approach, each element of the fluid being small enough for the ''brute force'' method to give accurate results. This is however extremely costly in regards to computing time and power and rarely used for large models.</p>
 
     <p>Instead a finite volume method was used to solve the Navier-Stokes equations in order to properly simulate the flow field in a given pond geometry. In this approach there are several assumptions;
@@ -54,7 +55,7 @@
 
     <p>_Incompressible fluid_; In this simulation the fluid, namely liquid water, is assumed to be incompressible and so has a constant density at all points.</p>
 
-    <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the center of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
+    <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes: sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the center of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
 
     <p>In order to prevent the ''checker boarding'' of values a staggered grid has been used. This means that the grid of pressures, x velocities and y velocities are not the same size. For each pressure cell or point there is a velocity on each wall, two x velocities and two y velocities. This means that the x velocity grid has one more column than the pressure grid and the y velocity grid has one more row. This means that for a pressure cell with index (i,j) the x velocity (i,j) is the velocity on the wall to the west of it and (i+1,j) is the velocity on the wall to the east of the pressure. The same holds for y velocities with (i,j) in the y velocity grid to be the wall above or north of the pressure point and (i,j+1) to be the velocity of the wall below or south of the pressure cell. This arrangement may seem odd at first look but makes sense when it is remembered that computer graphics begin counting in the top left corner. By seeming to count backwards in the y direction we ensure the resulting graphics isn't up-down.</p>
 
