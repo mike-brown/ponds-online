@@ -86,34 +86,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const $inletTool = document.querySelector('.js-inlet-tool')
   const $outletTool = document.querySelector('.js-outlet-tool')
 
+  const toolButtons = [
+    [new AddTool(editor, $addTool), $addTool, 'add'],
+    [new RemoveTool(editor, $removeTool), $removeTool, 'remove'],
+    [new VegTool(editor, $vegTool), $vegTool, 'veg'],
+    [new InletTool(editor, $inletTool), $inletTool, 'inlet'],
+    [new OutletTool(editor, $outletTool), $outletTool, 'outlet']
+  ]
+
   const $resetTool = document.querySelector('.js-reset-tool')
   const $gridSnapTool = document.querySelector('.js-grid-snap')
   const $subdivisionsTool = document.querySelector('.js-grid-subdivisions')
 
-  editor.registerTool('add', new AddTool(editor, $addTool))
-  editor.registerTool('remove', new RemoveTool(editor, $removeTool))
-  editor.registerTool('veg', new VegTool(editor, $vegTool))
-  editor.registerTool('inlet', new InletTool(editor, $inletTool))
-  editor.registerTool('outlet', new OutletTool(editor, $outletTool))
+  toolButtons.forEach(([tool, button, toolName]) => {
+    editor.registerTool(toolName, tool)
 
-  $addTool.addEventListener('click', () => {
-    editor.activateTool('add')
-  })
-
-  $removeTool.addEventListener('click', () => {
-    editor.activateTool('remove')
-  })
-
-  $vegTool.addEventListener('click', () => {
-    editor.activateTool('veg')
-  })
-
-  $inletTool.addEventListener('click', () => {
-    editor.activateTool('inlet')
-  })
-
-  $outletTool.addEventListener('click', () => {
-    editor.activateTool('outlet')
+    button.addEventListener('click', () => {
+      editor.activateTool(toolName)
+    })
   })
 
   $resetTool.addEventListener('click', () => {
