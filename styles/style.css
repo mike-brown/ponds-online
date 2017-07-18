@@ -109,6 +109,12 @@ nav ul {
   position: absolute;
   bottom: 0px;
 
+
+  margin: 0px;
+  padding: 0px;
+
+  line-height: 1.0em;
+
   width: 100%;
 
 	background-color: #202028;
@@ -121,6 +127,8 @@ nav ul {
 nav ul li {
 	width: 96px;
 	height: 32px;
+
+  padding: 0px;
 
 	display: inline-block;
 
