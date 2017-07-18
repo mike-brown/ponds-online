@@ -57,9 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const raster = editor.pond.rasterize()
       const { data, width, height } = raster.getImageData(editor.view.bounds)
 
-      const reds = Float32Array.from(data.filter((val, index) => {
-        return index % 4 === 0
-      }))
+      const reds = Float32Array.from(
+        data.filter((val, index) => {
+          return index % 4 === 0
+        })
+      )
 
       const input = Array.from(Array(height)).map((val, i) => {
         return reds.slice(i * width, i * width + width)
@@ -119,8 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   $gridSnapTool.addEventListener('click', () => {
-    editor.gridSnap = !!editor.gridSnap
-    $gridSnapTool.checked = editor.gridSnap
+    $gridSnapTool.checked = editor.gridSnap = !editor.gridSnap
   })
 
   $subdivisionsTool.addEventListener('change', () => {
