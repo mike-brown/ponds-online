@@ -1,5 +1,6 @@
 'use strict'
 
+const { Path } = require('paper')
 const Mousetrap = require('mousetrap')
 
 const {
@@ -15,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // canvas
   const $canvases = document.querySelector('.canvases')
   const $designCanvas = $canvases.querySelector('canvas.design')
+  const $simulationCanvas = $canvases.querySelector('canvas.simulation')
   const $run = document.querySelector('.js-run')
 
   let simulating = false
@@ -25,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
       $run.classList.add('secondary')
       $run.textContent = 'Stop Simulation'
       document.querySelector('.title').textContent = 'Simulation'
-
-      $designCanvas.style.display = 'none'
     }
   }
 
@@ -39,26 +39,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $run.addEventListener('click', () => {
     if (!simulating) {
-      // startSim()
+      editor.view.autoUpdate = false
 
       editor.scaleLayer.visible = false
       editor.gridLayer.visible = false
       editor.subGridLayer.visible = false
 
       editor.baseLayer.fitBounds(editor.view.bounds)
-      editor.baseLayer.scale(0.98, editor.view.center)
-      editor.pond.fillColor = '#0affff'
+      editor.baseLayer.scale(0.95, editor.view.center)
 
+      editor.pond.fillColor = '#0affff'
       editor.inlet.strokeWidth = 5
       editor.outlet.strokeWidth = 5
+      editor.inlet.strokeCap = 'butt'
+      editor.outlet.strokeCap = 'butt'
       editor.inlet.strokeColor = '#0100ff'
       editor.outlet.strokeColor = '#02ff00'
 
+      editor.view.update()
       const raster = editor.baseLayer.rasterize(72)
+      editor.view.update()
 
-      const { data, width, height } = raster.getImageData(editor.view.bounds)
+      const $previewCanvas = raster.getSubCanvas({
+        x: editor.view.bounds.x - 10,
+        y: editor.view.bounds.y - 10,
+        width: editor.view.bounds.width + 20,
+        height: editor.view.bounds.height + 20
+      })
 
-      const reds = Float32Array.from(
+      const pctx = $previewCanvas.getContext('2d')
+      const imageData = pctx.getImageData(
+        0,
+        0,
+        $previewCanvas.width,
+        $previewCanvas.height
+      )
+
+      const { data, width, height } = imageData
+
+      const reds = Array.from(
         data.filter((val, index) => {
           return index % 4 === 0
         })
@@ -68,7 +87,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(reds.slice(i * width, i * width + width))
       })
 
-      console.log(input)
+      // const rasterArea = new Path.Rectangle({
+      //   x: editor.baseLayer.bounds.x - 10,
+      //   y: editor.baseLayer.bounds.y - 10,
+      //   width: editor.baseLayer.bounds.width + 20,
+      //   height: editor.baseLayer.bounds.height + 20
+      // })
+      // rasterArea.strokeWidth = 1
+      // rasterArea.strokeColor = 'red'
+      //
+      // editor.baseLayer.addChild(rasterArea)
+      // editor.view.update()
+
+      $designCanvas.classList.remove('active')
+      $previewCanvas.classList.add('active')
+
+      // const pctx = $previewCanvas.getContext('2d')
+      // pctx.putImageData(imageData, 20, 20)
+
+      $designCanvas.parentNode.appendChild($previewCanvas)
+
+      // startSim(input, width, height)
     } else {
       stopSim()
     }
