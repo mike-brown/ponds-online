@@ -94,10 +94,10 @@ nav {
   position: relative;
 
   background: rgb(48, 48, 56);
-  background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:      -o-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
-  background:         linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), url("../images/water_lily.jpg") no-repeat right;
+  background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
+  background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
+  background:      -o-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
+  background:         linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
 
   background-size: cover;
 
