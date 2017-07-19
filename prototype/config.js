@@ -1,8 +1,8 @@
 'use strict'
 
-const CELL_SIZE = 10
-const COLS = 60
-const ROWS = 20
+const CELL_SIZE = 10 // the graphics size of the cell
+const COLS = 60 // the number of cells in the x-axis
+const ROWS = 20 // the number of cells in the y-axis
 
 const params = {
   gamma: 0.02, // interface diffusion
@@ -11,13 +11,13 @@ const params = {
   mu: 0.001002, // dynamic viscosity
   nu: 0.000001004, // kinematic viscosity
   input: {
-    x: 0.0005,
-    y: 0.0
+    x: 0.0005, // inlet velocity in the x-axis
+    y: 0.0 // inlet velocity in the y-axis
   },
   plant: [
-    { diameter: 1.000, phi: 0.000, state: 10 },
-    { diameter: 0.010, phi: 0.013, state: 11 },
-    { diameter: 0.019, phi: 0.047, state: 12 }
+    { diameter: 1.000, phi: 0.000, state: 10 }, // water
+    { diameter: 0.010, phi: 0.013, state: 11 }, // winter plants
+    { diameter: 0.019, phi: 0.047, state: 12 } // summer plants
   ]
 }
 
@@ -38,8 +38,8 @@ for (let n = 0; n < params.plant.length; n++) {
     0 // a1
   ])
 
-  plants[n][3] = 7276.43 * plants[n][0] + 23.55
-  plants[n][4] = 32.7 * plants[n][0] + 3.01 * plants[n][1] + 0.42
+  plants[n][3] = 7276.43 * plants[n][0] + 23.55 // a0 value
+  plants[n][4] = 32.7 * plants[n][0] + 3.01 * plants[n][1] + 0.42 // a1 value
 }
 
 module.exports = {
