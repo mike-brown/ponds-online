@@ -6,22 +6,53 @@ const {
   plants
 } = require('./config')
 
+/**
+ * Creates a 2D array of cells; each set to a value of zero.
+ * @param {number} ROWS - the number of rows
+ * @param {number} COLS - the number of columns
+ * @returns {object} a list of lists; populated with zeros
+ * @example
+ * // returns [[0, 0], [0, 0]]
+ * zeros(2, 2)
+ */
 function zeros (ROWS, COLS) {
   let grid = []
   for (let j = 0; j < ROWS; j++) {
     let line = []
     for (let i = 0; i < COLS; i++) {
-      line.push(0)
+      line.push(0) // for each column, push a zero to the list
     }
-    grid.push(line)
+    grid.push(line) // for each row, push a line to the list
   }
   return grid
 }
 
+/**
+ * Calculates the hypotenuse of a triangle with known side lengths.
+ * @param {number} a - the first side length of the triangle
+ * @param {number} b - the second side length of the triangle
+ * @returns {number} the hypotenuse of the triangle
+ * @example
+ * // returns 5
+ * pyth(3, 4)
+ */
 function pyth (a, b) {
   return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2))
 }
 
+/**
+ * Supplies the value of the specified cell; or zero if out of bounds.
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the y-axis index
+ * @param {number} i - the x-axis index
+ * @returns {number} the value of the cell specified, or zero if out of bounds
+ * @example
+ * // return 2
+ * cell([[1, 2], [3, 4]], 0, 1)
+ * @example
+ * // return 0
+ * cell([[1, 2], [3, 4]], 9, 9)
+ */
 function cell (arr, j, i) {
   const bx = i >= 0 && i < arr[0].length
   const by = j >= 0 && j < arr.length
@@ -34,6 +65,15 @@ function cell (arr, j, i) {
   return arr[mj][mi] * bz
 }
 
+/**
+ * Supplies the value of either specified cell; or zero if both out of bounds.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function edge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i) !== 0 // returns zero if wall
   const wdz = cell(sArr, dj, di) !== 0 // returns zero if wall
@@ -47,6 +87,18 @@ function edge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
+/**
+ * Supplies the value of either specified cell; or zero if both out of bounds.
+ *
+ * Similar to other edge functions, except the state array is offset by
+ * one in the x-axis.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function eastedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
   const wdz = cell(sArr, dj, di - 1) !== 0 // returns zero if wall
@@ -60,6 +112,18 @@ function eastedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
+/**
+ * Supplies the value of either specified cell; or zero if both out of bounds.
+ *
+ * Similar to other edge functions, except the state array is offset by
+ * one in the y-axis.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function downedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
   const wdz = cell(sArr, dj - 1, di) !== 0 // returns zero if wall
@@ -73,6 +137,15 @@ function downedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz * wdz
 }
 
+/**
+ * Supplies the value of the first cell; or the second cell if out of bounds.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function softedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i) !== 0 // returns zero if wall
 
@@ -85,6 +158,18 @@ function softedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
+/**
+ * Supplies the value of the first cell; or the second cell if out of bounds.
+ *
+ * Similar to other soft-edge functions, except the state array is offset by
+ * one in the x-axis.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function softeastedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
 
@@ -97,6 +182,18 @@ function softeastedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
+/**
+ * Supplies the value of the first cell; or the second cell if out of bounds.
+ *
+ * Similar to other soft-edge functions, except the state array is offset by
+ * one in the y-axis.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} arr - the 2D array to be evaluated
+ * @param {number} j - the primary y-axis index
+ * @param {number} i - the primary x-axis index
+ * @param {number} dj - the secondary y-axis index
+ * @param {number} di - the secondary x-axis index
+ */
 function softdownedge (sArr, arr, j, i, dj, di) {
   const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
 
@@ -109,6 +206,12 @@ function softdownedge (sArr, arr, j, i, dj, di) {
   return arr[mj][mi] * wz + arr[mdj][mdi] * !wz
 }
 
+/**
+ * Supplies a collection of weighted coefficients.
+ * @param {object} f - a collection of flux values
+ * @param {number} diff - the interface diffusion coefficient
+ * @returns a collection of a-values
+ */
 function diffuse (f, diff) {
   const a = [
     diff + Math.max(f[0], 0), // a_n = D_n + max(F_n, 0)
@@ -126,6 +229,15 @@ function diffuse (f, diff) {
   ]
 }
 
+/**
+ * Supplies a collection of weighted coefficients.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} dens - the density coefficient
+ * @param {number} diff - the interface diffusion coefficient
+ * @returns a collection of a-values for the x-axis
+ */
 function ax (sArr, xArr, yArr, dens, diff) {
   let iArr = zeros(ROWS, COLS + 1)
 
@@ -149,6 +261,15 @@ function ax (sArr, xArr, yArr, dens, diff) {
   return iArr
 }
 
+/**
+ * Supplies a collection of weighted coefficients.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} dens - the density coefficient
+ * @param {number} diff - the interface diffusion coefficient
+ * @returns a collection of a-values for the y-axis
+ */
 function ay (sArr, xArr, yArr, dens, diff) {
   let jArr = zeros(ROWS + 1, COLS)
 
@@ -172,6 +293,13 @@ function ay (sArr, xArr, yArr, dens, diff) {
   return jArr
 }
 
+/**
+ * Supplies a 2D arrray of viscosity coefficients
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} mu - the dynamic viscosity of water
+ * @returns a collection of viscosity values
+ */
 function viscosity (xArr, yArr, mu) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
@@ -204,6 +332,15 @@ function viscosity (xArr, yArr, mu) {
   ]
 }
 
+/**
+ * Supplies a collection of drag coefficients.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} nu - the kinematic viscosity of water
+ * @param {number} rho - the density of water
+ * @returns a collection of drag values
+ */
 function drag (sArr, xArr, yArr, nu, rho) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
@@ -260,6 +397,22 @@ function drag (sArr, xArr, yArr, nu, rho) {
   ]
 }
 
+/**
+ * Supplies a 2D array of pressure-velocity coupling values.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} pArr - the 2D array of pressure values
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {object} xA - the a-values for the x-axis
+ * @param {object} yA - the a-values for the y-axis
+ * @param {number} size - the face area of the cell
+ * @param {number} mu - the dynamic viscosity of water
+ * @param {number} nu -the static viscosity of water
+ * @param {number} rho - the density of water
+ * @param {number} xI - the x-velocity inlet values
+ * @param {number} yI - the y-velocity inlet values
+ * @returns a collection of coupled pressure-velocity values
+ */
 function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
   let iArr = zeros(ROWS, COLS + 1)
   let jArr = zeros(ROWS + 1, COLS)
@@ -342,6 +495,17 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
   ]
 }
 
+/**
+ * Supplies a 2D array of estimated pressure values
+ * @param {object} sArr - the 2D array of states
+ * @param {object} pArr - the 2D array of pressure values
+ * @param {object} xArr - the 2D array of x-velocity values
+ * @param {object} yArr - the 2D array of y-velocity values
+ * @param {object} xA - the a-values for the x-axis
+ * @param {object} yA - the a-values for the y-axis
+ * @param {number} size - the face area of the cell
+ * @returns a collection of estimated pressure values
+ */
 function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
   const kArr = zeros(ROWS, COLS)
 
@@ -365,10 +529,10 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
       ]
 
       const a = [
-        yA[j][i][4],
-        yA[j + 1][i][4],
-        xA[j][i][4],
-        xA[j][i + 1][4]
+        yA[j][i][4], // north
+        yA[j + 1][i][4], // south
+        xA[j][i][4], // west
+        xA[j][i + 1][4] // east
       ]
 
       let pSub1 = p[0] / a[0] + p[1] / a[1] + p[2] / a[2] + p[3] / a[3] // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
@@ -384,6 +548,22 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
   return kArr
 }
 
+/**
+ * Supplies a 2D array of corrected pressures and velocities.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} pArr - the 2D array of old pressure values
+ * @param {object} qArr - the 2D array of estimated pressure values
+ * @param {object} xArr - the 2D array of estimated x-velocity values
+ * @param {object} yArr - the 2D array of estimated y-velocity values
+ * @param {object} xOld - the 2D array of old x-velocity values
+ * @param {object} yOld - the 2D array of old y-velocity values
+ * @param {object} xA - the a-values for the x-axis
+ * @param {object} yA - the a-values for the y-axis
+ * @param {number} size - the face area of the cell
+ * @param {number} xI - the x-velocity inlet values
+ * @param {number} yI - the y-velocity inlet values
+ * @returns a collection of corrected pressure and velocity values
+ */
 function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI) {
   const iArr = zeros(ROWS, COLS + 1)
   const jArr = zeros(ROWS + 1, COLS)
@@ -451,6 +631,15 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
   ]
 }
 
+/**
+ * Supplies whether or not the simulation has converged.
+ * @param {object} sArr - the 2D array of states
+ * @param {object} xArr - the 2D array of old x-velocity values
+ * @param {object} yArr - the 2D array of old y-velocity values
+ * @param {object} iArr - the 2D array of estimated x-velocity values
+ * @param {object} jArr - the 2D array of estimated y-velocity values
+ * @returns the average change in velocity between steps
+ */
 function converge (sArr, xArr, yArr, iArr, jArr) {
   let temp = 0
   let diff = 0
