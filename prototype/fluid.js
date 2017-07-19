@@ -67,7 +67,7 @@ function cell (arr, j, i) {
 
 /**
  * Supplies the value of either specified cell; or zero if both out of bounds.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -92,7 +92,7 @@ function edge (sArr, arr, j, i, dj, di) {
  *
  * Similar to other edge functions, except the state array is offset by
  * one in the x-axis.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -117,7 +117,7 @@ function eastedge (sArr, arr, j, i, dj, di) {
  *
  * Similar to other edge functions, except the state array is offset by
  * one in the y-axis.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -139,7 +139,7 @@ function downedge (sArr, arr, j, i, dj, di) {
 
 /**
  * Supplies the value of the first cell; or the second cell if out of bounds.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -163,7 +163,7 @@ function softedge (sArr, arr, j, i, dj, di) {
  *
  * Similar to other soft-edge functions, except the state array is offset by
  * one in the x-axis.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -187,7 +187,7 @@ function softeastedge (sArr, arr, j, i, dj, di) {
  *
  * Similar to other soft-edge functions, except the state array is offset by
  * one in the y-axis.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} arr - the 2D array to be evaluated
  * @param {number} j - the primary y-axis index
  * @param {number} i - the primary x-axis index
@@ -231,7 +231,7 @@ function diffuse (f, diff) {
 
 /**
  * Supplies a collection of weighted coefficients.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
  * @param {number} dens - the density coefficient
@@ -263,7 +263,7 @@ function ax (sArr, xArr, yArr, dens, diff) {
 
 /**
  * Supplies a collection of weighted coefficients.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
  * @param {number} dens - the density coefficient
@@ -334,7 +334,7 @@ function viscosity (xArr, yArr, mu) {
 
 /**
  * Supplies a collection of drag coefficients.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
  * @param {number} nu - the kinematic viscosity of water
@@ -348,7 +348,7 @@ function drag (sArr, xArr, yArr, nu, rho) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0] // selects plant properties from list based on state value
 
       const c = [
         p[3] * nu,
@@ -361,7 +361,7 @@ function drag (sArr, xArr, yArr, nu, rho) {
       )
 
       const uSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
-      const uSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
+      const uSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4] // the "reynold === 0" circumvents divide-by-zero error
       const uSub3 = -(uSub1 * rho * Math.min(10, 2 * uSub2) * c[1]) / 2
 
       iArr[j][i] = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
@@ -371,7 +371,7 @@ function drag (sArr, xArr, yArr, nu, rho) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0] // selects plant properties from list based on state value
 
       const c = [
         p[3] * nu,
@@ -384,7 +384,7 @@ function drag (sArr, xArr, yArr, nu, rho) {
       )
 
       const vSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
-      const vSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
+      const vSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4] // the "reynold === 0" circumvents divide-by-zero error
       const vSub3 = -(vSub1 * rho * Math.min(10, 2 * vSub2) * c[1]) / 2
 
       jArr[j][i] = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
@@ -399,7 +399,7 @@ function drag (sArr, xArr, yArr, nu, rho) {
 
 /**
  * Supplies a 2D array of pressure-velocity coupling values.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} pArr - the 2D array of pressure values
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
@@ -440,11 +440,11 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
       const wx = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2 ||
                 cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0 ||
                 cell(sArr, j, i) !== 0 &&
-                  cell(sArr, j, i - 1) !== 0 &&
+                cell(sArr, j, i - 1) !== 0 &&
                 (cell(sArr, j + 1, i) !== 0 ||
-                  cell(sArr, j + 1, i - 1) !== 0) &&
+                cell(sArr, j + 1, i - 1) !== 0) &&
                 (cell(sArr, j - 1, i) !== 0 ||
-                  cell(sArr, j - 1, i - 1) !== 0)
+                cell(sArr, j - 1, i - 1) !== 0)
 
       // returns true if inlet cell adjacent to wall in x-axis
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
@@ -471,11 +471,11 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
       const wy = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2 ||
                 cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0 ||
                 cell(sArr, j, i) !== 0 &&
-                  cell(sArr, j - 1, i) !== 0 &&
+                cell(sArr, j - 1, i) !== 0 &&
                 (cell(sArr, j, i - 1) !== 0 ||
-                  cell(sArr, j - 1, i - 1) !== 0) &&
+                cell(sArr, j - 1, i - 1) !== 0) &&
                 (cell(sArr, j, i + 1) !== 0 ||
-                  cell(sArr, j - 1, i + 1) !== 0)
+                cell(sArr, j - 1, i + 1) !== 0)
 
       // returns true if inlet cell adjacent to wall in y-axis
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
@@ -497,7 +497,7 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
 
 /**
  * Supplies a 2D array of estimated pressure values
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} pArr - the 2D array of pressure values
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
@@ -550,7 +550,7 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
 
 /**
  * Supplies a 2D array of corrected pressures and velocities.
- * @param {object} sArr - the 2D array of states
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} pArr - the 2D array of old pressure values
  * @param {object} qArr - the 2D array of estimated pressure values
  * @param {object} xArr - the 2D array of estimated x-velocity values
@@ -582,11 +582,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
       const wx = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2 ||
                 cell(sArr, j, i - 1) === 2 && cell(sArr, j, i) === 0 ||
                 cell(sArr, j, i) !== 0 &&
-                  cell(sArr, j, i - 1) !== 0 &&
+                cell(sArr, j, i - 1) !== 0 &&
                 (cell(sArr, j + 1, i) !== 0 ||
-                  cell(sArr, j + 1, i - 1) !== 0) &&
+                cell(sArr, j + 1, i - 1) !== 0) &&
                 (cell(sArr, j - 1, i) !== 0 ||
-                  cell(sArr, j - 1, i - 1) !== 0)
+                cell(sArr, j - 1, i - 1) !== 0)
 
       // returns true if inlet cell adjacent to wall in x-axis
       const inL = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 1
@@ -594,7 +594,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
 
       const outX = xArr[j][i] + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (size / xA[j][i][4])
 
-      const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i]
+      const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i] // hardcoded under-relaxation factor of 0.2
 
       iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * xI // either returns calculated value or inlet value
     }
@@ -606,11 +606,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
       const wy = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 2 ||
                 cell(sArr, j - 1, i) === 2 && cell(sArr, j, i) === 0 ||
                 cell(sArr, j, i) !== 0 &&
-                  cell(sArr, j - 1, i) !== 0 &&
+                cell(sArr, j - 1, i) !== 0 &&
                 (cell(sArr, j, i - 1) !== 0 ||
-                  cell(sArr, j - 1, i - 1) !== 0) &&
+                cell(sArr, j - 1, i - 1) !== 0) &&
                 (cell(sArr, j, i + 1) !== 0 ||
-                  cell(sArr, j - 1, i + 1) !== 0)
+                cell(sArr, j - 1, i + 1) !== 0)
 
       // returns true if inlet cell adjacent to wall in y-axis
       const inU = cell(sArr, j - 1, i) === 0 && cell(sArr, j, i) === 1
@@ -618,7 +618,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
 
       const outY = yArr[j][i] + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (size / yA[j][i][4])
 
-      const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i]
+      const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i] // hardcoded under-relaxation factor of 0.2
 
       jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * yI // either returns calculated value or inlet value
     }
@@ -632,8 +632,8 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
 }
 
 /**
- * Supplies whether or not the simulation has converged.
- * @param {object} sArr - the 2D array of states
+ * Supplies the rate of change in velocities at the current step.
+ * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of old x-velocity values
  * @param {object} yArr - the 2D array of old y-velocity values
  * @param {object} iArr - the 2D array of estimated x-velocity values
