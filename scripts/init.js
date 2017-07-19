@@ -49,12 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
       editor.baseLayer.scale(0.98, editor.view.center)
       editor.pond.fillColor = '#0affff'
 
-      editor.inlet.strokeWidth = 1
-      editor.outlet.strokeWidth = 1
-      editor.inlet.strokeColor = '#01ffff'
-      editor.outlet.strokeColor = '#02ffff'
+      editor.inlet.strokeWidth = 5
+      editor.outlet.strokeWidth = 5
+      editor.inlet.strokeColor = '#0100ff'
+      editor.outlet.strokeColor = '#02ff00'
 
-      const raster = editor.pond.rasterize()
+      const raster = editor.baseLayer.rasterize(72)
+
       const { data, width, height } = raster.getImageData(editor.view.bounds)
 
       const reds = Float32Array.from(
@@ -64,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
       )
 
       const input = Array.from(Array(height)).map((val, i) => {
-        return reds.slice(i * width, i * width + width)
+        return Array.from(reds.slice(i * width, i * width + width))
       })
 
       console.log(input)
@@ -75,10 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
     simulating = !simulating
   })
 
-  const $canvas = document.querySelector('canvas.design')
-
   // initialise editor
-  const editor = new Editor($canvas)
+  const editor = new Editor($designCanvas)
 
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
@@ -129,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $subdivisionsTool.value
   })
 
-  $canvas.addEventListener('mousewheel', ev => {
+  $designCanvas.addEventListener('mousewheel', ev => {
     ev.preventDefault()
     editor.zoom(1 + ev.wheelDeltaY / 1000)
   })
