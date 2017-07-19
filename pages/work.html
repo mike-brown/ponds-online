@@ -119,7 +119,9 @@
 
     <p> This gives the following result for the now simplified steady state Navier-Stokes equatons for an incompressible fluid. </p>
     <p>. **show the simplified equations here (ie the ones we used)** </p>
-    <p>Next these equations were discretized so they could be applied to our staggered grid structure. The base of the algorithm used here is the SIMPLE algorithm, where a ''guessed'' pressure field is used to estimate a velocity field. This estiemated velocity field is then used to great a pressure correction field and from these two arrays a new, corrected array is created for velocity and pressure. The final step is to test the new arrays against the old and check for convergence, if nne is found then the new fields become the old and the process is repeated.</p>
+    <p>Next these equations were discretized so they could be applied to our staggered grid structure. The base of the algorithm used here is the SIMPLE algorithm, where a ''guessed'' pressure field is used to estimate a velocity field. This estiemated velocity field is then used to great a pressure correction field and from these two arrays a new, corrected array is created for velocity and pressure. The final step is to test the new arrays against the old and check for convergence, if nne is found then the new fields become the old and the process is repeated. The discrete equation for u momentum can be written lke this after some work.</p>
+    <p> **show discrete u momemtum equation** </p>
+    <p>This equation calculates the estimated velocities from the old pressure field, the old velocity field and viscosity.</p>
     <figure style="float:right">
       <img src="../images/utah_teapot.png" width="320px" height="auto" alt="Image of the Utah Teapot" />
       <figcaption>3D graphical representation of the Utah Teapot, made by Martin Newell</figcaption>
