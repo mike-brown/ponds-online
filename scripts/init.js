@@ -4,6 +4,25 @@ const { Path } = require('paper')
 const Mousetrap = require('mousetrap')
 
 const {
+  zeros,
+  ax,
+  ay,
+  couple,
+  jacobi,
+  correct,
+  converge
+} = require('../prototype/fluid')
+
+const {
+  dye,
+  concentrations,
+  corrections,
+  record
+} = require('../prototype/flow')
+
+const { CELL_SIZE, COLS, ROWS, params, values } = require('../prototype/config')
+
+const {
   AddTool,
   RemoveTool,
   VegTool,
@@ -21,12 +40,115 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let simulating = false
 
-  const startSim = () => {
+  const startSim = (input, w, h) => {
     if (editor.isReady()) {
       $run.classList.remove('primary')
       $run.classList.add('secondary')
       $run.textContent = 'Stop Simulation'
       document.querySelector('.title').textContent = 'Simulation'
+
+      const xctx = $simulationCanvas.getContext('2d')
+      xctx.canvas.width = (w + 1) * CELL_SIZE + 1
+      xctx.canvas.height = h * CELL_SIZE + 1
+
+      let count = 0
+
+      let state = input.map(arr => [...arr])
+
+      let prevP = zeros(h, w)
+      let prevX = zeros(h, w + 1)
+      let prevY = zeros(h + 1, w)
+
+      let primeP = zeros(h, w)
+      let aX = zeros(h, w + 1)
+      let aY = zeros(h + 1, w)
+
+      const draw = (sArr, pArr, xArr, yArr) => {
+        xctx.clearRect(0, 0, xctx.canvas.width, xctx.canvas.height)
+
+        let maxp = 0
+        let maxv = 0
+
+        for (let y = 0; y < pArr.length; y++) {
+          for (let x = 0; x < pArr[y].length; x++) {
+            maxp = Math.max(maxp, Math.abs(pArr[y][x]))
+          }
+        }
+
+        for (let y = 0; y < xArr.length; y++) {
+          for (let x = 0; x < xArr[y].length; x++) {
+            maxv = Math.max(maxv, Math.abs(xArr[y][x]))
+          }
+        }
+
+        for (let y = 0; y < yArr.length; y++) {
+          for (let x = 0; x < yArr[y].length; x++) {
+            maxv = Math.max(maxv, Math.abs(yArr[y][x]))
+          }
+        }
+
+        for (let i = 0; i < xArr.length; i++) {
+          for (let j = 0; j < xArr[i].length; j++) {
+            const val = 240 - xArr[i][j] / maxv * 240
+
+            xctx.fillStyle = `hsl(${val}, 100%, 50%)`
+            xctx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+          }
+        }
+      }
+
+      const initiate = () => {
+        const valsX = ax(state, prevX, prevY, values.density, values.diffuse)
+
+        const valsY = ay(state, prevX, prevY, values.density, values.diffuse)
+
+        const [tempX, tempY] = couple(
+          state,
+          prevP,
+          prevX,
+          prevY,
+          valsX,
+          valsY,
+          params.size,
+          params.mu,
+          params.nu,
+          params.rho,
+          params.input.x,
+          params.input.y
+        )
+
+        primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY, params.size)
+
+        const [nextX, nextY, nextP] = correct(
+          state,
+          prevP,
+          primeP,
+          tempX,
+          tempY,
+          prevX,
+          prevY,
+          valsX,
+          valsY,
+          params.size,
+          params.input.x,
+          params.input.y
+        )
+
+        if (count === 0) {
+          draw(state, nextP, nextX, nextY)
+          count = 1
+        }
+
+        count--
+        prevX = nextX.map(arr => [...arr])
+        prevY = nextY.map(arr => [...arr])
+        prevP = nextP.map(arr => [...arr])
+
+        // draw(state, nextP, nextX, nextY)
+        requestAnimationFrame(initiate)
+      }
+
+      requestAnimationFrame(initiate)
     }
   }
 
@@ -49,8 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
       editor.baseLayer.scale(0.95, editor.view.center)
 
       editor.pond.fillColor = '#0affff'
-      editor.inlet.strokeWidth = 5
-      editor.outlet.strokeWidth = 5
+      editor.inlet.strokeWidth = 2
+      editor.outlet.strokeWidth = 2
       editor.inlet.strokeCap = 'butt'
       editor.outlet.strokeCap = 'butt'
       editor.inlet.strokeColor = '#0100ff'
@@ -101,13 +223,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       $designCanvas.classList.remove('active')
       $previewCanvas.classList.add('active')
-
-      // const pctx = $previewCanvas.getContext('2d')
-      // pctx.putImageData(imageData, 20, 20)
+      $simulationCanvas.classList.add('active')
 
       $designCanvas.parentNode.appendChild($previewCanvas)
 
-      // startSim(input, width, height)
+      startSim(input, width, height)
     } else {
       stopSim()
     }
