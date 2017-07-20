@@ -21,22 +21,27 @@
   <nav>
     <ul>
       <li><a href="index.html">Home</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="#">Work</a></li>
-      <li><a href="software.html">Software</a></li>
-      <li><a href="guide.html">Guide</a></li>
+      <li><a href="about.html">Ponds</a></li>
+      <li><a href="#">Models</a></li>
+      <li><a href="software.html">Services</a></li>
+      <li><a href="guide.html">Guides</a></li>
     </ul>
   </nav>
 
   <section>
     <h2>Applying the Maths!</h2>
     <h3>How does the model work?</h3>
-    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales is resolved, this is computationally complex and impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations. The Navier-Stokes equations relate the change in momentum to a change in pressure as well as any other sources of work by other forces, the equations are derived using these three fundimental laws;
+    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales is resolved, this is computationally complex and impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations. The Navier-Stokes equations relate the change in momentum to a change in pressure as well as any other sources of work by other forces, the equations are derived using these three fundimental laws:
 
     <ul>
       <li><span class="bold">Conservation of Mass:</span> in an isolated system such as our pond simulato, mass may not be spontaneously created or destroyed. If a loss or gain of mass occurs there must be an appropriate process to explain it; since mass cannot simply 'fall' out of the simulation.</li>
       <li><span class="bold">Conservation of Energy:</span> the change in energy of any particle must be equal to any work done or change in temperature; as energy may not be spontaneously created or destroyed. This is in essence the first law of thermodynamics.</li>
       <li><span class="bold">Newton's Second Law:</span> this states that any change in momentum must equal the sum of the forces acting upon it.</li>
+    </ul>
+
+    <p>In addition, the following assumptions have been made:</p>
+
+    <ul>
       <li><span class="bold">Continuum:</span> the fluid being modelled is considered to be a Continuum. This is a formal way of saying that the scale at which the model is operating is large enough for any effects from the molecular structure and motion are irrelevant. Looking from one point to the next we should see no difference in characteristics. This means that a point of fluid is the smallest volume of the fluid where it can still be considered a continuum and the macroscopic properties still provide an adequate description.</li>
       <li><span class="bold">Macroscopic Description:</span> the variables used to fully describe the motion of the fluid: such as pressure, velocity, density, and temperature; are all macroscopic. This means that they are averages over the microscopic variables which each molecule has. We assume that this is a complete description which continues on from our assumption of it being a continuum.</li>
       <li><span class="bold">Two Dimensional:</span> in this example the model has only been applied in two dimensions. In essence it has been treated as a one meter slice of an infinity deep body of water. In reality this means additional contributions from vertical effects have been neglected but in pond structures these tend t be small due to the shallow depth.</li>
