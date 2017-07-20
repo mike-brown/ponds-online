@@ -1,0 +1,120 @@
+\documentclass{article}
+\begin{document}
+
+Equation one.
+\begin{equation}
+    \frac{\partial \rho}{\partial t} + \rho \bigtriangledown \bullet \mathbf{u} = 0
+\end{equation}
+
+Equation two.
+\begin{equation}
+    \frac{\partial \rho}{\partial t} = 0
+\end{equation}
+
+Equation three.
+\begin{equation}
+    \rho \bigtriangledown \bullet \mathbf{u} = 0
+\end{equation}
+
+Equation four.
+\begin{equation}
+	\rho \frac{D u}{D t} = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S
+\end{equation}
+\begin{equation}
+	\rho \frac{D v}{D t} = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S
+\end{equation}
+
+Equation five.
+\begin{equation}
+\rho \frac{D u}{D t} = \frac{\partial u}{\partial t} + \bigtriangledown \bullet (\rho u \mathbf{u})
+\end{equation}
+
+Equation six.
+\begin{equation}
+\bigtriangledown \bullet (\rho u \mathbf{u}) = \mathbf{u} \bullet (\bigtriangledown \rho u) + \rho u \bigtriangledown \bullet \mathbf{u}
+\end{equation}
+
+Equation seven.
+\begin{equation}
+\mathbf{u} \bullet (\bigtriangledown \rho u) = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S
+\end{equation}
+\begin{equation}
+\mathbf{u} \bullet (\bigtriangledown \rho v) = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S
+\end{equation}
+
+Equation Eight
+\begin{equation}
+a_{i,j} u_{i,j} = \Sigma a_{n,b} u_{n,b} - (p_{i,j}-p_{i-1,j}) A_{i,j} + b_{i,j}
+\end{equation}
+\begin{equation}
+a_{i,j} v_{i,j} = \Sigma a_{n,b} v_{n,b} - (p_{i,j-1}-p_{i,j}) A_{i,j} + b_{i,j}
+\end{equation}
+
+
+equation nine.
+\begin{equation}
+a_{W} = D + max(F_{W},0)
+\end{equation}
+\begin{equation}
+a_{E} = D + max(-F_{E},0)
+\end{equation}
+\begin{equation}
+a_{S} = D + max(F_{S},0)
+\end{equation}
+\begin{equation}
+a_{N} = D +max(-F_{N},0)
+\end{equation}
+\begin{equation}
+a_{C} = a_{W} + a_{E} + a_{S} + a_{N} + (F_{E} - F_{W}) + (F_{N} - F_{S})
+\end{equation}
+
+\begin{equation}
+F_{W} = \frac{\rho}{2} ( u_{i,j} + u_{i-1,j})
+\end{equation}
+\begin{equation}
+F_{E} = \frac{\rho}{2} ( u_{i+1,j} + u_{i,j})
+\end{equation}
+\begin{equation}
+F_{S} = \frac{\rho}{2}( v_{i,j} + v_{i-1,j})
+\end{equation}
+\begin{equation}
+F_{N} = \frac{\rho}{2}(v_{i,j+1} + v_{i-1,j+1})
+\end{equation}
+\begin{equation}
+D = \frac{\Gamma}{side\\ length}
+\end{equation}
+
+Equation ten
+\begin{equation}
+\mathbf{a}_{i,j} \acute{p}_{i,j} = \mathbf{a}_{i+1,j}\acute{p}_{i+1,j} + \mathbf{a}_{i-1,j}\acute{p}_{i-1,j} + \mathbf{a}_{i,j+1}\acute{p}_{i,j+1} + \mathbf{a}_{i,j-1}\acute{p}_{i,j-1} + \acute{b}_{i,j}
+\end{equation}
+\begin{equation}
+\mathbf{a}_{i,j} = \rho A d_{i,j}
+\end{equation}
+\begin{equation}
+d_{i,j} = \frac{A}{a_{i,j}}
+\end{equation}
+
+equation eleven
+\begin{equation}
+p_{new} = p + \acute{p}
+\end{equation}
+\begin{equation}
+u_{new, i, j} = u*_{i,j} + d_{i,j}(\acute{p}_{i-1,j} - \acute{p}_{i,j})
+\end{equation}
+\begin{equation}
+v_{new, i, j} = v*_{i,j} + d_{i,j}(\acute{p}_{i,j-1} - \acute{p}_{i,j})
+\end{equation}
+
+equation twelve
+\begin{equation}
+p_{new} = p + \alpha_{p} \acute{p}
+\end{equation}
+\begin{equation}
+u_{new, i, j} = \alpha_{u}( u*_{i,j} + d_{i,j}(\acute{p}_{i-1,j} - \acute{p}_{i,j})) + (1-\alpha_{u})u^{n-1}_{i,j}
+\end{equation}
+\begin{equation}
+v_{new, i, j} = \alpha_{v}( v*_{i,j} + d_{i,j}(\acute{p}_{i,j-1} - \acute{p}_{i,j})) + (1-\alpha_{v})v^{n-1}_{i,j}
+\end{equation}
+
+\end{document}
