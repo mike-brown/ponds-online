@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $simulationCanvas = $canvases.querySelector('canvas.simulation')
   const $run = document.querySelector('.js-run')
 
+  let frame = 0
   let simulating = false
 
   const startSim = (input, w, h) => {
@@ -91,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const initiate = () => {
+        console.time(`frame ${++frame}`)
         const valsX = ax(state, prevX, prevY, h, w, values.density, values.diffuse)
 
         const valsY = ay(state, prevX, prevY, h, w, values.density, values.diffuse)
@@ -139,7 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
         prevY = nextY.map(arr => [...arr])
         prevP = nextP.map(arr => [...arr])
 
-        // draw(state, nextP, nextX, nextY)
+        console.timeEnd(`frame ${frame}`)
+
         requestAnimationFrame(initiate)
       }
 
@@ -180,8 +183,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const $previewCanvas = raster.getSubCanvas({
         x: editor.view.bounds.x - 10,
         y: editor.view.bounds.y - 10,
-        width: editor.view.bounds.width + 20,
-        height: editor.view.bounds.height + 20
+        width: editor.baseLayer.bounds.width + 20,
+        height: editor.baseLayer.bounds.height + 20
       })
 
       const pctx = $previewCanvas.getContext('2d')
@@ -204,17 +207,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(reds.slice(i * width, i * width + width))
       })
 
-      // const rasterArea = new Path.Rectangle({
-      //   x: editor.baseLayer.bounds.x - 10,
-      //   y: editor.baseLayer.bounds.y - 10,
-      //   width: editor.baseLayer.bounds.width + 20,
-      //   height: editor.baseLayer.bounds.height + 20
-      // })
-      // rasterArea.strokeWidth = 1
-      // rasterArea.strokeColor = 'red'
-      //
-      // editor.baseLayer.addChild(rasterArea)
-      // editor.view.update()
+      const rasterArea = new Path.Rectangle({
+        x: editor.baseLayer.bounds.x - 10,
+        y: editor.baseLayer.bounds.y - 10,
+        width: editor.baseLayer.bounds.width + 20,
+        height: editor.baseLayer.bounds.height + 20
+      })
+      rasterArea.strokeWidth = 1
+      rasterArea.strokeColor = 'red'
+
+      editor.baseLayer.addChild(rasterArea)
+      editor.view.update()
 
       $designCanvas.classList.remove('active')
       $previewCanvas.classList.add('active')
