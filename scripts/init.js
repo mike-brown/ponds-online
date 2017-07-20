@@ -13,14 +13,7 @@ const {
   converge
 } = require('../prototype/fluid')
 
-const {
-  dye,
-  concentrations,
-  corrections,
-  record
-} = require('../prototype/flow')
-
-const { CELL_SIZE, COLS, ROWS, params, values } = require('../prototype/config')
+const { CELL_SIZE, params, values } = require('../prototype/config')
 
 const {
   AddTool,

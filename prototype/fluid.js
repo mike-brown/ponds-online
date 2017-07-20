@@ -1,8 +1,6 @@
 'use strict'
 
 const {
-  COLS,
-  ROWS,
   plants
 } = require('./config')
 
@@ -15,11 +13,11 @@ const {
  * // returns [[0, 0], [0, 0]]
  * zeros(2, 2)
  */
-function zeros (ROWS, COLS) {
+function zeros (rows, cols) {
   let grid = []
-  for (let j = 0; j < ROWS; j++) {
+  for (let j = 0; j < rows; j++) {
     let line = []
-    for (let i = 0; i < COLS; i++) {
+    for (let i = 0; i < cols; i++) {
       line.push(0) // for each column, push a zero to the list
     }
     grid.push(line) // for each row, push a line to the list
@@ -238,8 +236,8 @@ function diffuse (f, diff) {
  * @param {number} diff - the interface diffusion coefficient
  * @returns a collection of a-values for the x-axis
  */
-function ax (sArr, xArr, yArr, dens, diff) {
-  let iArr = zeros(ROWS, COLS + 1)
+function ax (sArr, xArr, yArr, rows, cols, dens, diff) {
+  let iArr = zeros(rows, cols + 1)
 
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
@@ -270,8 +268,8 @@ function ax (sArr, xArr, yArr, dens, diff) {
  * @param {number} diff - the interface diffusion coefficient
  * @returns a collection of a-values for the y-axis
  */
-function ay (sArr, xArr, yArr, dens, diff) {
-  let jArr = zeros(ROWS + 1, COLS)
+function ay (sArr, xArr, yArr, rows, cols, dens, diff) {
+  let jArr = zeros(rows + 1, cols)
 
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
@@ -300,9 +298,9 @@ function ay (sArr, xArr, yArr, dens, diff) {
  * @param {number} mu - the dynamic viscosity of water
  * @returns a collection of viscosity values
  */
-function viscosity (xArr, yArr, mu) {
-  let iArr = zeros(ROWS, COLS + 1)
-  let jArr = zeros(ROWS + 1, COLS)
+function viscosity (xArr, yArr, rows, cols, mu) {
+  let iArr = zeros(rows, cols + 1)
+  let jArr = zeros(rows + 1, cols)
 
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
@@ -341,9 +339,9 @@ function viscosity (xArr, yArr, mu) {
  * @param {number} rho - the density of water
  * @returns a collection of drag values
  */
-function drag (sArr, xArr, yArr, nu, rho) {
-  let iArr = zeros(ROWS, COLS + 1)
-  let jArr = zeros(ROWS + 1, COLS)
+function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
+  let iArr = zeros(rows, cols + 1)
+  let jArr = zeros(rows + 1, cols)
 
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
@@ -413,9 +411,9 @@ function drag (sArr, xArr, yArr, nu, rho) {
  * @param {number} yI - the y-velocity inlet values
  * @returns a collection of coupled pressure-velocity values
  */
-function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
-  let iArr = zeros(ROWS, COLS + 1)
-  let jArr = zeros(ROWS + 1, COLS)
+function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, xI, yI) {
+  let iArr = zeros(rows, cols + 1)
+  let jArr = zeros(rows + 1, cols)
 
   const [
     iVis,
@@ -506,8 +504,8 @@ function couple (sArr, pArr, xArr, yArr, xA, yA, size, mu, nu, rho, xI, yI) {
  * @param {number} size - the face area of the cell
  * @returns a collection of estimated pressure values
  */
-function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
-  const kArr = zeros(ROWS, COLS)
+function jacobi (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size) {
+  const kArr = zeros(rows, cols)
 
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
@@ -564,10 +562,10 @@ function jacobi (sArr, pArr, xArr, yArr, xA, yA, size) {
  * @param {number} yI - the y-velocity inlet values
  * @returns a collection of corrected pressure and velocity values
  */
-function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI) {
-  const iArr = zeros(ROWS, COLS + 1)
-  const jArr = zeros(ROWS + 1, COLS)
-  const kArr = zeros(ROWS, COLS)
+function correct (sArr, pArr, qArr, xArr, yArr, rows, cols, xOld, yOld, xA, yA, size, xI, yI) {
+  const iArr = zeros(rows, cols + 1)
+  const jArr = zeros(rows + 1, cols)
+  const kArr = zeros(rows, cols)
 
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
@@ -640,7 +638,7 @@ function correct (sArr, pArr, qArr, xArr, yArr, xOld, yOld, xA, yA, size, xI, yI
  * @param {object} jArr - the 2D array of estimated y-velocity values
  * @returns the average change in velocity between steps
  */
-function converge (sArr, xArr, yArr, iArr, jArr) {
+function converge (sArr, xArr, yArr, iArr, jArr, rows, cols) {
   let temp = 0
   let diff = 0
   let step = 0
@@ -651,8 +649,8 @@ function converge (sArr, xArr, yArr, iArr, jArr) {
     }
   }
 
-  for (let j = 0; j < ROWS + 1; j++) {
-    for (let i = 0; i < COLS + 1; i++) {
+  for (let j = 0; j < rows + 1; j++) {
+    for (let i = 0; i < cols + 1; i++) {
       temp = Math.pow(cell(xArr, j, i) - cell(iArr, j, i), 2)
       temp += Math.pow(cell(yArr, j, i) - cell(jArr, j, i), 2)
       diff += Math.sqrt(temp)
