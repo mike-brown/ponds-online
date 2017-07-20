@@ -31,7 +31,7 @@
   <section>
     <h2>Applying the Maths!</h2>
     <h3>How does the model work?</h3>
-    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales must be resolved, this is often computationally complex and often impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations within a finite volume; in which several assumptions have been made:</p>
+    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales is resolved, this is computationally complex and impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations. The Navier-Stokes equations relate the change in momentum to a change in pressure as well as any other sources of work by other forces, the equations are derived using these three fundimental laws;
 
     <ul>
       <li><span class="bold">Conservation of Mass:</span> in an isolated system such as our pond simulato, mass may not be spontaneously created or destroyed. If a loss or gain of mass occurs there must be an appropriate process to explain it; since mass cannot simply 'fall' out of the simulation.</li>
@@ -48,83 +48,55 @@
 
     <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes: sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the center of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
 
-    <p>In order to prevent the ''checker boarding'' of values a staggered grid has been used. This means that the grid of pressures, x velocities and y velocities are not the same size. For each pressure cell or point there is a velocity on each wall, two x velocities and two y velocities. This means that the x velocity grid has one more column than the pressure grid and the y velocity grid has one more row. This means that for a pressure cell with index (i,j) the x velocity (i,j) is the velocity on the wall to the west of it and (i+1,j) is the velocity on the wall to the east of the pressure. The same holds for y velocities with (i,j) in the y velocity grid to be the wall above or north of the pressure point and (i,j+1) to be the velocity of the wall below or south of the pressure cell. This arrangement may seem odd at first look but makes sense when it is remembered that computer graphics begin counting in the top left corner. By seeming to count backwards in the y direction we ensure the resulting graphics isn't up-down.</p>
+    <p>A staggered grid has been used in this model to increase reliability. This means that the grid of pressures, x velocities and y velocities are not the same size. For each pressure cell or point there is a velocity on each wall, two x velocities and two y velocities. This means that the x velocity grid has one more column than the pressure grid and the y velocity grid has one more row. This means that for a pressure cell with index (i,j) the x velocity (i,j) is the velocity on the wall to the west of it and (i+1,j) is the velocity on the wall to the east of the pressure. The same holds for y velocities with (i,j) in the y velocity grid to be the wall above or north of the pressure point and (i,j+1) to be the velocity of the wall below or south of the pressure cell. This arrangement may seem odd at first look but makes sense when it is remembered that computer graphics begin counting in the top left corner. By seeming to count backwards in the y direction we ensure the resulting graphics isn't up-down.</p>
 
     <p>The first step begins with two of the base assumptions, incompressibility and the conservation of mass. The conservation of mass can be written as the rate of change of mass for an element being equal to the net rate of flow of mass for that element. Mathematically this can be written like this;</p>
-
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \frac{\partial \rho}{\partial t} + \rho \bigtriangledown \circ \mathbf{u} = 0
-    \end{equation*}
-    \end{document}
-
+    <p>equation 1 on sheet</p>
     <p>In the above expression and all later equations u and v represent the x and y velocities respectively and where a bold u represents the total vector of velocity (u,v). The left hand side can be simplified using the assumption of the incompressibility of the fluid which states that density is constant, this gives us this;</p>
 
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \frac{\partial \rho}{\partial t} = 0
-    \end{equation*}
-    \end{document}
-
+    <p>equation two on sheet</p>
     <p>Substituting this back into the conservation of mass the following result is found;</p>
 
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \rho \bigtriangledown \circ \mathbf{u} = 0
-    \end{equation*}
-    \end{document}
+    <p>Equation three on sheet</p>
+    <p>This result will be very useful in this next step with the Navier-Stokes equations. The Navier-Stokes equations can be written like this;</p>
 
-    <p>This result will be very useful in this next derivation using the Navier-Stokes equations. The Navier-Stokes equations relate the change in velocity to a change in pressure plus effects from viscus stress and any other source or sink terms, they can be written like this;</p>
+    <p>Equation four.</p>
+    <p>In the formula above the S term contains the momentum sink and source terms and includes things such as gravity or magnetic interaction if applicable. Here the use of D in the place of the normal or partial deltas signifies total change of the variable over time and so can be expanded into this.</p>
 
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \rho \frac{D u}{D t} = -\frac{\partial p}{\partial x} + \bigtriangledown \circ \mu \bigtriangledown u + S
+    <p>Equation five.</p>
 
-    \rho \frac{D v}{D t} = -\frac{\partial p}{\partial y} + \bigtriangledown \circ \mu \bigtriangledown v + S
-    \end{equation*}
-    \end{document}
-
-
-    <p>In the formula above the S term contains the momentum sink and source terms and includes things such as gravity or magnetic interaction if applicatable. Here the use of D in the place of the normal or partial deltas signifiies total change of the variable over time and so can be expanded into this.</p>
-
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \rho \frac{D u}{D t} = \frac{\partial u}{\partial t} + \bigtriangledown \circ \rho u \mathbf{u}
-    \end{equation*}
-    \end{document}
-
-    <p>This shows the total change in a given moment of time to be the sum of the change of that variable with time and the change of the variable wth regards to space. Using the assumption of steady state the derivative with respect to time can be set to 0 and then using the following vector identity
+    <p>This shows the total change in a given moment of time to be the sum of the change of that variable with time and the change of the variable with regards to space. Using the assumption of steady state the derivative with respect to time can be set to 0 and then using the following vector identity
        identity the Navier-Stokes equations can be simplified.</p>
 
-    \documentclass{article}
-    \begin{document}
-    \begin{equation*}
-    \bigtriangledown \circ \rho u \mathbf{u} = \mathbf{u} \circ \bigtriangledown \rho u + \rho u \bigtriangledown \circ \mathbf{u}
-    \end{equation*}
-    \end{document}
+    <p>Equation six.</p>
 
-    <p> This gives the following result for the now simplified steady state Navier-Stokes equatons for an incompressible fluid. </p>
-    <p>. **show the simplified equations here (ie the ones we used)** </p>
-    <p>Next these equations were discretized so they could be applied to our staggered grid structure. The base of the algorithm used here is the SIMPLE algorithm, where a ''guessed'' pressure field is used to estimate a velocity field. This estiemated velocity field is then used to great a pressure correction field and from these two arrays a new, corrected array is created for velocity and pressure. The final step is to test the new arrays against the old and check for convergence, if none is found then the new fields become the old and the process is repeated. The discrete equation for u momentum can be written lke this after some work.</p>
-    <p> **show discrete u momemtum equation** </p>
-    <p>This equation calculates the estimated velocities from the old pressure field, the old velocity field and viscosity. The v momentum equation ia in the same form.</p>
-    <p>**v discrete momentum equation**</p>
-    <p>The derivation of how the discreteness was achieved are not given here but it was done by converting the differencuations into differences between adjacent cells over the distance between them which is the volume side length, after some rearrangment you arrive at the given formula. Both of these equations include ''a'' terms, these are co-effiecients that in essentence create a weighted average. They are calculated using a differencing mathode. In this work the TVD scheme was used to calculate the a values. For each cell five values were calculated. a central one of the cell in question and then the north, south, east and west values. These determin what the contribution from the velocities to the west, east, north and south are to the one in question. The coefficent terms are calculated using interface diifusion terms and mass flux terms as shown here.</p>
-    <p> **show all the TVD stuff here**</p>
-    <p>In the discrete equations the first term on the left side is a sum of the four surrounding neighbours. The next term is the change in velociity from pressure differenece across the velocity. The last term is the contribution from our sources from before, in this model the only addtion to this viscosity and the drag force if vegetation is present in the given location.</p>
-    <p>This now means that as well as having u and v velocity arrays there are now estimated u and v arrays, called temp u and temp v in the actual code. These are now used to calculate a pressure coreection which takes the following form;</p>
-    <p> **show pressure coreection here**</p>
-    <p>The first term on the left is agian a weighted sum of it's neighbours, in this case it's neighbours in the previous step pressure chnages. The next term is the divergence of the estimated velocities. The coefficents here are calculated from the a coefficients for the veolcities like so;</p>
-    <p>**show coefficients**</p>
-    <p>Now using the velocity estimates and this array of pressure corrections new pressures and velocities can be generated using the following equations;</p>
-    <p>**show the corection equations for new stuff**</p>
-    <p>Now a convergence check is carried out where the old velocity arrays are taken off the new velocity arrays for both u and v, an average difference is then calculated and this is compared to a hard coded value where if the average difference is greater than the limit the process is repeated with the new arrays taking the place of the intial old arrays including the pressure correction. If the average difference is below the convergence limit then the simulation ends nd the final velocity flow field is displayed. This in theory is a complete method for calculating the steady state flow field for a given fluid however this will not always succeed. In order to improve stability and reliability under-relaxation factors have been included. These factors limit the chnage per cycle and so help prevent the program becoming trapped in ant local minimum as it steps toward convergence. These alter the equations slightly giving these new forms;</p>
-    <p>**show the adjusted equations with the under-relaxation factors**</p>
+    <p> This gives the following result for the now simplified steady state Navier-Stokes equations for an incompressible fluid. </p>
+    <p>Equation seven.</p>
+
+    <p>Next these equations were discretized so they could be applied to our staggered grid structure. </p>
+    <p> Equation eight. </p>
+
+    <p>The derivation of how the discreteness was achieved are not given here but it was done by converting the differentiations into differences between adjacent cells over the distance between them which is the volume side length, after some rearrangement you arrive at the given formula. In the equations above the A term is the side length of one of the finite volume squares.
+
+    <p>Both of these equations include ''a'' terms, these are coefficient that in essence creates a weighted average and are calculated using a differencing method. In this work the TVD scheme was used to calculate the a values. For each cell five values are calculated. A central coefficient of the cell in question and then the north, south, east and west values. It is these four coefficients that determine what the contribution from the velocities to the north, south, east and west are to velocity being calculated. The coefficient terms are calculated using interface diffusion terms and mass flux terms as shown here.</p>
+    <p> Equation nine.</p>
+    <p>Here the capital gamma is the constant of diffusion for water.</p>
+
+    <p>In the discrete equations the first term on the left side is a sum of the four surrounding neighbors. The next term is the change in velocity from pressure difference across the velocity. The last term is the contribution from our sources from before, in this model the only addition to this was the effects from viscosity and the drag force if vegetation was present in the given location.</p>
+    <p> Now that the Navier-Stokes equations have been converted into the correct form they can be incorporated into the algorithm used to model the fluid flow. In this work the SIMPLE algorithm has been used. In this algorithm a ''guessed'' pressure field is used to estimate a velocity field using the discretized velocity equations above. This estimated velocity field is then used to generate a pressure correction field using this formula;</p>
+    Equation ten.
+    <p>The first term on the left is again a weighted sum of it's neighbors, in this case it's neighbors in the previous pressure changes calculated in the step before. The next term is the divergence of the estimated velocities. In this equation for calculating the pressure correction the bold a coefficients are not the same as the previous ones used for velocities, although they do depend on these values among other constants as shown above. The lower case a coefficients here represent the central coefficients of the neighboring velocities.</p>
+    <p>Using the array of pressure corrections and estimated velocities just calculated new arrays of corrected or ''new'' values are made for both pressure and velocity in each direction. This is carried out using the following formulas;</p>
+
+    equation eleven
+
+    <p>The final step is to test the new arrays against the old and check for convergence. This is where the old velocity arrays are subtracted from the new velocity arrays for both u and v, and average difference is then calculated and this is compared to a hard coded value where if the average difference is greater than the limit the process is repeated with the new arrays taking the place of the initial old arrays including the pressure correction. If the average difference is below the convergence limit then the simulation ends and the final velocity flow field is displayed.</P>
+
+    <p> This in theory is a complete method for calculating the steady state flow field for a given fluid however this will not always succeed. In order to improve stability and reliability under-relaxation factors have been included. These are factors between 0 and 1 which limit the change from old to new and so help prevent the program becoming trapped in a local minimum as it moves toward convergence. These alter the equations slightly giving these new forms;</p>
+    Equation twelve
+
+    <p> In these equations the alphas represent the respective under-relaxation factors for pressure, u velocity and v velocity. The velocities with the n-1 superscript represent the old velocities from the previous step. Using under-relaxation factors does increase the run time of the model as more loops are required to reach convergence however they are necessary in order to achieve mathematical stability.</p>
+
     <figure style="float:right">
       <img src="../images/utah_teapot.png" width="320px" height="auto" alt="Image of the Utah Teapot" />
       <figcaption>3D graphical representation of the Utah Teapot, made by Martin Newell</figcaption>
