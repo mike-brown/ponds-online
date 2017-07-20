@@ -418,12 +418,12 @@ function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, 
   const [
     iVis,
     jVis
-  ] = viscosity(xArr, yArr, mu)
+  ] = viscosity(xArr, yArr, rows, cols, mu)
 
   const [
     iForce,
     jForce
-  ] = drag(sArr, xArr, yArr, nu, rho)
+  ] = drag(sArr, xArr, yArr, rows, cols, nu, rho)
 
   // performs velocity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {

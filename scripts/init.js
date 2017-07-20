@@ -13,7 +13,7 @@ const {
   converge
 } = require('../prototype/fluid')
 
-const { CELL_SIZE, params, values } = require('../prototype/config')
+const { params, values } = require('../prototype/config')
 
 const {
   AddTool,
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelector('.title').textContent = 'Simulation'
 
       const xctx = $simulationCanvas.getContext('2d')
-      xctx.canvas.width = (w + 1) * CELL_SIZE + 1
-      xctx.canvas.height = h * CELL_SIZE + 1
+      xctx.canvas.width = (w + 1) * 1 + 1
+      xctx.canvas.height = h * 1 + 1
 
       let count = 0
 
@@ -85,21 +85,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = 240 - xArr[i][j] / maxv * 240
 
             xctx.fillStyle = `hsl(${val}, 100%, 50%)`
-            xctx.fillRect(j * CELL_SIZE, i * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+            xctx.fillRect(j * 1, i * 1, 1, 1)
           }
         }
       }
 
       const initiate = () => {
-        const valsX = ax(state, prevX, prevY, values.density, values.diffuse)
+        const valsX = ax(state, prevX, prevY, h, w, values.density, values.diffuse)
 
-        const valsY = ay(state, prevX, prevY, values.density, values.diffuse)
+        const valsY = ay(state, prevX, prevY, h, w, values.density, values.diffuse)
 
         const [tempX, tempY] = couple(
           state,
           prevP,
           prevX,
           prevY,
+          h, w,
           valsX,
           valsY,
           params.size,
@@ -110,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
           params.input.y
         )
 
-        primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY, params.size)
+        primeP = jacobi(state, primeP, tempX, tempY, h, w, valsX, valsY, params.size)
 
         const [nextX, nextY, nextP] = correct(
           state,
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
           primeP,
           tempX,
           tempY,
+          h, w,
           prevX,
           prevY,
           valsX,

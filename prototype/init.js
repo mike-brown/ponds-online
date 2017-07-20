@@ -17,8 +17,8 @@ const {
 
 const {
   CELL_SIZE,
-  COLS,
   ROWS,
+  COLS,
   params,
   values
 } = require('./config') // imports simulation properties from config.js file
@@ -178,12 +178,14 @@ window.addEventListener(
       if (running.checked) {
         const valsX = ax(
           state, prevX, prevY,
+          ROWS, COLS,
           values.density,
           values.diffuse
         ) // calculates a-values for the x-velocity axis
 
         const valsY = ay(
           state, prevX, prevY,
+          ROWS, COLS,
           values.density,
           values.diffuse
         ) // calculates a-values for the y-velocity axis
@@ -192,7 +194,9 @@ window.addEventListener(
           tempX,
           tempY
         ] = couple(
-          state, prevP, prevX, prevY, valsX, valsY,
+          state, prevP, prevX, prevY,
+          ROWS, COLS,
+          valsX, valsY,
           params.size,
           params.mu,
           params.nu,
@@ -201,7 +205,10 @@ window.addEventListener(
           params.input.y
         ) // calcualtes pressure-velocity coupling terms
 
-        primeP = jacobi(state, primeP, tempX, tempY, valsX, valsY,
+        primeP = jacobi(
+          state, primeP, tempX, tempY,
+          ROWS, COLS,
+          valsX, valsY,
           params.size
         ) // calculates pressure estimate
 
@@ -209,7 +216,10 @@ window.addEventListener(
           nextX,
           nextY,
           nextP
-        ] = correct(state, prevP, primeP, tempX, tempY, prevX, prevY, valsX, valsY,
+        ] = correct(
+          state, prevP, primeP, tempX, tempY,
+          ROWS, COLS,
+          prevX, prevY, valsX, valsY,
           params.size,
           params.input.x,
           params.input.y
@@ -221,7 +231,7 @@ window.addEventListener(
         }
 
         // invokes next animation frame if convergence is above threshold
-        if (converge(state, nextX, nextY, prevX, prevY) > tolerance) {
+        if (converge(state, nextX, nextY, prevX, prevY, ROWS, COLS) > tolerance) {
           count--
           prevX = nextX.map(arr => [...arr]) // puts array into cell and expands out
           prevY = nextY.map(arr => [...arr]) // puts array into cell and expands out
