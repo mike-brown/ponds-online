@@ -35,10 +35,10 @@
   <section>
     <h2>Applying the Maths!</h2>
     <h3>How does the model work?</h3>
-    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales is resolved, this is computationally complex and impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations. The Navier-Stokes equations relate the change in momentum to a change in pressure as well as any other sources of work by other forces, the equations are derived using these three fundimental laws:
+    <p><span class="italic">Computational Fluid Dynamics</span> (CFD) employs the use of mathematical models to simulate the flow of fluids. While it is possible to resolve most scenarios using <span class="italic">Direct Numerical Simulation</span> (DNS), in which the entire range of turbulence scales is resolved, this is computationally complex and impractical for large-scale models. Instead, our simulation has been designed to solve the Navier-Stokes equations. The Navier-Stokes equations relate the change in momentum to a change in pressure as well as any other sources of work by other forces, the equations are derived using these three fundamental laws:
 
     <ul>
-      <li><span class="bold">Conservation of Mass:</span> in an isolated system such as our pond simulato, mass may not be spontaneously created or destroyed. If a loss or gain of mass occurs there must be an appropriate process to explain it; since mass cannot simply 'fall' out of the simulation.</li>
+      <li><span class="bold">Conservation of Mass:</span> in an isolated system such as our pond simulation, mass may not be spontaneously created or destroyed. If a loss or gain of mass occurs there must be an appropriate process to explain it; since mass cannot simply 'fall' out of the simulation.</li>
       <li><span class="bold">Conservation of Energy:</span> the change in energy of any particle must be equal to any work done or change in temperature; as energy may not be spontaneously created or destroyed. This is in essence the first law of thermodynamics.</li>
       <li><span class="bold">Newton's Second Law:</span> this states that any change in momentum must equal the sum of the forces acting upon it.</li>
     </ul>
@@ -48,14 +48,14 @@
     <ul>
       <li><span class="bold">Continuum:</span> the fluid being modelled is considered to be a Continuum. This is a formal way of saying that the scale at which the model is operating is large enough for any effects from the molecular structure and motion are irrelevant. Looking from one point to the next we should see no difference in characteristics. This means that a point of fluid is the smallest volume of the fluid where it can still be considered a continuum and the macroscopic properties still provide an adequate description.</li>
       <li><span class="bold">Macroscopic Description:</span> the variables used to fully describe the motion of the fluid: such as pressure, velocity, density, and temperature; are all macroscopic. This means that they are averages over the microscopic variables which each molecule has. We assume that this is a complete description which continues on from our assumption of it being a continuum.</li>
-      <li><span class="bold">Two Dimensional:</span> in this example the model has only been applied in two dimensions. In essence it has been treated as a one meter slice of an infinity deep body of water. In reality this means additional contributions from vertical effects have been neglected but in pond structures these tend t be small due to the shallow depth.</li>
+      <li><span class="bold">Two Dimensional:</span> in this example the model has only been applied in two dimensions. In essence it has been treated as a one meter slice from an infinitely deep body of water. In reality this means additional contributions from vertical effects have been neglected but in pond structures these tend t be small due to the shallow depth.</li>
       <li><span class="bold">Completely Isolated:</span> the fluid is also assumed to be completely isolated from its surroundings and so no change in temperature or work due to external forces (such as wind or wildlife) are included. Again this will decrease the accuracy of the results compared to real world data as temperature and external conditions can have very significant effects.</li>
       <li><span class="bold">Vegetative Drag:</span> in this model the effect due to vegetation is accounted by the inclusion of an additional drag force to oppose the motion of the fluid. This drag force depends upon several experimentally found results and so may not be perfectly representative. Other schemes for vegetation do exist.</li>
-      <li><span class="bold">Steady State:</span> this model is a steady state solution which assumes no changes with respect to time occur to the flow field and that it has stabilized to some result after sufficient time has elapsed since flow began.</li>
+      <li><span class="bold">Steady State:</span> this model is a steady state solution which assumes no changes with respect to time occur to the flow field and that it has stabilised to some result after sufficient time has elapsed since flow began.</li>
       <li><span class="bold">Incompressible Fluid:</span> in this simulation the fluid, namely liquid water, is assumed to be incompressible and so has a constant density at all points.</li>
     </ul>
 
-    <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes: sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the center of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
+    <p>The finite volume method used here is based upon dividing the whole fluid into smaller volumes: sufficiently small enough to allow the accurate modelling of the flow field. In commercial software a mesh algorithm is used to generate a custom mesh of smaller volumes to improve accuracy. This will result in areas of probable complexity such as edges being divided into smaller volumes then the centre of the fluid as the central flow field should be fairly constant. This approach in the interest of reducing processing time has instead simply divided the total volume into a grid of squares, each with the same lengths.</p>
 
     <p>A staggered grid has been used in this model to increase reliability. This means that the grid of pressures, x velocities and y velocities are not the same size. For each pressure cell or point there is a velocity on each wall, two x velocities and two y velocities. This means that the x velocity grid has one more column than the pressure grid and the y velocity grid has one more row. This means that for a pressure cell with index \( (i,j) \) the x velocity \( (i,j) \) is the velocity on the wall to the west of it and \( (i+1,j) \) is the velocity on the wall to the east of the pressure. The same holds for y velocities with \( (i,j) \) in the y velocity grid to be the wall above or north of the pressure point and \( (i,j+1) \) to be the velocity of the wall below or south of the pressure cell. This arrangement may seem odd at first look but makes sense when it is remembered that computer graphics begin counting in the top left corner. By seeming to count backwards in the y direction we ensure the resulting graphics isn't up-down.</p>
 
@@ -63,7 +63,7 @@
 
     <p>$$ \frac{\partial \rho}{\partial t} + \rho \bigtriangledown \bullet \mathbf{u} = 0 $$</p>
 
-    <p>In the above expression and all later equations u and v represent the x and y velocities respectively and where a bold u represents the total vector of velocity (u,v). The left hand side can be simplified using the assumption of the incompressibility of the fluid which states that density is constant, this gives us this;</p>
+    <p>In the above expression and all later equations \( u \) and \( v \) represent the x and y velocities respectively and where a bold \( u \) represents the total vector of velocity \( (u,v) \). The left hand side can be simplified using the assumption of the incompressibility of the fluid which states that density is constant, this gives us this;</p>
 
     <p>$$ \frac{\partial \rho}{\partial t} = 0 $$</p>
 
@@ -74,8 +74,8 @@
     <p>This result will be very useful in this next step with the Navier-Stokes equations. The Navier-Stokes equations can be written like this;</p>
 
     <p>
-      $$ \rho \frac{D u}{D t} = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S $$
-      $$ \rho \frac{D v}{D t} = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S $$
+      $$ \rho \frac{D u}{D t} = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S_x $$
+      $$ \rho \frac{D v}{D t} = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S_y $$
     </p>
 
     <p>In the formula above the S term contains the momentum sink and source terms and includes things such as gravity or magnetic interaction if applicable. Here the use of D in the place of the normal or partial deltas signifies total change of the variable over time and so can be expanded into this.</p>
@@ -90,11 +90,11 @@
     <p> This gives the following result for the now simplified steady state Navier-Stokes equations for an incompressible fluid. </p>
 
     <p>
-      $$ \mathbf{u} \bullet (\bigtriangledown \rho u) = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S $$
-      $$ \mathbf{u} \bullet (\bigtriangledown \rho v) = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S $$
+      $$ \mathbf{u} \bullet (\bigtriangledown \rho u) = -\frac{\partial p}{\partial x} + \bigtriangledown \bullet (\mu \bigtriangledown u) + S_x $$
+      $$ \mathbf{u} \bullet (\bigtriangledown \rho v) = -\frac{\partial p}{\partial y} + \bigtriangledown \bullet (\mu \bigtriangledown v) + S_y $$
     </p>
 
-    <p>Next these equations were discretized so they could be applied to our staggered grid structure. </p>
+    <p>Next these equations were discretised so they could be applied to our staggered grid structure. </p>
 
     <p>$$ a_{i,j} u_{i,j} = \Sigma a_{n,b} u_{n,b} - (p_{i,j}-p_{i-1,j}) A_{i,j} + b_{i,j} $$
 
@@ -121,7 +121,7 @@
 
     <p>Here the capital gamma is the constant of diffusion for water.</p>
 
-    <p>In the discrete equations the first term on the left side is a sum of the four surrounding neighbors. The next term is the change in velocity from pressure difference across the velocity. The last term is the contribution from our sources from before, in this model the only addition to this was the effects from viscosity and the drag force if vegetation was present in the given location.</p>
+    <p>In the discrete equations the first term on the left side is a sum of the four surrounding neighbours. The next term is the change in velocity from pressure difference across the velocity. The last term is the contribution from our sources from before, in this model the only addition to this was the effects from viscosity and the drag force if vegetation was present in the given location.</p>
     <p> Now that the Navier-Stokes equations have been converted into the correct form they can be incorporated into the algorithm used to model the fluid flow. In this work the SIMPLE algorithm has been used. In this algorithm a ''guessed'' pressure field is used to estimate a velocity field using the discretized velocity equations above. This estimated velocity field is then used to generate a pressure correction field using this formula;</p>
 
     <p>
@@ -132,7 +132,7 @@
       $$ d_{i,j} = \frac{A}{a_{i,j}} $$
     </p>
 
-    <p>The first term on the left is again a weighted sum of it's neighbors, in this case it's neighbors in the previous pressure changes calculated in the step before. The next term is the divergence of the estimated velocities. In this equation for calculating the pressure correction the bold a coefficients are not the same as the previous ones used for velocities, although they do depend on these values among other constants as shown above. The lower case a coefficients here represent the central coefficients of the neighboring velocities.</p>
+    <p>The first term on the left is again a weighted sum of it's neighbours, in this case it's neighbours in the previous pressure changes calculated in the step before. The next term is the divergence of the estimated velocities. In this equation for calculating the pressure correction the bold a coefficients are not the same as the previous ones used for velocities, although they do depend on these values among other constants as shown above. The lower case a coefficients here represent the central coefficients of the neighbouring velocities.</p>
     <p>Using the array of pressure corrections and estimated velocities just calculated new arrays of corrected or ''new'' values are made for both pressure and velocity in each direction. This is carried out using the following formulas;</p>
 
     <p>
@@ -143,7 +143,7 @@
       $$ v_{new, i, j} = v*_{i,j} + d_{i,j}(\acute{p}_{i,j-1} - \acute{p}_{i,j}) $$
     </p>
 
-    <p>The final step is to test the new arrays against the old and check for convergence. This is where the old velocity arrays are subtracted from the new velocity arrays for both u and v, and average difference is then calculated and this is compared to a hard coded value where if the average difference is greater than the limit the process is repeated with the new arrays taking the place of the initial old arrays including the pressure correction. If the average difference is below the convergence limit then the simulation ends and the final velocity flow field is displayed.</P>
+    <p>The final step is to test the new arrays against the old and check for convergence. This is where the old velocity arrays are subtracted from the new velocity arrays for both \( u \) and \( v \), and average difference is then calculated and this is compared to a hard coded value where if the average difference is greater than the limit the process is repeated with the new arrays taking the place of the initial old arrays including the pressure correction. If the average difference is below the convergence limit then the simulation ends and the final velocity flow field is displayed.</P>
 
     <p> This in theory is a complete method for calculating the steady state flow field for a given fluid however this will not always succeed. In order to improve stability and reliability under-relaxation factors have been included. These are factors between 0 and 1 which limit the change from old to new and so help prevent the program becoming trapped in a local minimum as it moves toward convergence. These alter the equations slightly giving these new forms;</p>
 
@@ -155,7 +155,7 @@
       $$ v_{new, i, j} = \alpha_{v}( v*_{i,j} + d_{i,j}(\acute{p}_{i,j-1} - \acute{p}_{i,j})) + (1-\alpha_{v})v^{n-1}_{i,j} $$
     </p>
 
-    <p> In these equations the alphas represent the respective under-relaxation factors for pressure, u velocity and v velocity. The velocities with the n-1 superscript represent the old velocities from the previous step. Using under-relaxation factors does increase the run time of the model as more loops are required to reach convergence however they are necessary in order to achieve mathematical stability.</p>
+    <p> In these equations the alphas represent the respective under-relaxation factors for pressure, \( u \) velocity and \( v \) velocity. The velocities with the n-1 superscript represent the old velocities from the previous step. Using under-relaxation factors does increase the run time of the model as more loops are required to reach convergence however they are necessary in order to achieve mathematical stability.</p>
   </section>
 
   <footer>
