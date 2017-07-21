@@ -11,9 +11,9 @@ const {
   jacobi,
   correct,
   converge
-} = require('../prototype/fluid')
+} = require('./sim/fluid')
 
-const { params, values } = require('../prototype/config')
+const { params, values } = require('./sim/config')
 
 const {
   AddTool,
@@ -35,119 +35,145 @@ document.addEventListener('DOMContentLoaded', () => {
   let simulating = false
 
   const startSim = (input, w, h) => {
-    if (editor.isReady()) {
-      $run.classList.remove('primary')
-      $run.classList.add('secondary')
-      $run.textContent = 'Stop Simulation'
-      document.querySelector('.title').textContent = 'Simulation'
+    $run.classList.remove('primary')
+    $run.classList.add('secondary')
+    $run.textContent = 'Stop Simulation'
+    document.querySelector('.title').textContent = 'Simulation'
 
-      const xctx = $simulationCanvas.getContext('2d')
-      xctx.canvas.width = (w + 1) * 1 + 1
-      xctx.canvas.height = h * 1 + 1
+    const xctx = $simulationCanvas.getContext('2d')
+    xctx.canvas.width = (w + 1) * 1 + 1
+    xctx.canvas.height = h * 1 + 1
 
-      let count = 0
+    let count = 0
 
-      let state = input.map(arr => [...arr])
+    let state = input.map(arr => [...arr])
 
-      let prevP = zeros(h, w)
-      let prevX = zeros(h, w + 1)
-      let prevY = zeros(h + 1, w)
+    let prevP = zeros(h, w)
+    let prevX = zeros(h, w + 1)
+    let prevY = zeros(h + 1, w)
 
-      let primeP = zeros(h, w)
-      let aX = zeros(h, w + 1)
-      let aY = zeros(h + 1, w)
+    let primeP = zeros(h, w)
+    let aX = zeros(h, w + 1)
+    let aY = zeros(h + 1, w)
 
-      const draw = (sArr, pArr, xArr, yArr) => {
-        xctx.clearRect(0, 0, xctx.canvas.width, xctx.canvas.height)
+    const draw = (sArr, pArr, xArr, yArr) => {
+      xctx.clearRect(0, 0, xctx.canvas.width, xctx.canvas.height)
 
-        let maxp = 0
-        let maxv = 0
+      let maxp = 0
+      let maxv = 0
 
-        for (let y = 0; y < pArr.length; y++) {
-          for (let x = 0; x < pArr[y].length; x++) {
-            maxp = Math.max(maxp, Math.abs(pArr[y][x]))
-          }
-        }
-
-        for (let y = 0; y < xArr.length; y++) {
-          for (let x = 0; x < xArr[y].length; x++) {
-            maxv = Math.max(maxv, Math.abs(xArr[y][x]))
-          }
-        }
-
-        for (let y = 0; y < yArr.length; y++) {
-          for (let x = 0; x < yArr[y].length; x++) {
-            maxv = Math.max(maxv, Math.abs(yArr[y][x]))
-          }
-        }
-
-        for (let i = 0; i < xArr.length; i++) {
-          for (let j = 0; j < xArr[i].length; j++) {
-            const val = 240 - xArr[i][j] / maxv * 240
-
-            xctx.fillStyle = `hsl(${val}, 100%, 50%)`
-            xctx.fillRect(j * 1, i * 1, 1, 1)
-          }
+      for (let y = 0; y < pArr.length; y++) {
+        for (let x = 0; x < pArr[y].length; x++) {
+          maxp = Math.max(maxp, Math.abs(pArr[y][x]))
         }
       }
 
-      const initiate = () => {
-        console.time(`frame ${++frame}`)
-        const valsX = ax(state, prevX, prevY, h, w, values.density, values.diffuse)
-
-        const valsY = ay(state, prevX, prevY, h, w, values.density, values.diffuse)
-
-        const [tempX, tempY] = couple(
-          state,
-          prevP,
-          prevX,
-          prevY,
-          h, w,
-          valsX,
-          valsY,
-          params.size,
-          params.mu,
-          params.nu,
-          params.rho,
-          params.input.x,
-          params.input.y
-        )
-
-        primeP = jacobi(state, primeP, tempX, tempY, h, w, valsX, valsY, params.size)
-
-        const [nextX, nextY, nextP] = correct(
-          state,
-          prevP,
-          primeP,
-          tempX,
-          tempY,
-          h, w,
-          prevX,
-          prevY,
-          valsX,
-          valsY,
-          params.size,
-          params.input.x,
-          params.input.y
-        )
-
-        if (count === 0) {
-          draw(state, nextP, nextX, nextY)
-          count = 1
+      for (let y = 0; y < xArr.length; y++) {
+        for (let x = 0; x < xArr[y].length; x++) {
+          maxv = Math.max(maxv, Math.abs(xArr[y][x]))
         }
-
-        count--
-        prevX = nextX.map(arr => [...arr])
-        prevY = nextY.map(arr => [...arr])
-        prevP = nextP.map(arr => [...arr])
-
-        console.timeEnd(`frame ${frame}`)
-
-        requestAnimationFrame(initiate)
       }
+
+      for (let y = 0; y < yArr.length; y++) {
+        for (let x = 0; x < yArr[y].length; x++) {
+          maxv = Math.max(maxv, Math.abs(yArr[y][x]))
+        }
+      }
+
+      for (let i = 0; i < xArr.length; i++) {
+        for (let j = 0; j < xArr[i].length; j++) {
+          const val = 240 - xArr[i][j] / maxv * 240
+
+          xctx.fillStyle = `hsl(${val}, 100%, 50%)`
+          xctx.fillRect(j * 1, i * 1, 1, 1)
+        }
+      }
+    }
+
+    const initiate = () => {
+      console.time(`frame ${++frame}`)
+      const valsX = ax(
+        state,
+        prevX,
+        prevY,
+        h,
+        w,
+        values.density,
+        values.diffuse
+      )
+
+      const valsY = ay(
+        state,
+        prevX,
+        prevY,
+        h,
+        w,
+        values.density,
+        values.diffuse
+      )
+
+      const [tempX, tempY] = couple(
+        state,
+        prevP,
+        prevX,
+        prevY,
+        h,
+        w,
+        valsX,
+        valsY,
+        params.size,
+        params.mu,
+        params.nu,
+        params.rho,
+        params.input.x,
+        params.input.y
+      )
+
+      primeP = jacobi(
+        state,
+        primeP,
+        tempX,
+        tempY,
+        h,
+        w,
+        valsX,
+        valsY,
+        params.size
+      )
+
+      const [nextX, nextY, nextP] = correct(
+        state,
+        prevP,
+        primeP,
+        tempX,
+        tempY,
+        h,
+        w,
+        prevX,
+        prevY,
+        valsX,
+        valsY,
+        params.size,
+        params.input.x,
+        params.input.y
+      )
+
+      if (count === 0) {
+        draw(state, nextP, nextX, nextY)
+        count = 1
+      }
+
+      count--
+      prevX = nextX.map(arr => [...arr])
+      prevY = nextY.map(arr => [...arr])
+      prevP = nextP.map(arr => [...arr])
+
+      console.timeEnd(`frame ${frame}`)
 
       requestAnimationFrame(initiate)
     }
+
+    requestAnimationFrame(initiate)
   }
 
   const stopSim = () => {
@@ -220,10 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
       editor.view.update()
 
       $designCanvas.classList.remove('active')
-      $previewCanvas.classList.add('active')
+      $previewCanvas.classList.add('preview')
       $simulationCanvas.classList.add('active')
 
-      $designCanvas.parentNode.appendChild($previewCanvas)
+      $canvases.appendChild($previewCanvas)
 
       startSim(input, width, height)
     } else {

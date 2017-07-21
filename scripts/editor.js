@@ -10,7 +10,7 @@ const {
   Path: { Line, Rectangle }
 } = require('paper')
 
-const { HandTool } = require('./hand-tool')
+const { HandTool } = require('./tools/hand-tool')
 
 class Editor {
   constructor ($canvas) {

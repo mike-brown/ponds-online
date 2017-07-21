@@ -1,11 +1,7 @@
 'use strict'
 
 const { Tool } = require('./tool')
-const { Editor } = require('./editor')
-const {
-  directionalSnap,
-  snapToGrid
-} = require('./snap')
+const { Editor } = require('../editor')
 
 class RemoveTool extends Tool {
   activate () {

@@ -1,7 +1,7 @@
 'use strict'
 
 const { Tool } = require('./tool')
-const { Editor } = require('./editor')
+const { Editor } = require('../editor')
 
 class VegTool extends Tool {
   activate () {
