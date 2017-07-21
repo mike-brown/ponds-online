@@ -19,6 +19,7 @@ const {
   AddTool,
   RemoveTool,
   VegTool,
+  RemoveVegTool,
   InletTool,
   OutletTool
 } = require('./tools')
@@ -291,25 +292,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
   const $vegTool = document.querySelector('.js-veg-tool')
+  const $removeVegTool = document.querySelector('.js-remove-veg-tool')
   const $inletTool = document.querySelector('.js-inlet-tool')
   const $outletTool = document.querySelector('.js-outlet-tool')
 
   const toolButtons = [
-    [new AddTool(editor, $addTool), $addTool, 'add'],
-    [new RemoveTool(editor, $removeTool), $removeTool, 'remove'],
-    [new VegTool(editor, $vegTool), $vegTool, 'veg'],
-    [new InletTool(editor, $inletTool), $inletTool, 'inlet'],
-    [new OutletTool(editor, $outletTool), $outletTool, 'outlet']
+    [new AddTool(editor, $addTool), 'add', 'a'],
+    [new RemoveTool(editor, $removeTool), 'remove', 's'],
+    [new VegTool(editor, $vegTool), 'veg', 'v'],
+    [new RemoveVegTool(editor, $removeVegTool), 'remove-veg', 'r'],
+    [new InletTool(editor, $inletTool), 'inlet', 'i'],
+    [new OutletTool(editor, $outletTool), 'outlet', 'o']
   ]
 
   const $resetTool = document.querySelector('.js-reset-tool')
   const $gridSnapTool = document.querySelector('.js-grid-snap')
   const $subdivisionsTool = document.querySelector('.js-grid-subdivisions')
 
-  toolButtons.forEach(([tool, button, toolName]) => {
+  toolButtons.forEach(([tool, toolName, keybind]) => {
     editor.registerTool(toolName, tool)
 
-    button.addEventListener('click', () => {
+    tool.button.addEventListener('click', () => {
+      editor.activateTool(toolName)
+    })
+
+    Mousetrap.bind(keybind, ev => {
       editor.activateTool(toolName)
     })
   })
@@ -349,27 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })
 
-  Mousetrap.bind('a', ev => {
-    editor.activateTool('add')
-  })
-
-  Mousetrap.bind('s', ev => {
-    editor.activateTool('remove')
-  })
-
-  Mousetrap.bind('v', ev => {
-    editor.activateTool('veg')
-  })
-
-  Mousetrap.bind('i', ev => {
-    editor.activateTool('inlet')
-  })
-
-  Mousetrap.bind('o', ev => {
-    editor.activateTool('outlet')
-  })
-
-  Mousetrap.bind('r', ev => {
+  Mousetrap.bind('x', ev => {
     editor.reset()
     editor.activateTool('hand')
   })
