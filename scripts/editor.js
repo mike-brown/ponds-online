@@ -7,10 +7,12 @@ const {
   Path,
   Color,
   PointText,
-  Path: { Line, Rectangle }
+  Path: { Line }
 } = require('paper')
 
 const { HandTool } = require('./tools/hand-tool')
+const { presets } = require('./presets')
+const editorColors = require('./colors')
 
 class Editor {
   constructor ($canvas) {
@@ -47,36 +49,7 @@ class Editor {
     this.activeTool = undefined
     this.registerTool('hand', new HandTool(this))
 
-    this.reset()
-
-    //
-    // HACK: PRESET REMOVE
-    //
-
-    this.pond = new Rectangle({
-      topLeft: [100, 100],
-      bottomRight: [400, 200],
-      fillColor: Editor.colors.aqua
-    })
-    this.baseLayer.addChild(this.pond)
-
-    this.inlet = new Line({
-      from: [100, 100],
-      to: [100, 200],
-      strokeColor: Editor.colors.blue,
-      strokeCap: 'round',
-      strokeWidth: 5
-    })
-    this.baseLayer.addChild(this.inlet)
-
-    this.outlet = new Line({
-      from: [400, 100],
-      to: [400, 200],
-      strokeColor: Editor.colors.orange,
-      strokeCap: 'round',
-      strokeWidth: 5
-    })
-    this.baseLayer.addChild(this.outlet)
+    this.reset(true)
   }
 
   registerTool (name, tool) {
@@ -101,11 +74,20 @@ class Editor {
     this.activeTool = name
   }
 
-  reset () {
-    if (this.resetinit && !confirm('Reset?')) {
+  usePreset (name) {
+    console.info(`using ${name} preset`)
+    if (!(name in presets)) {
+      console.warn('not a valid preset name')
       return
-    } else {
-      this.resetinit = true
+    }
+
+    this.reset(true)
+    presets[name](this)
+  }
+
+  reset (override) {
+    if (!override && !confirm('Reset?')) {
+      return
     }
 
     if (this.pond) this.pond.remove()
@@ -395,15 +377,7 @@ class Editor {
   }
 
   static get colors () {
-    return {
-      white: '#ffffff',
-      black: '#000000',
-      red: '#ff4136',
-      orange: '#ff851b',
-      blue: '#0074d9',
-      green: '#2ecc40',
-      aqua: '#7fdbff'
-    }
+    return editorColors
   }
 }
 

@@ -403,4 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editor.isReady()) {
     $run.disabled = false
   }
+
+  Array.from(document.querySelectorAll('.js-preset')).forEach($preset => {
+    $preset.addEventListener('click', ev => {
+      editor.usePreset($preset.dataset.preset)
+    })
+  })
 })
