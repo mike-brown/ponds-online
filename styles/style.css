@@ -31,9 +31,9 @@ section {
   background-color: #E8E8E0;
 
   -webkit-box-shadow: 4px 4px 1px #A8A8B0;
-     -moz-box-shadow: 4px 4px 1px #A8A8B0;
+    -moz-box-shadow: 4px 4px 1px #A8A8B0;
       -ms-box-shadow: 4px 4px 1px #A8A8B0;
-       -o-box-shadow: 4px 4px 1px #A8A8B0;
+      -o-box-shadow: 4px 4px 1px #A8A8B0;
           box-shadow: 4px 4px 1px #A8A8B0;
 }
 
@@ -121,25 +121,25 @@ nav ul {
   width: 100%;
   max-width: 800px;
 
-	list-style: none;
+  list-style: none;
 }
 
 nav ul li {
   padding: 0;
-	display: inline-block;
+  display: inline-block;
 
-	text-align: center;
+  text-align: center;
 
-	font-size: 20px;
+  font-size: 20px;
 }
 
 nav ul li a, nav ul li a:hover, nav ul li a:visited {
   padding: 10px 20px;
   color: #DCDCD4;
 
-	display: inline-block;
+  display: inline-block;
 
-	text-decoration: none;
+  text-decoration: none;
 }
 
 nav ul li a:hover {
