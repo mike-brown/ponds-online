@@ -82,6 +82,8 @@ ul {
   padding: 0px 8px 8px 8px;
 
   line-height: 1.4em;
+
+  position: relative;
 }
 
 ul li {
