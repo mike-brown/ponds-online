@@ -1,7 +1,6 @@
 'use strict'
 
 const { Tool } = require('./tool')
-const { Editor } = require('./editor')
 
 class HandTool extends Tool {
   activate () {

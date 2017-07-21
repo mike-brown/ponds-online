@@ -9,12 +9,11 @@
 
   <!-- Styles -->
   <link rel="stylesheet" href="https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-dark.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./style.css">
 
   <!-- Scripts -->
   <script src="https://use.fontawesome.com/f0914e7b27.js" async></script>
-  <script src="http://evanw.github.com/lightgl.js/lightgl.js"></script>
-  <script src="/scripts/bundle.js" charset="utf-8"></script>
+  <script src="./scripts/bundle.js" charset="utf-8"></script>
 </head>
 <body>
   <header>
@@ -37,7 +36,8 @@
       <div class="col-sm-12 col-md-9 sim">
         <h1 class="title">Design</h1>
         <div class="canvases">
-          <canvas class="design"></canvas>
+          <canvas class="design active"></canvas>
+          <canvas class="simulation"></canvas>
         </div>
 
         <button class="primary js-run" disabled><span class="fa fa-cogs" aria-hidden="true"></span> Run Simulation</button>
@@ -71,9 +71,9 @@
         <div class="presets">
           <h2>Presets</h2>
 
-          <button>Linear Pipe</button>
-          <button>Basic Pond</button>
-          <button>Island</button>
+          <button class="js-preset" data-preset="linearPlates">Linear Pipe</button>
+          <button class="js-preset" data-preset="basic">Basic Pond</button>
+          <button class="js-preset" data-preset="island">Island</button>
         </div>
     </div>
   </main>

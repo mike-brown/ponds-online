@@ -12,16 +12,22 @@ header a {
 }
 
 canvas.design,
+canvas.preview,
 canvas.simulation {
   --margin: 0.5rem;
   flex: 1 1 auto;
   max-width: calc(100% - 2 * var(--margin));
   min-height: 70vh;
-  display: block;
   margin: 0 var(--margin) var(--margin);
+  display: none;
 
   border: 1px solid black;
   background: black;
+}
+
+canvas.preview,
+canvas.simulation {
+  display: none;
 }
 
 canvas.design {
@@ -31,6 +37,10 @@ canvas.design {
 canvas.design.pan {
   cursor: move;
   cursor: -webkit-grab;
+}
+
+canvas.active {
+  display: block;
 }
 
 .tools button,

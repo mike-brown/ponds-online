@@ -1,6 +1,19 @@
 'use strict'
 
+const { Path } = require('paper')
 const Mousetrap = require('mousetrap')
+
+const {
+  zeros,
+  ax,
+  ay,
+  couple,
+  jacobi,
+  correct,
+  converge
+} = require('./sim/fluid')
+
+const { params, values } = require('./sim/config')
 
 const {
   AddTool,
@@ -15,19 +28,171 @@ document.addEventListener('DOMContentLoaded', () => {
   // canvas
   const $canvases = document.querySelector('.canvases')
   const $designCanvas = $canvases.querySelector('canvas.design')
+  const $simulationCanvas = $canvases.querySelector('canvas.simulation')
   const $run = document.querySelector('.js-run')
 
+  let frame = 0
   let simulating = false
 
-  const startSim = () => {
-    if (editor.isReady()) {
-      $run.classList.remove('primary')
-      $run.classList.add('secondary')
-      $run.textContent = 'Stop Simulation'
-      document.querySelector('.title').textContent = 'Simulation'
+  const startSim = (input, w, h) => {
+    $run.classList.remove('primary')
+    $run.classList.add('secondary')
+    $run.textContent = 'Stop Simulation'
+    document.querySelector('.title').textContent = 'Simulation'
 
-      $designCanvas.style.display = 'none'
+    const xctx = $simulationCanvas.getContext('2d')
+    xctx.canvas.width = (w + 1) * 1 + 1
+    xctx.canvas.height = h * 1 + 1
+
+    // defines convergence threshold for simulation
+    const tolerance =
+      Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) /
+      100000
+
+    let converged = false
+    let count = 0
+
+    let state = input.map(arr => [...arr])
+
+    let prevP = zeros(h, w)
+    let prevX = zeros(h, w + 1)
+    let prevY = zeros(h + 1, w)
+
+    let primeP = zeros(h, w)
+    let aX = zeros(h, w + 1)
+    let aY = zeros(h + 1, w)
+
+    const draw = (sArr, pArr, xArr, yArr) => {
+      xctx.clearRect(0, 0, xctx.canvas.width, xctx.canvas.height)
+
+      let maxp = 0
+      let maxv = 0
+
+      for (let y = 0; y < pArr.length; y++) {
+        for (let x = 0; x < pArr[y].length; x++) {
+          maxp = Math.max(maxp, Math.abs(pArr[y][x]))
+        }
+      }
+
+      for (let y = 0; y < xArr.length; y++) {
+        for (let x = 0; x < xArr[y].length; x++) {
+          maxv = Math.max(maxv, Math.abs(xArr[y][x]))
+        }
+      }
+
+      for (let y = 0; y < yArr.length; y++) {
+        for (let x = 0; x < yArr[y].length; x++) {
+          maxv = Math.max(maxv, Math.abs(yArr[y][x]))
+        }
+      }
+
+      for (let i = 0; i < xArr.length; i++) {
+        for (let j = 0; j < xArr[i].length; j++) {
+          const val = 240 - xArr[i][j] / maxv * 240
+
+          xctx.fillStyle = `hsl(${val}, 100%, 50%)`
+          xctx.fillRect(j * 1, i * 1, 1, 1)
+        }
+      }
     }
+
+    const initiate = () => {
+      console.time(`frame ${++frame}`)
+      const valsX = ax(
+        state,
+        prevX,
+        prevY,
+        h,
+        w,
+        values.density,
+        values.diffuse
+      )
+
+      const valsY = ay(
+        state,
+        prevX,
+        prevY,
+        h,
+        w,
+        values.density,
+        values.diffuse
+      )
+
+      const [tempX, tempY] = couple(
+        state,
+        prevP,
+        prevX,
+        prevY,
+        h,
+        w,
+        valsX,
+        valsY,
+        params.size,
+        params.mu,
+        params.nu,
+        params.rho,
+        params.input.x,
+        params.input.y
+      )
+
+      primeP = jacobi(
+        state,
+        primeP,
+        tempX,
+        tempY,
+        h,
+        w,
+        valsX,
+        valsY,
+        params.size
+      )
+
+      const [nextX, nextY, nextP] = correct(
+        state,
+        prevP,
+        primeP,
+        tempX,
+        tempY,
+        h,
+        w,
+        prevX,
+        prevY,
+        valsX,
+        valsY,
+        params.size,
+        params.input.x,
+        params.input.y
+      )
+
+      if (count === 0) {
+        draw(state, nextP, nextX, nextY)
+        count = 1
+      }
+
+      if (converge(state, nextX, nextY, prevX, prevY, h, w) > tolerance) {
+        count--
+        prevX = nextX.map(arr => [...arr])
+        prevY = nextY.map(arr => [...arr])
+        prevP = nextP.map(arr => [...arr])
+      } else {
+        converged = true
+        prevX = nextX.map(arr => [...arr])
+        prevY = nextY.map(arr => [...arr])
+        prevP = nextP.map(arr => [...arr])
+        aX = valsX.map(arr => [...arr])
+        aY = valsY.map(arr => [...arr])
+
+        console.log('converged!')
+
+        draw(state, nextP, nextX, nextY)
+      }
+
+      console.timeEnd(`frame ${frame}`)
+
+      requestAnimationFrame(initiate)
+    }
+
+    requestAnimationFrame(initiate)
   }
 
   const stopSim = () => {
@@ -39,35 +204,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $run.addEventListener('click', () => {
     if (!simulating) {
-      // startSim()
+      editor.view.autoUpdate = false
 
       editor.scaleLayer.visible = false
       editor.gridLayer.visible = false
       editor.subGridLayer.visible = false
 
       editor.baseLayer.fitBounds(editor.view.bounds)
-      editor.baseLayer.scale(0.98, editor.view.center)
+      editor.baseLayer.scale(0.95, editor.view.center)
+
       editor.pond.fillColor = '#0affff'
+      if (editor.veg[0]) {
+        editor.veg[0].fillColor = '#0bcc88'
+        editor.veg[0].strokeWidth = 0
+      }
+      editor.inlet.strokeWidth = 2
+      editor.outlet.strokeWidth = 2
+      editor.inlet.strokeCap = 'butt'
+      editor.outlet.strokeCap = 'butt'
+      editor.inlet.strokeColor = '#0100ff'
+      editor.outlet.strokeColor = '#02ff00'
+      editor.inlet.bringToFront()
+      editor.outlet.bringToFront()
 
-      editor.inlet.strokeWidth = 1
-      editor.outlet.strokeWidth = 1
-      editor.inlet.strokeColor = '#01ffff'
-      editor.outlet.strokeColor = '#02ffff'
+      editor.view.update()
+      const raster = editor.baseLayer.rasterize(72)
+      editor.view.update()
 
-      const raster = editor.pond.rasterize()
-      const { data, width, height } = raster.getImageData(editor.view.bounds)
+      const $previewCanvas = raster.getSubCanvas({
+        x: editor.view.bounds.x - 10,
+        y: editor.view.bounds.y - 10,
+        width: editor.baseLayer.bounds.width + 20,
+        height: editor.baseLayer.bounds.height + 20
+      })
 
-      const reds = Float32Array.from(
+      const pctx = $previewCanvas.getContext('2d')
+      const imageData = pctx.getImageData(
+        0,
+        0,
+        $previewCanvas.width,
+        $previewCanvas.height
+      )
+
+      const { data, width, height } = imageData
+
+      const reds = Array.from(
         data.filter((val, index) => {
           return index % 4 === 0
         })
       )
 
       const input = Array.from(Array(height)).map((val, i) => {
-        return reds.slice(i * width, i * width + width)
+        return Array.from(reds.slice(i * width, i * width + width))
       })
 
-      console.log(input)
+      const rasterArea = new Path.Rectangle({
+        x: editor.baseLayer.bounds.x - 10,
+        y: editor.baseLayer.bounds.y - 10,
+        width: editor.baseLayer.bounds.width + 20,
+        height: editor.baseLayer.bounds.height + 20
+      })
+      rasterArea.strokeWidth = 1
+      rasterArea.strokeColor = 'red'
+
+      editor.baseLayer.addChild(rasterArea)
+      editor.view.update()
+
+      $designCanvas.classList.remove('active')
+      $previewCanvas.classList.add('preview')
+      // $previewCanvas.classList.add('active')
+      $simulationCanvas.classList.add('active')
+
+      $canvases.appendChild($previewCanvas)
+
+      startSim(input, width, height)
     } else {
       stopSim()
     }
@@ -75,10 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
     simulating = !simulating
   })
 
-  const $canvas = document.querySelector('canvas.design')
-
   // initialise editor
-  const editor = new Editor($canvas)
+  const editor = new Editor($designCanvas)
 
   const $addTool = document.querySelector('.js-add-tool')
   const $removeTool = document.querySelector('.js-remove-tool')
@@ -129,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $subdivisionsTool.value
   })
 
-  $canvas.addEventListener('mousewheel', ev => {
+  $designCanvas.addEventListener('mousewheel', ev => {
     ev.preventDefault()
     editor.zoom(1 + ev.wheelDeltaY / 1000)
   })
@@ -195,4 +403,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (editor.isReady()) {
     $run.disabled = false
   }
+
+  Array.from(document.querySelectorAll('.js-preset')).forEach($preset => {
+    $preset.addEventListener('click', ev => {
+      editor.usePreset($preset.dataset.preset)
+    })
+  })
 })

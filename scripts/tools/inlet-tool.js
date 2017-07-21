@@ -3,26 +3,27 @@
 const { Path: { Line } } = require('paper')
 
 const { Tool } = require('./tool')
-const { Editor } = require('./editor')
+const { Editor } = require('../editor')
 
-class OutletTool extends Tool {
+class InletTool extends Tool {
   onMouseDown (ev) {
     if (this.editor._hitTarget) {
-      if (this.editor.outlet) {
-        this.editor.outlet.remove()
+      if (this.editor.inlet) {
+        this.editor.inlet.remove()
       }
 
-      this.editor.outlet = this.editor._hitTarget
+      this.editor.inlet = this.editor._hitTarget
+      this.editor.inlet.closed = true
       this.editor._hitTarget = undefined
 
-      this.editor.outlet.strokeColor = Editor.colors.orange
+      this.editor.inlet.strokeColor = Editor.colors.blue
 
       if (
-        this.editor.inlet &&
-        this.editor.outlet.intersects(this.editor.inlet)
+        this.editor.outlet &&
+        this.editor.inlet.intersects(this.editor.outlet)
       ) {
-        this.editor.inlet.remove()
-        this.editor.inlet = undefined
+        this.editor.outlet.remove()
+        this.editor.outlet = undefined
       }
     }
   }
@@ -56,5 +57,5 @@ class OutletTool extends Tool {
 }
 
 module.exports = {
-  OutletTool
+  InletTool
 }
