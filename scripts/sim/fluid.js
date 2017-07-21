@@ -6,9 +6,9 @@ const {
 
 /**
  * Creates a 2D array of cells; each set to a value of zero.
- * @param {number} ROWS - the number of rows
- * @param {number} COLS - the number of columns
- * @returns {object} a list of lists; populated with zeros
+ * @param  {number} rows - the number of rows
+ * @param  {number} cols - the number of columns
+ * @return {Array} a list of lists; populated with zeros
  * @example
  * // returns [[0, 0], [0, 0]]
  * zeros(2, 2)
@@ -18,9 +18,11 @@ function zeros (rows, cols) {
   for (let j = 0; j < rows; j++) {
     let line = []
     for (let i = 0; i < cols; i++) {
-      line.push(0) // for each column, push a zero to the list
+      // for each column, push a zero to the list
+      line.push(0)
     }
-    grid.push(line) // for each row, push a line to the list
+    // for each row, push a line to the list
+    grid.push(line)
   }
   return grid
 }
@@ -73,8 +75,10 @@ function cell (arr, j, i) {
  * @param {number} di - the secondary x-axis index
  */
 function edge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
-  const wdz = cell(sArr, dj, di) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j, i) !== 0
+  // returns zero if wall
+  const wdz = cell(sArr, dj, di) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -98,8 +102,10 @@ function edge (sArr, arr, j, i, dj, di) {
  * @param {number} di - the secondary x-axis index
  */
 function eastedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
-  const wdz = cell(sArr, dj, di - 1) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j, i - 1) !== 0
+  // returns zero if wall
+  const wdz = cell(sArr, dj, di - 1) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -123,8 +129,10 @@ function eastedge (sArr, arr, j, i, dj, di) {
  * @param {number} di - the secondary x-axis index
  */
 function downedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
-  const wdz = cell(sArr, dj - 1, di) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j - 1, i) !== 0
+  // returns zero if wall
+  const wdz = cell(sArr, dj - 1, di) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -145,7 +153,8 @@ function downedge (sArr, arr, j, i, dj, di) {
  * @param {number} di - the secondary x-axis index
  */
 function softedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j, i) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -169,7 +178,8 @@ function softedge (sArr, arr, j, i, dj, di) {
  * @param {number} di - the secondary x-axis index
  */
 function softeastedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j, i - 1) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j, i - 1) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -193,7 +203,8 @@ function softeastedge (sArr, arr, j, i, dj, di) {
  * @param {number} di - the secondary x-axis index
  */
 function softdownedge (sArr, arr, j, i, dj, di) {
-  const wz = cell(sArr, j - 1, i) !== 0 // returns zero if wall
+  // returns zero if wall
+  const wz = cell(sArr, j - 1, i) !== 0
 
   const mi = Math.max(Math.min(i, arr[0].length - 1), 0)
   const mj = Math.max(Math.min(j, arr.length - 1), 0)
@@ -212,18 +223,25 @@ function softdownedge (sArr, arr, j, i, dj, di) {
  */
 function diffuse (f, diff) {
   const a = [
-    diff + Math.max(f[0], 0), // a_n = D_n + max(F_n, 0)
-    diff + Math.max(-f[1], 0), // a_s = D_s + max(-F_s, 0)
-    diff + Math.max(f[2], 0), // a_w = D_w + max(F_w, 0)
-    diff + Math.max(-f[3], 0) // a_e = D_e + max(-F_e, 0)
+    // a_n = D_n + max(F_n, 0)
+    diff + Math.max(f[0], 0),
+    // a_s = D_s + max(-F_s, 0)
+    diff + Math.max(-f[1], 0),
+    // a_w = D_w + max(F_w, 0)
+    diff + Math.max(f[2], 0),
+    // a_e = D_e + max(-F_e, 0)
+    diff + Math.max(-f[3], 0)
   ]
 
+  // [north, south, west, east]
   return [
-    a[0], // north
-    a[1], // south
-    a[2], // west
-    a[3], // east
-    a[0] + a[1] + a[2] + a[3] + (f[3] - f[2]) + (f[1] - f[0]) // a_c = a_n + a_s + a_w + a_e + d_F
+    a[0],
+    a[1],
+    a[2],
+    a[3],
+
+    // a_c = a_n + a_s + a_w + a_e + d_F
+    a[0] + a[1] + a[2] + a[3] + (f[3] - f[2]) + (f[1] - f[0])
   ]
 }
 
@@ -232,6 +250,8 @@ function diffuse (f, diff) {
  * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {number} dens - the density coefficient
  * @param {number} diff - the interface diffusion coefficient
  * @returns a collection of a-values for the x-axis
@@ -264,6 +284,8 @@ function ax (sArr, xArr, yArr, rows, cols, dens, diff) {
  * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {number} dens - the density coefficient
  * @param {number} diff - the interface diffusion coefficient
  * @returns a collection of a-values for the y-axis
@@ -295,6 +317,8 @@ function ay (sArr, xArr, yArr, rows, cols, dens, diff) {
  * Supplies a 2D arrray of viscosity coefficients
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {number} mu - the dynamic viscosity of water
  * @returns a collection of viscosity values
  */
@@ -305,22 +329,34 @@ function viscosity (xArr, yArr, rows, cols, mu) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const uSub1 = cell(xArr, j, i + 1) // takes cell to the east
-      const uSub2 = 2 * xArr[j][i] // takes center cell
-      const uSub3 = cell(xArr, j, i - 1) // takes cell to the west
+      // takes cell to the east
+      const uSub1 = cell(xArr, j, i + 1)
 
-      iArr[j][i] = mu * (uSub1 - uSub2 + uSub3) // calculates x-velocity viscosity coefficient
+      // takes center cell
+      const uSub2 = 2 * xArr[j][i]
+
+      // takes cell to the west
+      const uSub3 = cell(xArr, j, i - 1)
+
+      // calculates x-velocity viscosity coefficient
+      iArr[j][i] = mu * (uSub1 - uSub2 + uSub3)
     }
   }
 
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const vSub1 = cell(yArr, j + 1, i) // takes cell to the south
-      const vSub2 = 2 * yArr[j][i] // takes center cell
-      const vSub3 = cell(yArr, j - 1, i) // takes cell to the north
+      // takes cell to the south
+      const vSub1 = cell(yArr, j + 1, i)
 
-      jArr[j][i] = mu * (vSub1 - vSub2 + vSub3) // calculates y-velocity viscosity coefficient
+      // takes center cell
+      const vSub2 = 2 * yArr[j][i]
+
+      // takes cell to the north
+      const vSub3 = cell(yArr, j - 1, i)
+
+      // calculates y-velocity viscosity coefficient
+      jArr[j][i] = mu * (vSub1 - vSub2 + vSub3)
     }
   }
 
@@ -335,6 +371,8 @@ function viscosity (xArr, yArr, rows, cols, mu) {
  * @param {object} sArr - the 2D array of cell states
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {number} nu - the kinematic viscosity of water
  * @param {number} rho - the density of water
  * @returns a collection of drag values
@@ -346,7 +384,8 @@ function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
   // performs viscosity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
-      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0] // selects plant properties from list based on state value
+      // selects plant properties from list based on state value
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
 
       const c = [
         p[3] * nu,
@@ -358,8 +397,11 @@ function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
-      const uSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
-      const uSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4] // the "reynold === 0" circumvents divide-by-zero error
+      // hardcoded to set 11 as first plant state index
+      const uSub1 = 1 / (1 - p[1])
+
+      // the "reynold === 0" circumvents divide-by-zero error
+      const uSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
       const uSub3 = -(uSub1 * rho * Math.min(10, 2 * uSub2) * c[1]) / 2
 
       iArr[j][i] = uSub3 * xArr[j][i] * Math.abs(xArr[j][i])
@@ -369,7 +411,8 @@ function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
   // performs viscosity calculation in y-axis
   for (let j = 0; j < jArr.length; j++) {
     for (let i = 0; i < jArr[j].length; i++) {
-      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0] // selects plant properties from list based on state value
+      // selects plant properties from list based on state value
+      const p = plants.find(pt => pt[2] === cell(sArr, j, i)) || plants[0]
 
       const c = [
         p[3] * nu,
@@ -381,8 +424,11 @@ function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
         cell(yArr, j, i) + cell(yArr, j + 1, i)
       )
 
-      const vSub1 = 1 / (1 - p[1]) // hardcoded to set 11 as first plant state index
-      const vSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4] // the "reynold === 0" circumvents divide-by-zero error
+      // hardcoded to set 11 as first plant state index
+      const vSub1 = 1 / (1 - p[1])
+
+      // the "reynold === 0" circumvents divide-by-zero error
+      const vSub2 = c[0] / ((reynold + (reynold === 0)) * p[0]) + p[4]
       const vSub3 = -(vSub1 * rho * Math.min(10, 2 * vSub2) * c[1]) / 2
 
       jArr[j][i] = vSub3 * yArr[j][i] * Math.abs(yArr[j][i])
@@ -401,6 +447,8 @@ function drag (sArr, xArr, yArr, rows, cols, nu, rho) {
  * @param {object} pArr - the 2D array of pressure values
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {object} xA - the a-values for the x-axis
  * @param {object} yA - the a-values for the y-axis
  * @param {number} size - the face area of the cell
@@ -428,11 +476,12 @@ function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, 
   // performs velocity calculation in x-axis
   for (let j = 0; j < iArr.length; j++) {
     for (let i = 0; i < iArr[j].length; i++) {
+      // [north, south, west, east]
       const vx = [
-        xA[j][i][0] * softedge(sArr, xArr, j - 1, i, j, i), // north
-        xA[j][i][1] * softedge(sArr, xArr, j + 1, i, j, i), // south
-        xA[j][i][2] * softedge(sArr, xArr, j, i - 1, j, i), // west
-        xA[j][i][3] * softeastedge(sArr, xArr, j, i + 1, j, i) // east
+        xA[j][i][0] * softedge(sArr, xArr, j - 1, i, j, i),
+        xA[j][i][1] * softedge(sArr, xArr, j + 1, i, j, i),
+        xA[j][i][2] * softedge(sArr, xArr, j, i - 1, j, i),
+        xA[j][i][3] * softeastedge(sArr, xArr, j, i + 1, j, i)
       ]
 
       const wx = cell(sArr, j, i - 1) === 0 && cell(sArr, j, i) === 2 ||
@@ -452,7 +501,8 @@ function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, 
       const uSub2 = cell(pArr, j, i - 1) - cell(pArr, j, i)
       const uSub3 = (uSub1 + uSub2 * size + iVis[j][i] + iForce[j][i]) * wx
 
-      iArr[j][i] = uSub3 * !(inL || inR) / xA[j][i][4] + (inL ^ inR) * xI // either returns calculated value or inlet value
+      // either returns calculated value or inlet value
+      iArr[j][i] = uSub3 * !(inL || inR) / xA[j][i][4] + (inL ^ inR) * xI
     }
   }
 
@@ -483,7 +533,8 @@ function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, 
       const vSub2 = cell(pArr, j - 1, i) - cell(pArr, j, i)
       const vSub3 = (vSub1 + vSub2 * size + jVis[j][i] + jForce[j][i]) * wy
 
-      jArr[j][i] = vSub3 * !(inU || inD) / yA[j][i][4] + (inU ^ inD) * yI // either returns calculated value or inlet value
+      // either returns calculated value or inlet value
+      jArr[j][i] = vSub3 * !(inU || inD) / yA[j][i][4] + (inU ^ inD) * yI
     }
   }
 
@@ -499,6 +550,8 @@ function couple (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size, mu, nu, rho, 
  * @param {object} pArr - the 2D array of pressure values
  * @param {object} xArr - the 2D array of x-velocity values
  * @param {object} yArr - the 2D array of y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {object} xA - the a-values for the x-axis
  * @param {object} yA - the a-values for the y-axis
  * @param {number} size - the face area of the cell
@@ -509,35 +562,43 @@ function jacobi (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size) {
 
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
+      // [north, south, west, east]
       let vx = [
-        xArr[j][i], // west
-        xArr[j][i + 1] // east
+        xArr[j][i],
+        xArr[j][i + 1]
       ]
 
+      // [north, south, west, east]
       let vy = [
-        yArr[j][i], // north
-        yArr[j + 1][i] // south
+        yArr[j][i],
+        yArr[j + 1][i]
       ]
 
+      // [north, south, west, east]
       const p = [
-        cell(pArr, j - 1, i), // north
-        cell(pArr, j + 1, i), // south
-        cell(pArr, j, i - 1), // west
-        cell(pArr, j, i + 1) // east
+        cell(pArr, j - 1, i),
+        cell(pArr, j + 1, i),
+        cell(pArr, j, i - 1),
+        cell(pArr, j, i + 1)
       ]
 
+      // [north, south, west, east]
       const a = [
-        yA[j][i][4], // north
-        yA[j + 1][i][4], // south
-        xA[j][i][4], // west
-        xA[j][i + 1][4] // east
+        yA[j][i][4],
+        yA[j + 1][i][4],
+        xA[j][i][4],
+        xA[j][i + 1][4]
       ]
 
-      let pSub1 = p[0] / a[0] + p[1] / a[1] + p[2] / a[2] + p[3] / a[3] // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
-      let pSub2 = (vx[0] - vx[1] + vy[0] - vy[1]) / size // b_ij
+      // a_nP'_n + a_sP'_s + a_wP'_w + a_eP'_e
+      let pSub1 = p[0] / a[0] + p[1] / a[1] + p[2] / a[2] + p[3] / a[3]
+
+      // b_ij
+      let pSub2 = (vx[0] - vx[1] + vy[0] - vy[1]) / size
       let pSub3 = 1 / a[0] + 1 / a[1] + 1 / a[2] + 1 / a[3]
 
-      kArr[j][i] = (pSub1 + pSub2) / pSub3 * (cell(sArr, j, i) !== 0) // this calculation does not apply correct division formula
+      // this calculation does not apply correct division formula
+      kArr[j][i] = (pSub1 + pSub2) / pSub3 * (cell(sArr, j, i) !== 0)
 
       // kArr[j][i] = p.n + p.s + p.w + p.e + (vx.w - vx.e + vy.n - vy.s)
     }
@@ -553,6 +614,8 @@ function jacobi (sArr, pArr, xArr, yArr, rows, cols, xA, yA, size) {
  * @param {object} qArr - the 2D array of estimated pressure values
  * @param {object} xArr - the 2D array of estimated x-velocity values
  * @param {object} yArr - the 2D array of estimated y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @param {object} xOld - the 2D array of old x-velocity values
  * @param {object} yOld - the 2D array of old y-velocity values
  * @param {object} xA - the a-values for the x-axis
@@ -570,7 +633,8 @@ function correct (sArr, pArr, qArr, xArr, yArr, rows, cols, xOld, yOld, xA, yA, 
   // performs velocity calculation in x-axis
   for (let j = 0; j < kArr.length; j++) {
     for (let i = 0; i < kArr[j].length; i++) {
-      kArr[j][i] = pArr[j][i] + qArr[j][i] * 0.01 // hardcoded under-relaxation factor
+      // hardcoded under-relaxation factor
+      kArr[j][i] = pArr[j][i] + qArr[j][i] * 0.01
     }
   }
 
@@ -592,9 +656,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, rows, cols, xOld, yOld, xA, yA, 
 
       const outX = xArr[j][i] + (cell(qArr, j, i - 1) - cell(qArr, j, i)) * (size / xA[j][i][4])
 
-      const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i] // hardcoded under-relaxation factor of 0.2
+      // hardcoded under-relaxation factor of 0.2
+      const relX = 0.2 * outX + (1 - 0.2) * xOld[j][i]
 
-      iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * xI // either returns calculated value or inlet value
+      // either returns calculated value or inlet value
+      iArr[j][i] = wx * relX * !(inL || inR) + (inL ^ inR) * xI
     }
   }
 
@@ -616,9 +682,11 @@ function correct (sArr, pArr, qArr, xArr, yArr, rows, cols, xOld, yOld, xA, yA, 
 
       const outY = yArr[j][i] + (cell(qArr, j - 1, i) - cell(qArr, j, i)) * (size / yA[j][i][4])
 
-      const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i] // hardcoded under-relaxation factor of 0.2
+      // hardcoded under-relaxation factor of 0.2
+      const relY = 0.2 * outY + (1 - 0.2) * yOld[j][i]
 
-      jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * yI // either returns calculated value or inlet value
+      // either returns calculated value or inlet value
+      jArr[j][i] = wy * relY * !(inU || inD) + (inU ^ inD) * yI
     }
   }
 
@@ -636,6 +704,8 @@ function correct (sArr, pArr, qArr, xArr, yArr, rows, cols, xOld, yOld, xA, yA, 
  * @param {object} yArr - the 2D array of old y-velocity values
  * @param {object} iArr - the 2D array of estimated x-velocity values
  * @param {object} jArr - the 2D array of estimated y-velocity values
+ * @param {number} rows - the simulation grid y-size
+ * @param {number} cols - the simulation grid x-size
  * @returns the average change in velocity between steps
  */
 function converge (sArr, xArr, yArr, iArr, jArr, rows, cols) {
@@ -645,7 +715,8 @@ function converge (sArr, xArr, yArr, iArr, jArr, rows, cols) {
 
   for (let j = 0; j < sArr.length; j++) {
     for (let i = 0; i < sArr[j].length; i++) {
-      step += sArr[j][i] !== 0 // increments if cell isn't a wall
+      // increment if cell isn't a wall
+      step += sArr[j][i] !== 0
     }
   }
 
