@@ -28,9 +28,11 @@ const plants = params.plant.map(plant => {
 })
 
 module.exports = {
-  cellSize: 10,
-  cols: 10,
-  rows: 10,
+  defaultSize: {
+    cell: 10,
+    cols: 40,
+    rows: 10
+  },
   params,
   values: {
     density: params.rho / 2,

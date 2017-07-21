@@ -44,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
     xctx.canvas.width = (w + 1) * 1 + 1
     xctx.canvas.height = h * 1 + 1
 
+    // defines convergence threshold for simulation
+    const tolerance =
+      Math.sqrt(Math.pow(params.input.x, 2) + Math.pow(params.input.y, 2)) /
+      100000
+
+    let converged = false
     let count = 0
 
     let state = input.map(arr => [...arr])
@@ -163,10 +169,23 @@ document.addEventListener('DOMContentLoaded', () => {
         count = 1
       }
 
-      count--
-      prevX = nextX.map(arr => [...arr])
-      prevY = nextY.map(arr => [...arr])
-      prevP = nextP.map(arr => [...arr])
+      if (converge(state, nextX, nextY, prevX, prevY, h, w) > tolerance) {
+        count--
+        prevX = nextX.map(arr => [...arr])
+        prevY = nextY.map(arr => [...arr])
+        prevP = nextP.map(arr => [...arr])
+      } else {
+        converged = true
+        prevX = nextX.map(arr => [...arr])
+        prevY = nextY.map(arr => [...arr])
+        prevP = nextP.map(arr => [...arr])
+        aX = valsX.map(arr => [...arr])
+        aY = valsY.map(arr => [...arr])
+
+        console.log('converged!')
+
+        draw(state, nextP, nextX, nextY)
+      }
 
       console.timeEnd(`frame ${frame}`)
 
@@ -195,12 +214,18 @@ document.addEventListener('DOMContentLoaded', () => {
       editor.baseLayer.scale(0.95, editor.view.center)
 
       editor.pond.fillColor = '#0affff'
+      if (editor.veg[0]) {
+        editor.veg[0].fillColor = '#0bcc88'
+        editor.veg[0].strokeWidth = 0
+      }
       editor.inlet.strokeWidth = 2
       editor.outlet.strokeWidth = 2
       editor.inlet.strokeCap = 'butt'
       editor.outlet.strokeCap = 'butt'
       editor.inlet.strokeColor = '#0100ff'
       editor.outlet.strokeColor = '#02ff00'
+      editor.inlet.bringToFront()
+      editor.outlet.bringToFront()
 
       editor.view.update()
       const raster = editor.baseLayer.rasterize(72)
@@ -247,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       $designCanvas.classList.remove('active')
       $previewCanvas.classList.add('preview')
+      // $previewCanvas.classList.add('active')
       $simulationCanvas.classList.add('active')
 
       $canvases.appendChild($previewCanvas)

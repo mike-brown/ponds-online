@@ -34,7 +34,7 @@ class VegTool extends Tool {
   }
 
   onMouseDown (ev) {
-    const lastPoint = Editor.lastPointOf(this.editor.vegMask)
+    const lastPoint = Editor.lastPointOf(this.editor.vegmask)
     const point = this.lineSnap(ev.point, lastPoint)
 
     this.editor.vegmask.add(point)
