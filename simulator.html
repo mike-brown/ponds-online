@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ponds Online</title>
+
+  <!-- Meta -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-dark.min.css">
+  <link rel="stylesheet" href="./style.css">
+
+  <!-- Scripts -->
+  <script src="https://use.fontawesome.com/f0914e7b27.js" async></script>
+  <script src="./scripts/bundle.js" charset="utf-8"></script>
+</head>
+<body>
+  <header>
+    <a href="." class="button">
+      <span class="fa fa-home" aria-hidden="true"></span> Home
+    </a>
+    <a href="simulator.html" class="button">
+      <span class="fa fa-play-circle" aria-hidden="true"></span> Simulation
+    </a>
+    <a href="https://github.com/mike-brown/ponds-online" class="button" style="float: right;">
+      <span class="fa fa-github" aria-hidden="true"></span> GitHub Repo
+    </a>
+  </header>
+
+  <main class="container">
+    <div class="row">
+      <div class="col-sm-12 col-md-9 sim">
+        <h1 class="title">Design</h1>
+        <div class="canvases">
+          <canvas class="design active"></canvas>
+          <canvas class="simulation"></canvas>
+        </div>
+
+        <button class="primary js-run" disabled><span class="fa fa-cogs" aria-hidden="true"></span> Run Simulation</button>
+
+        <div class="input-group">
+          <input type="checkbox" id="js-grid-snap" class="js-grid-snap">
+          <label for="js-grid-snap">Grid Snap</label>
+        </div>
+
+        <div class="options">
+          <label for="js-grid-subdivisions">(G)rid Subdivisions</label>
+          <input type="range" class="js-grid-subdivisions" id="js-grid-subdivisions" min="1" max="5" step="1" value="2">
+          <span class="js-grid-subdivisions-val">2</span>
+        </div>
+      </div>
+
+      <div class="col-sm-12 col-sm-first col-md-3 col-md-last options">
+        <div class="tools">
+          <h2>Tools</h2>
+
+          <button class="primary js-add-tool">
+            <span class="fa fa-pencil" aria-hidden="true"></span>
+            (A)dd Boundary
+          </button>
+          <button class="secondary js-remove-tool">
+            <span class="fa fa-scissors" aria-hidden="true"></span>
+            (S)ubtract Areas
+          </button>
+          <button class="tertiary js-veg-tool">
+            <span class="fa fa-pagelines" aria-hidden="true"></span>
+            Set (V)egatation Areas
+          </button>
+          <button class="secondary js-remove-veg-tool">
+            <span class="fa fa-pagelines" aria-hidden="true"></span>
+            Subt(r)act Vegetation
+          </button>
+          <button class="inverse js-inlet-tool">
+            <span class="fa fa-arrow-right" aria-hidden="true"></span>
+            Set (I)nlet Wall
+          </button>
+          <button class="inverse js-outlet-tool">
+            <span class="fa fa-arrow-left" aria-hidden="true"></span>
+            Set (O)utlet Wall
+          </button>
+
+          <br>
+          <br>
+
+          <button class="secondary js-reset-tool">
+            <span class="fa fa-undo" aria-hidden="true"></span>
+            Reset Pond (x)
+          </button>
+        </div>
+
+        <div class="presets">
+          <h2>Presets</h2>
+
+          <button class="js-preset" data-preset="linearPlates">Linear Pipe</button>
+          <button class="js-preset" data-preset="basic">Basic Pond</button>
+          <button class="js-preset" data-preset="island">Island</button>
+        </div>
+    </div>
+  </main>
+</body>
+</html>

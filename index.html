@@ -1,105 +1,52 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+
 <head>
-  <title>Ponds Online</title>
+  <!-- Internal Metadata -->
+  <meta charset="utf-8" />
 
-  <!-- Meta -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- External Resources -->
+  <link href="../styles/style.css" rel="stylesheet" />
 
-  <!-- Styles -->
-  <link rel="stylesheet" href="https://gitcdn.link/repo/Chalarangelo/mini.css/master/dist/mini-dark.min.css">
-  <link rel="stylesheet" href="./style.css">
-
-  <!-- Scripts -->
+  <!-- External Scripts -->
   <script src="https://use.fontawesome.com/f0914e7b27.js" async></script>
-  <script src="./scripts/bundle.js" charset="utf-8"></script>
+
+  <!-- HTML 5 Shiv -->
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/r29/html5.min.js"></script>
+  <![endif]-->
+  <title>Ponds Online</title>
 </head>
+
 <body>
   <header>
-    <a href="/" class="button">
-      <span class="fa fa-home" aria-hidden="true"></span> Home
-    </a>
-    <a href="/" class="button">
-      <span class="fa fa-play-circle" aria-hidden="true"></span> Simulation
-    </a>
-    <a href="/" class="button">
-      <span class="fa fa-info-circle" aria-hidden="true"></span> More Info
-    </a>
-    <a href="https://github.com/mike-brown/ponds-online" class="button" style="float: right;">
-      <span class="fa fa-github" aria-hidden="true"></span> GitHub Repo
-    </a>
+    <nav>
+      <ul>
+        <li><a href="./">Home</a></li>
+        <li><a href="./about.html">Ponds</a></li>
+        <li><a href="./work.html">Models</a></li>
+        <li><a href="./simulator.html">Simulator</a></li>
+        <li><a href="./guide.html">Guides</a></li>
+      </ul>
+    </nav>
   </header>
 
-  <main class="container">
-    <div class="row">
-      <div class="col-sm-12 col-md-9 sim">
-        <h1 class="title">Design</h1>
-        <div class="canvases">
-          <canvas class="design active"></canvas>
-          <canvas class="simulation"></canvas>
-        </div>
+  <section>
+    <h2>Welcome to Ponds Online!</h2>
+    <h3>What is Ponds Online?</h3>
 
-        <button class="primary js-run" disabled><span class="fa fa-cogs" aria-hidden="true"></span> Run Simulation</button>
 
-        <div class="input-group">
-          <input type="checkbox" id="js-grid-snap" class="js-grid-snap">
-          <label for="js-grid-snap">Grid Snap</label>
-        </div>
+    <p>Ponds Online is an online fluid simulator project for designing ponds and wetlands; which has been created as part of a SURE Network Project at the University of Sheffield. While we have strived to create a versatile simulator, our main focus is stormwater runoff treatment ponds; which play an import role in the treatment and redistribution of water within urban environments.</p>
 
-        <div class="options">
-          <label for="js-grid-subdivisions">(G)rid Subdivisions</label>
-          <input type="range" class="js-grid-subdivisions" id="js-grid-subdivisions" min="1" max="5" step="1" value="2">
-          <span class="js-grid-subdivisions-val">2</span>
-        </div>
-      </div>
+    <p>Storm water is the runoff from rainfall events that build up on impermeable surfaces found all across an urban environment including roofs, pavements and highways. These ponds allow any sediment gathered to settle out and they also support the breakdown by local organisms of any smaller soluble nutrients or chemicals contained. Using these methods, stormwater can be effectively and efficiently treated within the pond system; after which the now-clean water can be redistributed back into the natural water table without harming the environment.</p>
 
-      <div class="col-sm-12 col-sm-first col-md-3 col-md-last options">
-        <div class="tools">
-          <h2>Tools</h2>
+    <h3>Why did we do this?</h3>
+    <p>Currently, softwares capable of performing these kinds of simulations are expensive. We wanted to provide the opportunity for people to experiment with computational fluid dynamics, without the costs or complexity associated with most commercial softwares.
+  </section>
 
-          <button class="primary js-add-tool">
-            <span class="fa fa-pencil" aria-hidden="true"></span>
-            (A)dd Boundary
-          </button>
-          <button class="secondary js-remove-tool">
-            <span class="fa fa-scissors" aria-hidden="true"></span>
-            (S)ubtract Areas
-          </button>
-          <button class="tertiary js-veg-tool">
-            <span class="fa fa-pagelines" aria-hidden="true"></span>
-            Set (V)egatation Areas
-          </button>
-          <button class="secondary js-remove-veg-tool">
-            <span class="fa fa-pagelines" aria-hidden="true"></span>
-            Subt(r)act Vegetation
-          </button>
-          <button class="inverse js-inlet-tool">
-            <span class="fa fa-arrow-right" aria-hidden="true"></span>
-            Set (I)nlet Wall
-          </button>
-          <button class="inverse js-outlet-tool">
-            <span class="fa fa-arrow-left" aria-hidden="true"></span>
-            Set (O)utlet Wall
-          </button>
-
-          <br>
-          <br>
-
-          <button class="secondary js-reset-tool">
-            <span class="fa fa-undo" aria-hidden="true"></span>
-            Reset Pond (x)
-          </button>
-        </div>
-
-        <div class="presets">
-          <h2>Presets</h2>
-
-          <button class="js-preset" data-preset="linearPlates">Linear Pipe</button>
-          <button class="js-preset" data-preset="basic">Basic Pond</button>
-          <button class="js-preset" data-preset="island">Island</button>
-        </div>
-    </div>
-  </main>
+  <footer>
+    <a href="https://vpond.group.shef.ac.uk/" class="fa fa-info-circle" aria-hidden="true"></a>
+    <a href="https://github.com/mike-brown/ponds-online" class="fa fa-github" aria-hidden="true"></a>
+  </footer>
 </body>
+
 </html>
