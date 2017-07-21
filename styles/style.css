@@ -12,6 +12,7 @@
 html {
   font-family: 'Signika', sans-serif;
   overflow-y: scroll;
+  font-size: 20px;
 }
 
 body {
@@ -25,7 +26,8 @@ body {
 
 section {
   padding: 8px;
-  margin: 8px;
+  margin: 8px auto;
+  max-width: 800px;
   background-color: #E8E8E0;
 
   -webkit-box-shadow: 4px 4px 1px #A8A8B0;
@@ -36,7 +38,7 @@ section {
 }
 
 section:last-of-type {
-  margin: 8px 8px 32px 8px;
+  margin-bottom: 32px;
 
   text-align: justify;
 }
@@ -78,6 +80,7 @@ figcaption {
 }
 
 ul {
+  max-width: 900px;
   margin: 8px 8px 8px 24px;
   padding: 0px 8px 8px 8px;
 
@@ -94,9 +97,7 @@ ul li {
 
 /* NAVBARS ///////////////////////////////////////////////////////////////////*/
 
-nav {
-  position: relative;
-
+header {
   background: rgb(48, 48, 56);
   background: -webkit-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
   background:    -moz-linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
@@ -104,49 +105,37 @@ nav {
   background:         linear-gradient(45deg, rgba(48, 48, 56, 0.7) 45%, rgba(48, 48, 56, 0) 75%), #000000 url("../images/water_lily.jpg") no-repeat right;
 
   background-size: cover;
+  background-position: center, center -146px;
 
-  width: 100%;
-  height: 128px;
+  padding-top: 150px;
+}
+
+nav {
+  background-color: #202028;
 }
 
 nav ul {
-  position: absolute;
-  bottom: 0px;
-
-
-  margin: 0px;
+  margin: 0 auto;
   padding: 0px;
 
-  line-height: 1.0em;
-
   width: 100%;
-
-	background-color: #202028;
+  max-width: 800px;
 
 	list-style: none;
-
-	font-size: 0px;
 }
 
 nav ul li {
-	width: 96px;
-	height: 32px;
-
-  padding: 0px;
-
+  padding: 0;
 	display: inline-block;
 
-	line-height: 32px;
 	text-align: center;
 
 	font-size: 20px;
 }
 
 nav ul li a, nav ul li a:hover, nav ul li a:visited {
+  padding: 10px 20px;
   color: #DCDCD4;
-
-	width: 100%;
-	height: 100%;
 
 	display: inline-block;
 
@@ -181,5 +170,5 @@ a:hover {
 
 h1, h2, h3, h4, h5, h6, p {
   padding: 8px;
-  line-height: 1.4em;
+  line-height: 1.6;
 }
